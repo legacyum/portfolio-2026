@@ -8,12 +8,12 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="Alessandro Altamirano | Datos, automatización y operaciones" />
   <meta property="og:description" content="Casos de estudio en Power BI, automatización logística y machine learning." />
-  <meta property="og:image" content="https://portfolio-alessandro-2026.vercel.app/assets/portfolio-preview.png" />
+  <meta property="og:image" content="assets/primax-power-bi-dashboard.png" />
   <meta property="og:locale" content="es_PE" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Alessandro Altamirano | Datos &amp; Operaciones" />
   <meta name="twitter:description" content="Casos de estudio en Power BI, automatización logística y machine learning." />
-  <meta name="twitter:image" content="https://portfolio-alessandro-2026.vercel.app/assets/portfolio-preview.png" />
+  <meta name="twitter:image" content="assets/primax-power-bi-dashboard.png" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta name="robots" content="index, follow" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
@@ -30,7 +30,7 @@
   <script src="vendor/OrbitControls.js" defer></script>
   <script src="vendor/cosmos-engine.js" defer></script>
   <script src="vendor/asciify-vanilla.js" defer></script>
-  <script src="script.js" defer></script>
+  
   <!-- Vercel Web Analytics -->
   <script>
     window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -40,245 +40,18 @@
     window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
   </script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
-</head>
+<style>
+    #preloader { display: none !important; }
+    body { opacity: 1 !important; visibility: visible !important; background: #0d110e !important; overflow: hidden !important; }
+    .hero { padding: 40px 60px !important; min-height: 630px !important; display: grid !important; grid-template-columns: 1.15fr 0.85fr !important; gap: 40px !important; align-items: center !important; }
+    .nav, footer { display: none !important; }
+    .terminal-window { box-shadow: 0 0 50px rgba(0, 255, 136, 0.15) !important; }
+  </style></head>
 <body>
   <!-- =========================================================================
        ReactBits Depth-Text 3D Preloader Stage
        ========================================================================= -->
-  <div id="preloader" class="preloader" aria-label="Pantalla de carga inicial">
-    <div class="preloader-ambient-grid" aria-hidden="true"></div>
-    <div class="preloader-content">
-      <div class="depth-text-stage" id="depthTextStage">
-        <div class="depth-text-container" id="depthTextContainer" data-text="ALESSANDRO">
-          <span class="depth-layer layer-deep" aria-hidden="true">ALESSANDRO</span>
-          <span class="depth-layer layer-shadow" aria-hidden="true">ALESSANDRO</span>
-          <span class="depth-layer layer-extrude-3" aria-hidden="true">ALESSANDRO</span>
-          <span class="depth-layer layer-extrude-2" aria-hidden="true">ALESSANDRO</span>
-          <span class="depth-layer layer-extrude-1" aria-hidden="true">ALESSANDRO</span>
-          <span class="depth-layer layer-front">ALESSANDRO</span>
-        </div>
-      </div>
-      <div class="preloader-sys-info">
-        <div class="preloader-status-row">
-          <span class="preloader-prompt">sys@boot:~$</span>
-          <span class="preloader-status-text" id="preloaderStatus">INITIALIZING SYSTEM ARCHITECTURE...</span>
-        </div>
-        <div class="preloader-bar-wrap">
-          <div class="preloader-bar-fill" id="preloaderBar"></div>
-          <div class="preloader-bar-scanner" aria-hidden="true"></div>
-        </div>
-        <div class="preloader-meta-row">
-          <span class="preloader-stat-badge">// DATA · AUTOMATION · OPS</span>
-          <span class="preloader-pct" id="preloaderPct">0%</span>
-        </div>
-      </div>
-      <button type="button" class="preloader-skip-btn" id="preloaderSkip" aria-label="Saltar introducción">[ ESC / CLIC PARA SALTAR ]</button>
-    </div>
-  </div>
-
-  <a class="skip" href="#content">Saltar al contenido</a>
-  <!-- =========================================================================
-       Cyber-Industrial Dynamic Background System
-       Layer 1: Deep Aurora Gradient Blobs with Fluid CSS animation
-       Layer 2: High-Performance Unified Cyber Canvas (Quantum Grid, Kinetic Particles, Shockwaves)
-       Layer 3: Asciify ASCII Lens (Canvas UI — canvasui.dev) over an animated art canvas
-       Layer 4: Tactile Noise Grain Texture
-       ========================================================================= -->
-  <div class="cyber-bg-wrap" aria-hidden="true">
-    <div class="cyber-aurora-mesh">
-      <div class="aurora-blob blob-1"></div>
-      <div class="aurora-blob blob-2"></div>
-      <div class="aurora-blob blob-3"></div>
-    </div>
-    <div class="cyber-vignette"></div>
-  </div>
-  <canvas id="cyber-canvas" aria-hidden="true"></canvas>
-  <div class="asciify-layer" id="asciify-layer" aria-hidden="true">
-    <div class="asciify-content" id="asciify-content">
-      <canvas id="asciify-art"></canvas>
-    </div>
-    <canvas id="asciify-canvas"></canvas>
-  </div>
-  <div class="noise" aria-hidden="true"></div>
-  <main class="shell" id="content" tabindex="-1">
-    <aside class="rail" aria-label="Perfil">
-      <a class="brand" href="#top" id="brandLink" aria-label="Alessandro Altamirano - Ir al inicio">
-        <div class="brand-mark-wrap">
-          <span class="mark" aria-hidden="true">
-            <svg class="brand-logo-svg" viewBox="0 0 28 28" width="18" height="18" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M5 22L14 4L23 22" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M8.5 15.5H19.5" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
-              <path d="M14 9.5V13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-              <circle cx="14" cy="4" r="1.5" fill="currentColor"/>
-            </svg>
-            <span class="mark-glow"></span>
-            <span class="mark-scanline"></span>
-          </span>
-          <span class="brand-live-pip" title="Sistema operativo" aria-hidden="true"></span>
-        </div>
-        <div class="brand-text-col">
-          <div class="brand-name-row">
-            <span class="brand-name">ALTAMIRANO</span><span class="brand-sys">.SYS</span>
-          </div>
-          <div class="brand-status-meta">
-            <span class="brand-status-dot" aria-hidden="true"></span>
-            <span class="brand-status-text">SYS.ONLINE</span>
-            <span class="brand-version">v2.6</span>
-          </div>
-        </div>
-      </a>
-      <div class="profile"><p class="eyebrow" data-t="profile">// perfil profesional</p><p class="profile-name">Alessandro<br>Altamirano</p><p class="role" data-t-html="role">Industrial Engineering<br><span>Data · Automation · Operations<br>Supply Chain · Logística · Planeamiento</span></p><div class="available"><span class="dot"></span><span data-t="available">Disponible para oportunidades</span></div></div>
-      <nav class="nav" aria-label="Navegación"><a href="#terminal" data-command="about"><b>01</b><span data-t="aboutNav">acerca de mí</span></a><a href="#cases"><b>02</b><span data-t="casesNav">casos de estudio</span></a><a href="#recruiter" data-view="recruiter"><b>03</b><span data-t="recruiterNav">vista reclutador</span></a><a href="#credentials"><b>04</b><span data-t="credentialsNav">formación &amp; herramientas</span></a><a href="#contact"><b>05</b><span data-t="contactNav">contacto</span></a></nav>
-      <div class="links"><div class="link-item"><a href="mailto:alessandro.altamirano23@gmail.com">email ↗</a><button class="copy-btn" data-copy="alessandro.altamirano23@gmail.com" type="button" aria-label="Copiar correo"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div><a href="https://www.linkedin.com/in/alessandroaltamirano" target="_blank" rel="noopener noreferrer">linkedin ↗</a><a href="https://github.com/legacyum" target="_blank" rel="noopener noreferrer">github ↗</a><a class="link-btn" id="openCvBtn" href="CV_Alessandro_Altamirano_Salazar_2026.pdf" target="_blank" rel="noopener noreferrer">ver_cv.pdf ↗</a></div>
-    </aside>
-    <section class="page" id="top">
-      <header class="top"><p><span class="dot"></span> LIMA, PERÚ <span>/</span> UTC−5</p><div class="utilities"><button class="utility" id="language" type="button" aria-label="Change language">EN</button><button class="utility" id="view" type="button" aria-pressed="false" data-t="recruiterMode">modo reclutador</button><button class="theme" id="theme" type="button">tema: verde</button><time id="clock"></time></div></header>
-      <section class="hero">
-        <div class="hero-grid">
-          <div class="hero-intro">
-            <p class="eyebrow">$ whoami</p>
-            <h1 data-t-html="hero">Convierto procesos<br><em class="accent">en sistemas más claros.</em></h1>
-            <p class="lead" data-t="lead">Ingeniero Industrial en formación con experiencia en análisis de datos, automatización, operaciones, Supply Chain y planeamiento.</p>
-
-            <div class="buttons">
-              <a class="button primary" href="#cases"><span data-t="explore">explorar casos</span><span>↓</span></a>
-              <a class="button ghost" id="heroCvBtn" href="CV_Alessandro_Altamirano_Salazar_2026.pdf" target="_blank" rel="noopener noreferrer"><span data-t="download">ver CV</span><span>↗</span></a>
-            </div>
-          </div>
-          <div class="hero-lanyard-wrapper">
-            <div class="lanyard-stage" id="lanyardStage" aria-label="Credencial interactiva 3D de Alessandro Altamirano">
-              <canvas class="lanyard-canvas" id="lanyardCanvas"></canvas>
-              <div class="lanyard-card" id="lanyardCard" tabindex="0" role="button" aria-label="Credencial física 3D de Alessandro Altamirano. Arrastra o gira la tarjeta.">
-                <div class="lanyard-clip" aria-hidden="true">
-                  <svg class="clip-svg" viewBox="0 0 36 66" width="36" height="66" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <!-- Top D-Ring Loop -->
-                    <path d="M 4 14 C 4 3, 32 3, 32 14 C 32 20, 27 23, 22 24 L 14 24 C 9 23, 4 20, 4 14 Z" fill="#0b0e0c" stroke="#333c35" stroke-width="2.6" stroke-linejoin="round" />
-                    <!-- D-Ring Inner Cutout -->
-                    <path d="M 8 13 C 8 6, 28 6, 28 13 C 28 17, 24 19, 20 20 L 16 20 C 12 19, 8 17, 8 13 Z" fill="#040605" stroke="#1c221e" stroke-width="1.2" />
-                    <!-- D-Ring Top Highlight -->
-                    <path d="M 9 9 C 13 5, 23 5, 27 9" stroke="#5a685e" stroke-width="1" stroke-linecap="round" opacity="0.65" />
-                    <!-- Swivel Joint Collar -->
-                    <rect x="12" y="23" width="12" height="8" rx="2" fill="url(#swivelMetalGrad)" stroke="#161a17" stroke-width="1" />
-                    <line x1="12.5" y1="26.5" x2="23.5" y2="26.5" stroke="#48544c" stroke-width="0.8" opacity="0.6" />
-                    <line x1="12.5" y1="28.5" x2="23.5" y2="28.5" stroke="#222824" stroke-width="0.6" />
-                    <!-- Carabiner Body & Spine -->
-                    <path d="M 14 30 L 22 30 L 23.5 38 L 24.5 48 C 25 55, 23 61, 18 64 C 13 61, 11 55, 12 48 L 13 38 Z" fill="url(#hookMetalGrad)" stroke="#222a24" stroke-width="1.4" />
-                    <!-- Carabiner Spring Gate -->
-                    <path d="M 23 37 L 27 41 C 28 43, 27 46, 24 47 L 22 45" fill="#121613" stroke="#3a443c" stroke-width="1.1" />
-                    <circle cx="23" cy="37" r="1.3" fill="#58665c" />
-                    <!-- Lower Claw / Hook entering punch slot -->
-                    <path d="M 18 55 C 18 62, 14.5 65, 11 63 C 8.5 61, 9 56, 12.5 53 L 14.5 50" stroke="#1c241e" stroke-width="2.6" stroke-linecap="round" fill="none" />
-                    <defs>
-                      <linearGradient id="swivelMetalGrad" x1="12" y1="23" x2="24" y2="23" gradientUnits="userSpaceOnUse">
-                        <stop offset="0%" stop-color="#0a0d0b" />
-                        <stop offset="25%" stop-color="#323b34" />
-                        <stop offset="50%" stop-color="#5a685e" />
-                        <stop offset="75%" stop-color="#242b26" />
-                        <stop offset="100%" stop-color="#080a09" />
-                      </linearGradient>
-                      <linearGradient id="hookMetalGrad" x1="11" y1="30" x2="25" y2="30" gradientUnits="userSpaceOnUse">
-                        <stop offset="0%" stop-color="#0d100e" />
-                        <stop offset="30%" stop-color="#2c352e" />
-                        <stop offset="55%" stop-color="#4a564d" />
-                        <stop offset="80%" stop-color="#1e2520" />
-                        <stop offset="100%" stop-color="#080a09" />
-                      </linearGradient>
-                    </defs>
-                  </svg>
-                </div>
-                <div class="lanyard-card-inner">
-                  <!-- Front Face -->
-                  <div class="card-face card-front">
-                    <div class="card-punch-hole" aria-hidden="true"></div>
-                    <div class="card-holo-glare" aria-hidden="true"></div>
-                    <div class="card-header">
-                      <div class="card-chip"><span class="chip-line"></span><span class="chip-line"></span></div>
-                      <span class="card-tag">AA-2026 // ACCESS ID</span>
-                      <span class="card-security-lvl">SEC-LVL 4</span>
-                    </div>
-                    <div class="card-photo-wrap">
-                      <img src="assets/alessandro-photo.png" alt="Fotografía profesional de Alessandro Altamirano" class="card-photo" loading="eager" width="220" height="220" />
-                      <div class="photo-overlay"></div>
-                      <span class="status-badge"><i class="status-dot"></i> ACTIVO</span>
-                      <span class="nfc-badge" title="NFC Enabled">NFC 🛈</span>
-                    </div>
-                    <div class="card-body">
-                      <div class="card-name-row">
-                        <h3 class="card-name">Alessandro Altamirano</h3>
-                        <span class="card-corp-badge">PX-OPS</span>
-                      </div>
-                      <p class="card-role" data-t="lanyardRole">Ingeniería Industrial · Data &amp; Ops</p>
-                      
-                      <!-- Meta row: ID code and Barcode -->
-                      <div class="card-meta-row">
-                        <div class="card-id-block">
-                          <span class="meta-label">ID:</span>
-                          <code class="meta-code">2026-AA-PERU</code>
-                        </div>
-                        <div class="barcode" aria-hidden="true">
-                          <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-                        </div>
-                      </div>
-
-                      <!-- Tech Stack Pills -->
-                      <div class="card-stack-pills">
-                        <span class="card-pill">Python</span>
-                        <span class="card-pill">SQL</span>
-                        <span class="card-pill">Power BI</span>
-                        <span class="card-pill">Excel</span>
-                        <span class="card-pill">Bizagi</span>
-                        <span class="card-pill">SAP ERP</span>
-                        <span class="card-pill">IA / AI</span>
-                      </div>
-
-                      <!-- Interactive Flip Trigger Bar -->
-                      <button class="card-flip-btn" id="lanyardFlipTrigger" type="button" aria-label="Girar credencial para ver reverso">
-                        <span class="flip-icon">⟳</span>
-                        <span data-t="lanyardFlipBtn">GIRAR CREDENCIAL / FLIP 3D</span>
-                      </button>
-                    </div>
-                  </div>
-                  <!-- Back Face -->
-                  <div class="card-face card-back">
-                    <div class="card-punch-hole" aria-hidden="true"></div>
-                    <div class="card-holo-glare" aria-hidden="true"></div>
-                    <div class="card-back-header">
-                      <span class="back-logo">ALTAMIRANO.SYS</span>
-                      <span class="back-sec">SECURITY VERIFIED // L4</span>
-                    </div>
-                    <div class="card-back-content">
-                      <a class="qr-wrap" href="https://www.linkedin.com/in/alessandroaltamirano" target="_blank" rel="noopener noreferrer" title="Abrir perfil de LinkedIn de Alessandro Altamirano">
-                        <div class="qr-box">
-                          <div class="qr-corner tl"></div>
-                          <div class="qr-corner tr"></div>
-                          <div class="qr-corner bl"></div>
-                          <div class="qr-corner br"></div>
-                          <img src="assets/linkedin-qr.svg" alt="Código QR para conectar en LinkedIn con Alessandro Altamirano" class="qr-image" width="68" height="68" />
-                        </div>
-                        <div class="qr-label-row">
-                          <svg class="linkedin-mini-icon" width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v8.37H9.2V10.9H6.46M7.83 6.64a1.66 1.66 0 0 0-1.66 1.66 1.66 1.66 0 0 0 1.66 1.66 1.66 1.66 0 0 0 1.66-1.66c0-.92-.74-1.66-1.66-1.66Z"/></svg>
-                          <small data-t="lanyardQr">ESCANEAR LINKEDIN ↗</small>
-                        </div>
-                      </a>
-                      <div class="back-details">
-                        <p><strong data-t="lanyardEduLabel">UNIVERSIDAD:</strong> Continental (10° Ciclo)</p>
-                        <p><strong data-t="lanyardSpecLabel">ENFOQUE:</strong> Supply Chain · Data · Bizagi · IA</p>
-                        <p><strong data-t="lanyardCoreLabel">CORE:</strong> Power BI · Python · SQL · Excel · Bizagi · SAP · IA</p>
-                        <p><strong data-t="lanyardStatusLabel">ESTADO:</strong> <span class="accent-text" data-t="lanyardStatusVal">Disponible para retos</span></p>
-                      </div>
-                    </div>
-                    <div class="card-back-footer">
-                      <div class="back-footer-meta">
-                        <span>Lima, Perú · UTC-5</span>
-                        <code>SEC: 944521832</code>
-                      </div>
-                      <button class="card-flip-btn back-flip-btn" type="button" aria-label="Volver al frente de la credencial">
-                        <span class="flip-icon">⟳</span>
-                        <span data-t="lanyardBackFlipBtn">VOLVER AL FRENTE</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
+  
                 <div class="lanyard-drag-hint" id="lanyardHint">
                   <span data-t="lanyardHint">✦ ARRASTRA / TIRA DE LA CREDENCIAL</span>
                 </div>
