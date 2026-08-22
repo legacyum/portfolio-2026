@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://legacyum.github.io/sitemap.xml
