@@ -14,6 +14,14 @@ distHtml = distHtml.replace(
   /<link rel="stylesheet" href="styles\.css"\s*\/?>/i,
   () => `<style>\n${stylesCss}\n  </style>`
 );
+// Inline vendor glyph.css (glyphcat) if present — after main styles
+try {
+  const glyphCss = fs.readFileSync(path.join(ROOT_DIR, 'vendor', 'glyph.css'), 'utf8');
+  distHtml = distHtml.replace(
+    /<link rel="stylesheet" href="vendor\/glyph\.css"\s*\/?>/i,
+    () => `<style data-vendor="glyph">\n${glyphCss}\n  </style>`
+  );
+} catch (e) { /* glyph.css optional */ }
 
 // Inline vendor scripts with data-vendor marker so they are NOT picked as the
 // first plain <script> (E2E harness executes the first plain script as the app).

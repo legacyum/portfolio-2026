@@ -1,0 +1,26 @@
+/* glyphcss — ASCII loader & glyph output foundation
+   Vendor stub inspired by https://glyphcss.com/examples/loaders/
+   Provides .glyph-output monospace rendering + subtle glow used by the glyph cat.
+   Full engine not required for this portfolio — this file supplies the visual contract
+   (font, line-height, text-shadow) that makes the cat feel like a glyphcss loader.
+*/
+.glyph-output {
+  font-family: ui-monospace, "DM Mono", "JetBrains Mono", "Cascadia Code", Menlo, monospace;
+  font-variant-ligatures: none;
+  line-height: 1;
+  white-space: pre;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  text-shadow: 0 0 6px currentColor, 0 0 1px rgba(0,0,0,0.9);
+}
+/* loader dots variant — cycles via CSS steps like glyphcss spinners */
+.glyph-loader {
+  display: inline-block;
+  letter-spacing: 0.18em;
+  animation: glyphLoaderDots 0.88s steps(4, end) infinite;
+}
+@keyframes glyphLoaderDots {
+  0% { opacity: 0.45; }
+  50% { opacity: 1; }
+  100% { opacity: 0.45; }
+}

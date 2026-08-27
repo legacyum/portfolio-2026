@@ -4361,50 +4361,85 @@ footer p {
   gap: 6px !important;
 }
 
-/* --- Cat 3D Easter Peek Stage (Three.js Low-Poly) --- */
+/* --- Glyph Cat Easter — ASCII + glyphcss loader by cards --- */
 #cat3DStage {
   position: fixed;
   bottom: 14px;
   right: 14px;
-  width: min(22vw, 170px);
-  height: min(22vw, 170px);
-  max-width: 170px;
-  max-height: 170px;
+  width: 148px;
+  height: auto;
+  min-height: 88px;
   z-index: 42;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(120%) scale(0.85) rotate(2deg);
+  transform: translateY(14px) scale(0.92);
   transform-origin: 85% 95%;
-  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s ease;
+  transition: transform 0.48s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.34s ease;
   will-change: transform, opacity;
   filter: drop-shadow(0 10px 28px rgba(0,0,0,0.55)) drop-shadow(0 0 14px rgba(var(--accent-rgb), 0.22));
+  /* glyph by-cards: JS will override bottom/right/left/top to anchor near a .case card */
 }
 
 #cat3DStage.cat-visible {
   opacity: 1;
-  transform: translateY(0) scale(1) rotate(0deg);
+  transform: none;
   pointer-events: auto;
 }
 
 #cat3DStage.cat-peeking {
-  animation: catPeekWiggle 3.6s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: catGlyphPeek 3.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes catPeekWiggle {
-  0% { transform: translateY(120%) scale(0.88) rotate(3deg); }
-  12% { transform: translateY(-6%) scale(1.02) rotate(-1deg); }
-  18% { transform: translateY(0) scale(1) rotate(0deg); }
-  82% { transform: translateY(0) scale(1) rotate(0deg); }
-  100% { transform: translateY(120%) scale(0.88) rotate(2deg); }
+@keyframes catGlyphPeek {
+  0% { opacity: 0; transform: translateY(16px) scale(0.88); }
+  10% { opacity: 1; transform: translateY(-4px) scale(1.03); }
+  16% { opacity: 1; transform: none; }
+  84% { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(12px) scale(0.92); }
 }
 
-#cat3DCanvas {
-  width: 100% !important;
-  height: 100% !important;
-  display: block;
-  border-radius: 14px;
-  overflow: hidden;
+/* glyphcss-inspired ASCII box */
+.cat-glyph-box {
+  background: linear-gradient(180deg, rgba(18, 24, 18, 0.98), rgba(10, 14, 11, 0.98));
+  border: 1px solid rgba(var(--accent-rgb), 0.38);
+  border-radius: 10px;
+  padding: 8px 10px 7px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
   cursor: pointer;
+  user-select: none;
+}
+
+.cat-glyph {
+  margin: 0;
+  font-family: ui-monospace, "DM Mono", "JetBrains Mono", monospace;
+  font-size: 11px;
+  line-height: 1.05;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+  white-space: pre;
+  text-align: center;
+  text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.55), 0 0 2px rgba(var(--accent-rgb), 0.9);
+  /* glyphcss effect: subtle scan */
+  position: relative;
+}
+
+.cat-glyph-loader {
+  display: block;
+  margin-top: 4px;
+  font-family: ui-monospace, "DM Mono", monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.22em;
+  text-align: center;
+  color: rgba(var(--accent-rgb), 0.9);
+  text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5);
+  opacity: 0.9;
+  animation: glyphDots 0.9s steps(4, end) infinite;
+}
+
+@keyframes glyphDots {
+  0% { opacity: 0.45; letter-spacing: 0.18em; }
+  50% { opacity: 1; letter-spacing: 0.24em; }
+  100% { opacity: 0.45; letter-spacing: 0.18em; }
 }
 
 .cat3d-tooltip {
@@ -4431,16 +4466,16 @@ footer p {
 #cat3DStage.cat-visible .cat3d-tooltip {
   opacity: 0.96;
   transform: none;
-  transition-delay: 0.35s;
+  transition-delay: 0.32s;
 }
 
 @media (max-width: 600px) {
   #cat3DStage {
     width: 132px;
-    height: 132px;
     bottom: 10px;
     right: 10px;
   }
+  .cat-glyph { font-size: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4450,4 +4485,5 @@ footer p {
     animation: none !important;
   }
   #cat3DStage.cat-visible { transform: none !important; }
+  .cat-glyph-loader { animation: none; }
 }
