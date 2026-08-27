@@ -273,6 +273,37 @@ body[data-theme="amber"] .cyber-vignette {
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 160 160' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
+/* --- Scroll Reveal Animations (IntersectionObserver) --- */
+.reveal {
+  opacity: 0;
+  transform: translateY(18px) scale(0.985);
+  filter: blur(4px);
+  will-change: transform, opacity, filter;
+  transition: opacity 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: calc(var(--stagger, 0) * 72ms);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+.reveal-stagger > .reveal {
+  transition-delay: calc(var(--stagger, 0) * 72ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
 /* ==========================================================================
    ReactBits Depth-Text 3D Preloader Stage
    ========================================================================== */
@@ -4356,6 +4387,97 @@ footer p {
   display: inline-flex !important;
   align-items: center !important;
   gap: 6px !important;
+}
+
+/* --- Cat 3D Easter Peek Stage (Three.js Low-Poly) --- */
+#cat3DStage {
+  position: fixed;
+  bottom: 14px;
+  right: 14px;
+  width: min(22vw, 170px);
+  height: min(22vw, 170px);
+  max-width: 170px;
+  max-height: 170px;
+  z-index: 42;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(120%) scale(0.85) rotate(2deg);
+  transform-origin: 85% 95%;
+  transition: transform 0.55s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s ease;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 10px 28px rgba(0,0,0,0.55)) drop-shadow(0 0 14px rgba(var(--accent-rgb), 0.22));
+}
+
+#cat3DStage.cat-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1) rotate(0deg);
+  pointer-events: auto;
+}
+
+#cat3DStage.cat-peeking {
+  animation: catPeekWiggle 3.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes catPeekWiggle {
+  0% { transform: translateY(120%) scale(0.88) rotate(3deg); }
+  12% { transform: translateY(-6%) scale(1.02) rotate(-1deg); }
+  18% { transform: translateY(0) scale(1) rotate(0deg); }
+  82% { transform: translateY(0) scale(1) rotate(0deg); }
+  100% { transform: translateY(120%) scale(0.88) rotate(2deg); }
+}
+
+#cat3DCanvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+  border-radius: 14px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.cat3d-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 6px;
+  background: rgba(12, 16, 13, 0.96);
+  border: 1px solid rgba(var(--accent-rgb), 0.38);
+  color: var(--accent);
+  font-family: "DM Mono", monospace;
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  padding: 5px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 0.22s ease, transform 0.22s ease;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.45);
+}
+
+#cat3DStage.cat-visible .cat3d-tooltip {
+  opacity: 0.96;
+  transform: none;
+  transition-delay: 0.35s;
+}
+
+@media (max-width: 600px) {
+  #cat3DStage {
+    width: 132px;
+    height: 132px;
+    bottom: 10px;
+    right: 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #cat3DStage {
+    transition: opacity 0.25s ease;
+    transform: none !important;
+    animation: none !important;
+  }
+  #cat3DStage.cat-visible { transform: none !important; }
 }
 
   </style>
@@ -10000,6 +10122,8 @@ initCopyButtons();
 
 initTiltCards();
 initScrollspy();
+initScrollReveal();
+initCat3D();
 
 // ==========================================================================
 // Cyber-Industrial Dynamic Background Engine
@@ -10899,6 +11023,407 @@ function initCosmosIntegration() {
   });
 }
 
+// ==========================================================================
+// Scroll Reveal Animations (IntersectionObserver, no deps)
+// Adds .is-visible to .reveal elements when entering viewport.
+// Stagger is driven by --stagger CSS variable per element.
+// ==========================================================================
+function initScrollReveal() {
+  try {
+    const revealEls = document.querySelectorAll('.reveal');
+    if (!revealEls.length) return;
+    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      revealEls.forEach(el => el.classList.add('is-visible'));
+      return;
+    }
+    if (typeof IntersectionObserver === 'undefined') {
+      revealEls.forEach(el => el.classList.add('is-visible'));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.14, rootMargin: '0px 0px -7% 0px' });
+    revealEls.forEach(el => io.observe(el));
+  } catch (e) { /* silent */ }
+}
+
+// ==========================================================================
+// Cat 3D Easter Peek — Three.js Low-Poly Procedural (no external model)
+// Fixed mini-canvas bottom-corner, random peek every 22-45s, 3.8s visible.
+// Uses window.THREE (vendor/three.min.js) when available; otherwise no-op.
+// Theme-aware collar color via --accent. Completely independent RAF.
+// ==========================================================================
+function initCat3D() {
+  try {
+    const stage = document.getElementById('cat3DStage');
+    const canvas = document.getElementById('cat3DCanvas');
+    if (!stage || !canvas) return;
+    if (typeof window === 'undefined' || typeof window.THREE === 'undefined' || !window.THREE.Scene) return;
+    // Don't init in test sandboxes that mock canvas without WebGL
+    try {
+      const testCtx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!testCtx && typeof window.WebGLRenderingContext === 'undefined') {
+        // still try — renderer will fail gracefully if no WebGL
+      }
+    } catch (e) { /* ignore */ }
+
+    const THREE = window.THREE;
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let rafId = null;
+    let timeoutId = null;
+    let isVisible = false;
+    let isPaused = false;
+    let catGroup = null;
+    let renderer = null;
+    let scene = null;
+    let camera = null;
+    let tail = null;
+    let leftEye = null;
+    let rightEye = null;
+    let collar = null;
+
+    // Scene setup
+    scene = new THREE.Scene();
+    // transparent background
+    const aspect = 1;
+    camera = new THREE.PerspectiveCamera(28, aspect, 0.1, 30);
+    camera.position.set(0.2, 1.1, 5.2);
+    camera.lookAt(0, 0, 0);
+
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
+    } catch (e) {
+      return;
+    }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = false;
+    // Tone mapping for soft look
+    if (renderer.toneMapping !== undefined) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+    }
+
+    // Lights
+    const amb = new THREE.AmbientLight(0xffffff, 0.92);
+    scene.add(amb);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.85);
+    dir.position.set(2, 4, 3);
+    scene.add(dir);
+    const rim = new THREE.PointLight(0xffffff, 0.55, 10);
+    rim.position.set(-2, 2, 2);
+    scene.add(rim);
+
+    // Helper to get accent color
+    function getAccentColor() {
+      const t = (document.body && document.body.dataset && document.body.dataset.theme) || '';
+      if (t === 'cyan') return new THREE.Color(0x7beeff);
+      if (t === 'amber') return new THREE.Color(0xffce64);
+      return new THREE.Color(0xc9ff62);
+    }
+    function getAccentRgb() {
+      const c = getAccentColor();
+      return [Math.round(c.r*255), Math.round(c.g*255), Math.round(c.b*255)];
+    }
+
+    // Build low-poly cat
+    catGroup = new THREE.Group();
+    // Body — rounded box approximation using Box
+    const bodyGeo = new THREE.BoxGeometry(1.55, 0.95, 0.95);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xfff6e5, roughness: 0.78, metalness: 0.02 });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = -0.15;
+    body.castShadow = false;
+    catGroup.add(body);
+
+    // Belly lighter patch
+    const bellyGeo = new THREE.SphereGeometry(0.62, 16, 12);
+    const bellyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85 });
+    const belly = new THREE.Mesh(bellyGeo, bellyMat);
+    belly.scale.set(1, 0.55, 0.5);
+    belly.position.set(0, -0.32, 0.48);
+    catGroup.add(belly);
+
+    // Head
+    const headGeo = new THREE.SphereGeometry(0.72, 22, 18);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0xfff6e5, roughness: 0.7 });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.set(0, 0.68, 0.22);
+    head.scale.set(1, 0.92, 0.9);
+    catGroup.add(head);
+
+    // Ears
+    const earGeo = new THREE.ConeGeometry(0.24, 0.48, 8);
+    const earMat = new THREE.MeshStandardMaterial({ color: 0xfff6e5, roughness: 0.7 });
+    const earInnerMat = new THREE.MeshStandardMaterial({ color: 0xffb0a8, roughness: 0.9 });
+    [-1, 1].forEach(side => {
+      const ear = new THREE.Mesh(earGeo, earMat);
+      ear.position.set(side * 0.38, 1.12, 0.18);
+      ear.rotation.z = side * -0.18;
+      ear.rotation.x = -0.18;
+      catGroup.add(ear);
+      const inner = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.28, 8), earInnerMat);
+      inner.position.set(side * 0.38, 1.08, 0.28);
+      inner.rotation.z = side * -0.18;
+      inner.rotation.x = -0.18;
+      catGroup.add(inner);
+    });
+
+    // Eyes
+    const eyeGeo = new THREE.SphereGeometry(0.11, 12, 10);
+    const eyeBlackMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 });
+    leftEye = new THREE.Mesh(eyeGeo, eyeBlackMat);
+    leftEye.position.set(-0.23, 0.72, 0.78);
+    leftEye.scale.set(1, 1.15, 0.65);
+    catGroup.add(leftEye);
+    rightEye = new THREE.Mesh(eyeGeo, eyeBlackMat.clone());
+    rightEye.position.set(0.23, 0.72, 0.78);
+    rightEye.scale.set(1, 1.15, 0.65);
+    catGroup.add(rightEye);
+    // Eye highlights
+    const hlGeo = new THREE.SphereGeometry(0.032, 8, 8);
+    const hlMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const hlL = new THREE.Mesh(hlGeo, hlMat);
+    hlL.position.set(-0.20, 0.76, 0.88);
+    catGroup.add(hlL);
+    const hlR = new THREE.Mesh(hlGeo, hlMat);
+    hlR.position.set(0.26, 0.76, 0.88);
+    catGroup.add(hlR);
+
+    // Nose
+    const noseGeo = new THREE.SphereGeometry(0.055, 8, 8);
+    const noseMat = new THREE.MeshStandardMaterial({ color: 0xff8fa3 });
+    const nose = new THREE.Mesh(noseGeo, noseMat);
+    nose.position.set(0, 0.58, 0.88);
+    nose.scale.set(1.4, 0.9, 0.7);
+    catGroup.add(nose);
+
+    // Mouth line
+    const mouthGeo = new THREE.TorusGeometry(0.075, 0.012, 6, 12, Math.PI);
+    const mouthMat = new THREE.MeshStandardMaterial({ color: 0x6b4a3a });
+    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+    mouth.position.set(0, 0.52, 0.86);
+    mouth.rotation.z = Math.PI;
+    mouth.rotation.x = 0.18;
+    catGroup.add(mouth);
+
+    // Whiskers (3 per side as thin cylinders)
+    const whiskerMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.9 });
+    for (let i = 0; i < 3; i++) {
+      [-1, 1].forEach(side => {
+        const w = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.55, 6), whiskerMat);
+        w.rotation.z = side * (Math.PI/2 + (i-1)*0.18);
+        w.position.set(side * 0.42, 0.62 - i*0.07, 0.72);
+        catGroup.add(w);
+      });
+    }
+
+    // Collar with accent
+    const collarGeo = new THREE.TorusGeometry(0.42, 0.045, 8, 20);
+    const collarMat = new THREE.MeshStandardMaterial({ color: getAccentColor(), roughness: 0.55, metalness: 0.15, emissive: getAccentColor(), emissiveIntensity: 0.12 });
+    collar = new THREE.Mesh(collarGeo, collarMat);
+    collar.position.set(0, 0.22, 0.18);
+    collar.rotation.x = Math.PI/2 + 0.35;
+    catGroup.add(collar);
+    const bellGeo = new THREE.SphereGeometry(0.09, 10, 10);
+    const bellMat = new THREE.MeshStandardMaterial({ color: 0xffd23e, metalness: 0.65, roughness: 0.35 });
+    const bell = new THREE.Mesh(bellGeo, bellMat);
+    bell.position.set(0, 0.02, 0.52);
+    collar.add(bell);
+
+    // Paws
+    const pawGeo = new THREE.SphereGeometry(0.21, 12, 10);
+    const pawMat = new THREE.MeshStandardMaterial({ color: 0xfff6e5 });
+    const pawL = new THREE.Mesh(pawGeo, pawMat);
+    pawL.position.set(-0.42, -0.58, 0.45);
+    pawL.scale.set(1, 0.65, 0.85);
+    catGroup.add(pawL);
+    const pawR = new THREE.Mesh(pawGeo, pawMat);
+    pawR.position.set(0.42, -0.58, 0.45);
+    pawR.scale.set(1, 0.65, 0.85);
+    catGroup.add(pawR);
+
+    // Tail — curved tube using CatmullRom
+    const tailCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, -0.18, -0.48),
+      new THREE.Vector3(0.35, -0.12, -0.78),
+      new THREE.Vector3(0.62, 0.18, -0.72),
+      new THREE.Vector3(0.58, 0.42, -0.42)
+    ]);
+    const tailGeo = new THREE.TubeGeometry(tailCurve, 12, 0.11, 8, false);
+    const tailMat = new THREE.MeshStandardMaterial({ color: 0xffc07a, roughness: 0.75 });
+    tail = new THREE.Mesh(tailGeo, tailMat);
+    catGroup.add(tail);
+
+    catGroup.position.y = -0.08;
+    catGroup.rotation.y = -0.18;
+    scene.add(catGroup);
+
+    // Ground subtle disc (shadow proxy)
+    const groundGeo = new THREE.CircleGeometry(1.15, 22);
+    const groundMat = new THREE.MeshBasicMaterial({ color: 0x0d110e, transparent: true, opacity: 0.42 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI/2;
+    ground.position.y = -0.72;
+    scene.add(ground);
+
+    function resizeRenderer() {
+      const w = stage.clientWidth || 170;
+      const h = stage.clientHeight || 170;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.6);
+      renderer.setPixelRatio(dpr);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+
+    let startT = performance.now();
+    let lastBlink = startT;
+
+    function animate() {
+      if (isPaused) { rafId = null; return; }
+      rafId = requestAnimationFrame(animate);
+      const now = performance.now();
+      const t = (now - startT) / 1000;
+
+      if (!prefersReduced) {
+        // subtle breathing + head tilt
+        catGroup.position.y = -0.08 + Math.sin(t * 1.25) * 0.035;
+        catGroup.rotation.y = -0.18 + Math.sin(t * 0.65) * 0.10;
+        catGroup.rotation.z = Math.sin(t * 0.42) * 0.025;
+        if (tail) tail.rotation.z = Math.sin(t * 1.9) * 0.12;
+        // occasional blink every 2.8-4.5s
+        if (now - lastBlink > 3200 + Math.random()*1400) {
+          if (leftEye && rightEye) {
+            leftEye.scale.y = 0.12;
+            rightEye.scale.y = 0.12;
+            setTimeout(() => { if (leftEye) leftEye.scale.y = 1.15; if (rightEye) rightEye.scale.y = 1.15; }, 120);
+          }
+          lastBlink = now;
+        }
+      }
+
+      try { renderer.render(scene, camera); } catch (e) {}
+    }
+
+    function updateCollarTheme() {
+      if (!collar) return;
+      const c = getAccentColor();
+      collar.material.color.copy(c);
+      collar.material.emissive.copy(c);
+    }
+
+    // Theme observer
+    if (typeof MutationObserver !== 'undefined') {
+      const obs = new MutationObserver(() => { updateCollarTheme(); });
+      obs.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+
+    // Show / hide logic
+    function showCat() {
+      if (isVisible || isPaused) return;
+      isVisible = true;
+      // random side
+      const toLeft = Math.random() < 0.22;
+      stage.style.right = toLeft ? 'auto' : '14px';
+      stage.style.left = toLeft ? '14px' : 'auto';
+      stage.classList.add('cat-visible');
+      stage.classList.remove('cat-peeking');
+      // force reflow then add peeking for wiggle
+      void stage.offsetWidth;
+      stage.classList.add('cat-peeking');
+      stage.setAttribute('aria-hidden', 'false');
+      // trigger ripple near stage position
+      try {
+        const r = stage.getBoundingClientRect();
+        if (typeof window.__triggerRipple === 'function') {
+          window.__triggerRipple(r.left + r.width*0.5, r.top + r.height*0.5, 0.85);
+        }
+      } catch(e){}
+      // auto hide after 3800ms
+      setTimeout(hideCat, 3800);
+    }
+
+    function hideCat() {
+      if (!isVisible) return;
+      isVisible = false;
+      stage.classList.remove('cat-visible', 'cat-peeking');
+      stage.setAttribute('aria-hidden', 'true');
+      scheduleNext();
+    }
+
+    function scheduleNext() {
+      window.clearTimeout(timeoutId);
+      const next = 22000 + Math.random() * 35000; // 22-57s
+      timeoutId = window.setTimeout(showCat, next);
+    }
+
+    // Click to pet
+    canvas.addEventListener('click', () => {
+      if (!isVisible) return;
+      // quick bounce
+      catGroup.scale.set(1.08, 1.08, 1.08);
+      setTimeout(() => catGroup.scale.set(1,1,1), 180);
+      try {
+        const r = stage.getBoundingClientRect();
+        window.__triggerRipple && window.__triggerRipple(r.left + r.width*0.5, r.top + r.height*0.5, 1.0);
+      } catch(e){}
+      // keep visible a bit longer
+      window.clearTimeout(timeoutId);
+      // hide after short extra
+      setTimeout(hideCat, 900);
+    });
+
+    // Pause when tab hidden or reduced motion
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        isPaused = true;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+      } else {
+        isPaused = false;
+        startT = performance.now();
+        if (!rafId) rafId = requestAnimationFrame(animate);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      try { resizeRenderer(); } catch(e){}
+    }, { passive: true });
+
+    // Init
+    try { resizeRenderer(); } catch(e){}
+    rafId = requestAnimationFrame(animate);
+    // first appearance after 12-18s
+    timeoutId = window.setTimeout(showCat, 12000 + Math.random()*6000);
+
+    // expose for manual testing
+    window.__summonCat = showCat;
+    window.__hideCat = hideCat;
+
+    // Also show once when user idles 18s (reuses lastInteractionTime from cyber engine if available)
+    let idleTimer = window.setTimeout(() => { if (!isVisible) showCat(); }, 18000);
+    ['pointermove','pointerdown','keydown','scroll'].forEach(ev => {
+      window.addEventListener(ev, () => {
+        window.clearTimeout(idleTimer);
+        idleTimer = window.setTimeout(() => { if (!isVisible) showCat(); }, 18000);
+      }, { passive: true });
+    });
+  } catch (e) {
+    // graceful fallback — no cat if anything fails
+  }
+}
+
   </script>
   <!-- Vercel Web Analytics -->
   <script>
@@ -11159,10 +11684,10 @@ function initCosmosIntegration() {
           </div>
         </div>
       </section>
-      <section class="section" id="cases"><div class="heading"><div><p class="eyebrow">// selected_work</p><h2 data-t="cases">Casos de estudio</h2></div><p data-t="caseIntro">Resultados aplicados en datos, automatización, analítica y operaciones.</p></div>
-        <article class="case featured tilt-card"><div class="media"><picture><source srcset="assets/primax-power-bi-dashboard.webp" type="image/webp"><img src="assets/primax-power-bi-dashboard.png" alt="Estación de trabajo con dashboard de Power BI para PRIMAX en un monitor" loading="lazy" decoding="async" width="800" height="450"></picture><span class="media-tag">01 / POWER BI</span></div><div class="case-content"><p class="case-kicker" data-t="primaxKicker">INTELIGENCIA COMERCIAL · PRIMAX ECUADOR</p><h3 data-t="primaxTitle">Dashboard para visibilizar KPI comerciales</h3><p data-t="primaxText">Diseño de un dashboard interactivo en Power BI para monitorear desempeño de asesores, distribución regional y segmentación de clientes.</p><ul class="tags"><li>Power BI</li><li>Power Query</li><li>Excel</li><li>KPI</li><li>SAP ERP</li></ul><div class="result"><strong>01</strong><span data-t="primaxResult">Información comercial más visible para el seguimiento operativo.</span></div><div class="case-actions"><span class="badge-internal" data-t="primaxScope">Proyecto de impacto interno · PRIMAX Ecuador</span><button class="text-link case-deep-btn" data-case="primax" type="button"><span data-t="viewStar">ver desglose técnico STAR</span> ↗</button></div></div></article>
+      <section class="section reveal" id="cases"><div class="heading"><div><p class="eyebrow">// selected_work</p><h2 data-t="cases">Casos de estudio</h2></div><p data-t="caseIntro">Resultados aplicados en datos, automatización, analítica y operaciones.</p></div>
+        <article class="case featured tilt-card reveal" style="--stagger:0"><div class="media"><picture><source srcset="assets/primax-power-bi-dashboard.webp" type="image/webp"><img src="assets/primax-power-bi-dashboard.png" alt="Estación de trabajo con dashboard de Power BI para PRIMAX en un monitor" loading="lazy" decoding="async" width="800" height="450"></picture><span class="media-tag">01 / POWER BI</span></div><div class="case-content"><p class="case-kicker" data-t="primaxKicker">INTELIGENCIA COMERCIAL · PRIMAX ECUADOR</p><h3 data-t="primaxTitle">Dashboard para visibilizar KPI comerciales</h3><p data-t="primaxText">Diseño de un dashboard interactivo en Power BI para monitorear desempeño de asesores, distribución regional y segmentación de clientes.</p><ul class="tags"><li>Power BI</li><li>Power Query</li><li>Excel</li><li>KPI</li><li>SAP ERP</li></ul><div class="result"><strong>01</strong><span data-t="primaxResult">Información comercial más visible para el seguimiento operativo.</span></div><div class="case-actions"><span class="badge-internal" data-t="primaxScope">Proyecto de impacto interno · PRIMAX Ecuador</span><button class="text-link case-deep-btn" data-case="primax" type="button"><span data-t="viewStar">ver desglose técnico STAR</span> ↗</button></div></div></article>
         <div class="case-grid">
-          <article class="case compact tilt-card">
+          <article class="case compact tilt-card reveal" style="--stagger:1">
             <div class="case-number">02</div>
             <p class="case-kicker" data-t="etlKicker">ETL & DATA PIPELINE · PYTHON</p>
             <h3 data-t="etlTitle">Automatización de reportes logísticos (ETL)</h3>
@@ -11175,7 +11700,7 @@ function initCosmosIntegration() {
               <button class="text-link case-deep-btn" data-case="etl" type="button"><span data-t="viewStar">desglose STAR</span> ↗</button>
             </div>
           </article>
-          <article class="case compact tilt-card">
+          <article class="case compact tilt-card reveal" style="--stagger:2">
             <div class="case-number">03</div>
             <p class="case-kicker">MACHINE LEARNING · GITHUB</p>
             <h3 data-t="machineTitle">Análisis predictivo de fallas en máquinas</h3>
@@ -11187,7 +11712,7 @@ function initCosmosIntegration() {
               <button class="text-link case-deep-btn" data-case="ml" type="button"><span data-t="viewStar">desglose STAR</span> ↗</button>
             </div>
           </article>
-          <article class="case compact tilt-card">
+          <article class="case compact tilt-card reveal" style="--stagger:3">
             <div class="case-number">04</div>
             <p class="case-kicker" data-t="vasmadKicker">LOGÍSTICA · PROYECTO APLICADO</p>
             <h3 data-t="vasmadTitle">Optimización logística y automatización</h3>
@@ -11198,7 +11723,7 @@ function initCosmosIntegration() {
               <button class="text-link case-deep-btn" data-case="vasmad" type="button"><span data-t="viewStar">ver desglose técnico STAR</span> ↗</button>
             </div>
           </article>
-          <article class="case compact tilt-card">
+          <article class="case compact tilt-card reveal" style="--stagger:4">
             <div class="case-number">05</div>
             <p class="case-kicker" data-t="cosmosKicker">3D WEBGL &amp; ASTROFÍSICA · THREE.JS</p>
             <h3 data-t="cosmosTitle">Cosmic Atlas — Sistema Solar Interactivo 3D</h3>
@@ -11215,7 +11740,7 @@ function initCosmosIntegration() {
         </div>
       </section>
       <section class="section recruiter" id="recruiter"><div class="heading"><div><p class="eyebrow">// recruiter_snapshot</p><h2 data-t="recruiterTitle">Perfil en 60 segundos</h2></div><button class="recruiter-close" type="button" data-view="terminal" data-t="back">volver a terminal</button></div><div class="snapshot"><article class="tilt-card"><span class="snap-index">01</span><h3 data-t="focus">Enfoque</h3><p data-t-html="focusText"><strong>Datos · Automatización · Operaciones</strong><br>Supply Chain, planeamiento operativo y analítica avanzada para optimizar la toma de decisiones y reducir costos.</p></article><article class="tilt-card"><span class="snap-index">02</span><h3 data-t="experience">Experiencia</h3><p data-t-html="experienceText"><strong>PX Servicios Generales · PRIMAX Ecuador</strong><br>Practicante Preprofesional de Gestión Documental · nov. 2025 — abr. 2026<br><br><strong>PMO · Comunidad Estudiantil PMI</strong><br>Dirección de Proyectos · nov. 2025 — ago. 2026</p></article><article class="tilt-card"><span class="snap-index">03</span><h3>Stack</h3><p>Power BI · Excel Avanzado · SQL · Python (Pandas/ETL) · SAP ERP · Power Automate · Supply Chain (MRP/5S) · Logística · PMO</p></article></div><div class="recruiter-actions"><a class="button primary" href="mailto:alessandro.altamirano23@gmail.com"><span data-t="contactMe">contactarme</span><span>↗</span></a><a class="button ghost" id="recruiterCvBtn" href="CV_Alessandro_Altamirano_Salazar_2026.pdf" target="_blank" rel="noopener noreferrer"><span data-t="download">ver CV</span><span>↓</span></a></div></section>
-      <section class="section terminal-section" id="terminal">
+      <section class="section terminal-section reveal" id="terminal">
         <div class="heading">
           <div><p class="eyebrow">// interactive_profile</p><h2 data-t="terminalTitle">Explora el perfil</h2></div>
           <p data-t="terminalIntro">Usa la terminal para conocer más o escribe un comando.</p>
@@ -11295,9 +11820,9 @@ function initCosmosIntegration() {
           </div>
         </div>
       </section>
-      <section class="section" id="credentials"><div class="heading"><div><p class="eyebrow">// credentials</p><h2 data-t="credentials">Formación y herramientas</h2></div><p data-t="credIntro">Base técnica con foco en la mejora continua y certificaciones verificables.</p></div>
+      <section class="section reveal" id="credentials"><div class="heading"><div><p class="eyebrow">// credentials</p><h2 data-t="credentials">Formación y herramientas</h2></div><p data-t="credIntro">Base técnica con foco en la mejora continua y certificaciones verificables.</p></div>
         <div class="credentials-grid">
-          <div class="education tilt-card">
+          <div class="education tilt-card reveal" style="--stagger:0">
             <p class="card-label" data-t="education">EDUCACIÓN & GESTIÓN</p>
             <h3 data-t="degree">Ingeniería Industrial</h3>
             <p data-t-html="university">Universidad Continental · 2022 — presente<br>Décimo ciclo</p>
@@ -11308,32 +11833,32 @@ function initCosmosIntegration() {
             <div class="edu-footer"><span class="badge-status">● En curso (10° Ciclo)</span><span class="edu-lang" data-t="languages">Español nativo · Inglés intermedio</span></div>
           </div>
           <div class="certifications-list">
-            <a class="credential-card tilt-card" href="https://drive.google.com/file/d/1cQc80EHDGVL-HHTvodDKgtxesuoVq0IT/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+            <a class="credential-card tilt-card reveal" style="--stagger:1" href="https://drive.google.com/file/d/1cQc80EHDGVL-HHTvodDKgtxesuoVq0IT/view?usp=sharing" target="_blank" rel="noopener noreferrer">
               <div class="cred-header"><span class="cred-issuer">Santander Open Academy</span><span class="cred-badge">ver credencial ↗</span></div>
               <h4 data-t="certPyTitle">Python para Análisis de Datos</h4>
               <p class="cred-skills" data-t="certPySkills">Pandas · NumPy · Automatización · Scripting</p>
             </a>
-            <a class="credential-card tilt-card" href="https://drive.google.com/file/d/1jqEA5AxWUhB4RaCrlOAuPybT3x-dP993/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+            <a class="credential-card tilt-card reveal" style="--stagger:2" href="https://drive.google.com/file/d/1jqEA5AxWUhB4RaCrlOAuPybT3x-dP993/view?usp=sharing" target="_blank" rel="noopener noreferrer">
               <div class="cred-header"><span class="cred-issuer">Santander Open Academy</span><span class="cred-badge">ver credencial ↗</span></div>
               <h4 data-t="certBiTitle">Power BI para Business Intelligence</h4>
               <p class="cred-skills" data-t="certBiSkills">DAX · Power Query · Modelado Dimensional · Dashboards KPI</p>
             </a>
-            <a class="credential-card tilt-card" href="https://drive.google.com/file/d/1thaxesW5lzO6yov0ce5aqxhTkFfruI2j/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+            <a class="credential-card tilt-card reveal" style="--stagger:3" href="https://drive.google.com/file/d/1thaxesW5lzO6yov0ce5aqxhTkFfruI2j/view?usp=sharing" target="_blank" rel="noopener noreferrer">
               <div class="cred-header"><span class="cred-issuer">Fundación Telefónica</span><span class="cred-badge">ver credencial ↗</span></div>
               <h4 data-t="certExcelTitle">Excel Avanzado & Automatización</h4>
               <p class="cred-skills" data-t="certExcelSkills">Tablas dinámicas · Fórmulas avanzadas · Análisis de datos</p>
             </a>
-            <a class="credential-card tilt-card" href="https://drive.google.com/file/d/1VJO_tBVTvv6llyoNRzwT90XEhjDDzB2H/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+            <a class="credential-card tilt-card reveal" style="--stagger:4" href="https://drive.google.com/file/d/1VJO_tBVTvv6llyoNRzwT90XEhjDDzB2H/view?usp=sharing" target="_blank" rel="noopener noreferrer">
               <div class="cred-header"><span class="cred-issuer">Udemy</span><span class="cred-badge">ver credencial ↗</span></div>
               <h4 data-t="certTradeTitle">Comercio Internacional y Logística</h4>
               <p class="cred-skills" data-t="certTradeSkills">Importación · Exportación · Cadena de Suministro · Aduanas</p>
             </a>
-            <a class="credential-card tilt-card" href="https://drive.google.com/file/d/1zkQ49YxqPnr1A7bpui4AeKSvIUpMw0BJ/view?usp=sharing" target="_blank" rel="noopener noreferrer">
+            <a class="credential-card tilt-card reveal" style="--stagger:5" href="https://drive.google.com/file/d/1zkQ49YxqPnr1A7bpui4AeKSvIUpMw0BJ/view?usp=sharing" target="_blank" rel="noopener noreferrer">
               <div class="cred-header"><span class="cred-issuer">NASA Space Apps</span><span class="cred-badge">ver credencial ↗</span></div>
               <h4>Galactic Problem Solver</h4>
               <p class="cred-skills">NASA Space Apps Challenge 2025 · Hackathon Internacional</p>
             </a>
-            <a class="credential-card tilt-card" href="https://verify.skilljar.com/c/aeqidtgg2pe2" target="_blank" rel="noopener noreferrer">
+            <a class="credential-card tilt-card reveal" style="--stagger:6" href="https://verify.skilljar.com/c/aeqidtgg2pe2" target="_blank" rel="noopener noreferrer">
               <div class="cred-header"><span class="cred-issuer">Anthropic</span><span class="cred-badge">ver credencial ↗</span></div>
               <h4>Claude Code in Action</h4>
               <p class="cred-skills">Ingeniería de contexto · Automatización con IA · Developer Workflow</p>
@@ -11341,7 +11866,7 @@ function initCosmosIntegration() {
           </div>
         </div>
       </section>
-      <section class="section contact" id="contact"><p class="eyebrow">// contact</p><h2 data-t-html="contactTitle">¿Tienes un reto?<br><em class="accent">Conversemos.</em></h2><div class="contact-layout"><p data-t="contactIntro">Si buscas mejorar la visibilidad de datos, automatizar una tarea operativa o estructurar un proceso, escríbeme.</p><form class="form" id="contactForm"><label><span data-t="name">Nombre</span><input name="name" required></label><label><span data-t="email">Correo</span><input name="email" type="email" required></label><label><span data-t="message">Mensaje</span><textarea name="message" rows="3" required></textarea></label><button class="button primary" type="submit"><span data-t="send">abrir correo</span><span>↗</span></button><p class="form-note" data-t="note">Se abrirá tu cliente de correo; no almacenamos datos.</p></form></div></section>
+      <section class="section contact reveal" id="contact"><p class="eyebrow">// contact</p><h2 data-t-html="contactTitle">¿Tienes un reto?<br><em class="accent">Conversemos.</em></h2><div class="contact-layout"><p data-t="contactIntro">Si buscas mejorar la visibilidad de datos, automatizar una tarea operativa o estructurar un proceso, escríbeme.</p><form class="form" id="contactForm"><label><span data-t="name">Nombre</span><input name="name" required></label><label><span data-t="email">Correo</span><input name="email" type="email" required></label><label><span data-t="message">Mensaje</span><textarea name="message" rows="3" required></textarea></label><button class="button primary" type="submit"><span data-t="send">abrir correo</span><span>↗</span></button><p class="form-note" data-t="note">Se abrirá tu cliente de correo; no almacenamos datos.</p></form></div></section>
       <footer>
         <p data-t="footer">Diseñado con intención, datos y café.</p>
         <div class="footer-links">
@@ -11352,6 +11877,11 @@ function initCosmosIntegration() {
       </footer>
     </section>
   </main>
+  <!-- Cat 3D Easter Peek — Three.js Low-Poly (fixed, random) -->
+  <div id="cat3DStage" aria-hidden="true" role="status" aria-label="Gatito 3D sorpresa">
+    <canvas id="cat3DCanvas" aria-hidden="true"></canvas>
+    <div class="cat3d-tooltip" aria-hidden="true">ฅ^•ﻌ•^ฅ ¡miau!</div>
+  </div>
   <dialog id="cvModal" class="cv-modal" aria-labelledby="cvModalTitle">
     <div class="cv-modal-box">
       <div class="cv-modal-header">

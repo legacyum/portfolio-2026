@@ -2664,6 +2664,8 @@ initCopyButtons();
 
 initTiltCards();
 initScrollspy();
+initScrollReveal();
+initCat3D();
 
 // ==========================================================================
 // Cyber-Industrial Dynamic Background Engine
@@ -3561,4 +3563,405 @@ function initCosmosIntegration() {
       c.classList.toggle('active', c.getAttribute('data-body-id') === b.id);
     });
   });
+}
+
+// ==========================================================================
+// Scroll Reveal Animations (IntersectionObserver, no deps)
+// Adds .is-visible to .reveal elements when entering viewport.
+// Stagger is driven by --stagger CSS variable per element.
+// ==========================================================================
+function initScrollReveal() {
+  try {
+    const revealEls = document.querySelectorAll('.reveal');
+    if (!revealEls.length) return;
+    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReduced) {
+      revealEls.forEach(el => el.classList.add('is-visible'));
+      return;
+    }
+    if (typeof IntersectionObserver === 'undefined') {
+      revealEls.forEach(el => el.classList.add('is-visible'));
+      return;
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.14, rootMargin: '0px 0px -7% 0px' });
+    revealEls.forEach(el => io.observe(el));
+  } catch (e) { /* silent */ }
+}
+
+// ==========================================================================
+// Cat 3D Easter Peek — Three.js Low-Poly Procedural (no external model)
+// Fixed mini-canvas bottom-corner, random peek every 22-45s, 3.8s visible.
+// Uses window.THREE (vendor/three.min.js) when available; otherwise no-op.
+// Theme-aware collar color via --accent. Completely independent RAF.
+// ==========================================================================
+function initCat3D() {
+  try {
+    const stage = document.getElementById('cat3DStage');
+    const canvas = document.getElementById('cat3DCanvas');
+    if (!stage || !canvas) return;
+    if (typeof window === 'undefined' || typeof window.THREE === 'undefined' || !window.THREE.Scene) return;
+    // Don't init in test sandboxes that mock canvas without WebGL
+    try {
+      const testCtx = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!testCtx && typeof window.WebGLRenderingContext === 'undefined') {
+        // still try — renderer will fail gracefully if no WebGL
+      }
+    } catch (e) { /* ignore */ }
+
+    const THREE = window.THREE;
+    const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let rafId = null;
+    let timeoutId = null;
+    let isVisible = false;
+    let isPaused = false;
+    let catGroup = null;
+    let renderer = null;
+    let scene = null;
+    let camera = null;
+    let tail = null;
+    let leftEye = null;
+    let rightEye = null;
+    let collar = null;
+
+    // Scene setup
+    scene = new THREE.Scene();
+    // transparent background
+    const aspect = 1;
+    camera = new THREE.PerspectiveCamera(28, aspect, 0.1, 30);
+    camera.position.set(0.2, 1.1, 5.2);
+    camera.lookAt(0, 0, 0);
+
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
+    } catch (e) {
+      return;
+    }
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.6));
+    renderer.setClearColor(0x000000, 0);
+    renderer.shadowMap.enabled = false;
+    // Tone mapping for soft look
+    if (renderer.toneMapping !== undefined) {
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.05;
+    }
+
+    // Lights
+    const amb = new THREE.AmbientLight(0xffffff, 0.92);
+    scene.add(amb);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.85);
+    dir.position.set(2, 4, 3);
+    scene.add(dir);
+    const rim = new THREE.PointLight(0xffffff, 0.55, 10);
+    rim.position.set(-2, 2, 2);
+    scene.add(rim);
+
+    // Helper to get accent color
+    function getAccentColor() {
+      const t = (document.body && document.body.dataset && document.body.dataset.theme) || '';
+      if (t === 'cyan') return new THREE.Color(0x7beeff);
+      if (t === 'amber') return new THREE.Color(0xffce64);
+      return new THREE.Color(0xc9ff62);
+    }
+    function getAccentRgb() {
+      const c = getAccentColor();
+      return [Math.round(c.r*255), Math.round(c.g*255), Math.round(c.b*255)];
+    }
+
+    // Build low-poly cat
+    catGroup = new THREE.Group();
+    // Body — rounded box approximation using Box
+    const bodyGeo = new THREE.BoxGeometry(1.55, 0.95, 0.95);
+    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xfff6e5, roughness: 0.78, metalness: 0.02 });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = -0.15;
+    body.castShadow = false;
+    catGroup.add(body);
+
+    // Belly lighter patch
+    const bellyGeo = new THREE.SphereGeometry(0.62, 16, 12);
+    const bellyMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.85 });
+    const belly = new THREE.Mesh(bellyGeo, bellyMat);
+    belly.scale.set(1, 0.55, 0.5);
+    belly.position.set(0, -0.32, 0.48);
+    catGroup.add(belly);
+
+    // Head
+    const headGeo = new THREE.SphereGeometry(0.72, 22, 18);
+    const headMat = new THREE.MeshStandardMaterial({ color: 0xfff6e5, roughness: 0.7 });
+    const head = new THREE.Mesh(headGeo, headMat);
+    head.position.set(0, 0.68, 0.22);
+    head.scale.set(1, 0.92, 0.9);
+    catGroup.add(head);
+
+    // Ears
+    const earGeo = new THREE.ConeGeometry(0.24, 0.48, 8);
+    const earMat = new THREE.MeshStandardMaterial({ color: 0xfff6e5, roughness: 0.7 });
+    const earInnerMat = new THREE.MeshStandardMaterial({ color: 0xffb0a8, roughness: 0.9 });
+    [-1, 1].forEach(side => {
+      const ear = new THREE.Mesh(earGeo, earMat);
+      ear.position.set(side * 0.38, 1.12, 0.18);
+      ear.rotation.z = side * -0.18;
+      ear.rotation.x = -0.18;
+      catGroup.add(ear);
+      const inner = new THREE.Mesh(new THREE.ConeGeometry(0.13, 0.28, 8), earInnerMat);
+      inner.position.set(side * 0.38, 1.08, 0.28);
+      inner.rotation.z = side * -0.18;
+      inner.rotation.x = -0.18;
+      catGroup.add(inner);
+    });
+
+    // Eyes
+    const eyeGeo = new THREE.SphereGeometry(0.11, 12, 10);
+    const eyeBlackMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2 });
+    leftEye = new THREE.Mesh(eyeGeo, eyeBlackMat);
+    leftEye.position.set(-0.23, 0.72, 0.78);
+    leftEye.scale.set(1, 1.15, 0.65);
+    catGroup.add(leftEye);
+    rightEye = new THREE.Mesh(eyeGeo, eyeBlackMat.clone());
+    rightEye.position.set(0.23, 0.72, 0.78);
+    rightEye.scale.set(1, 1.15, 0.65);
+    catGroup.add(rightEye);
+    // Eye highlights
+    const hlGeo = new THREE.SphereGeometry(0.032, 8, 8);
+    const hlMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const hlL = new THREE.Mesh(hlGeo, hlMat);
+    hlL.position.set(-0.20, 0.76, 0.88);
+    catGroup.add(hlL);
+    const hlR = new THREE.Mesh(hlGeo, hlMat);
+    hlR.position.set(0.26, 0.76, 0.88);
+    catGroup.add(hlR);
+
+    // Nose
+    const noseGeo = new THREE.SphereGeometry(0.055, 8, 8);
+    const noseMat = new THREE.MeshStandardMaterial({ color: 0xff8fa3 });
+    const nose = new THREE.Mesh(noseGeo, noseMat);
+    nose.position.set(0, 0.58, 0.88);
+    nose.scale.set(1.4, 0.9, 0.7);
+    catGroup.add(nose);
+
+    // Mouth line
+    const mouthGeo = new THREE.TorusGeometry(0.075, 0.012, 6, 12, Math.PI);
+    const mouthMat = new THREE.MeshStandardMaterial({ color: 0x6b4a3a });
+    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+    mouth.position.set(0, 0.52, 0.86);
+    mouth.rotation.z = Math.PI;
+    mouth.rotation.x = 0.18;
+    catGroup.add(mouth);
+
+    // Whiskers (3 per side as thin cylinders)
+    const whiskerMat = new THREE.MeshStandardMaterial({ color: 0x3a3a3a, roughness: 0.9 });
+    for (let i = 0; i < 3; i++) {
+      [-1, 1].forEach(side => {
+        const w = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 0.55, 6), whiskerMat);
+        w.rotation.z = side * (Math.PI/2 + (i-1)*0.18);
+        w.position.set(side * 0.42, 0.62 - i*0.07, 0.72);
+        catGroup.add(w);
+      });
+    }
+
+    // Collar with accent
+    const collarGeo = new THREE.TorusGeometry(0.42, 0.045, 8, 20);
+    const collarMat = new THREE.MeshStandardMaterial({ color: getAccentColor(), roughness: 0.55, metalness: 0.15, emissive: getAccentColor(), emissiveIntensity: 0.12 });
+    collar = new THREE.Mesh(collarGeo, collarMat);
+    collar.position.set(0, 0.22, 0.18);
+    collar.rotation.x = Math.PI/2 + 0.35;
+    catGroup.add(collar);
+    const bellGeo = new THREE.SphereGeometry(0.09, 10, 10);
+    const bellMat = new THREE.MeshStandardMaterial({ color: 0xffd23e, metalness: 0.65, roughness: 0.35 });
+    const bell = new THREE.Mesh(bellGeo, bellMat);
+    bell.position.set(0, 0.02, 0.52);
+    collar.add(bell);
+
+    // Paws
+    const pawGeo = new THREE.SphereGeometry(0.21, 12, 10);
+    const pawMat = new THREE.MeshStandardMaterial({ color: 0xfff6e5 });
+    const pawL = new THREE.Mesh(pawGeo, pawMat);
+    pawL.position.set(-0.42, -0.58, 0.45);
+    pawL.scale.set(1, 0.65, 0.85);
+    catGroup.add(pawL);
+    const pawR = new THREE.Mesh(pawGeo, pawMat);
+    pawR.position.set(0.42, -0.58, 0.45);
+    pawR.scale.set(1, 0.65, 0.85);
+    catGroup.add(pawR);
+
+    // Tail — curved tube using CatmullRom
+    const tailCurve = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(0, -0.18, -0.48),
+      new THREE.Vector3(0.35, -0.12, -0.78),
+      new THREE.Vector3(0.62, 0.18, -0.72),
+      new THREE.Vector3(0.58, 0.42, -0.42)
+    ]);
+    const tailGeo = new THREE.TubeGeometry(tailCurve, 12, 0.11, 8, false);
+    const tailMat = new THREE.MeshStandardMaterial({ color: 0xffc07a, roughness: 0.75 });
+    tail = new THREE.Mesh(tailGeo, tailMat);
+    catGroup.add(tail);
+
+    catGroup.position.y = -0.08;
+    catGroup.rotation.y = -0.18;
+    scene.add(catGroup);
+
+    // Ground subtle disc (shadow proxy)
+    const groundGeo = new THREE.CircleGeometry(1.15, 22);
+    const groundMat = new THREE.MeshBasicMaterial({ color: 0x0d110e, transparent: true, opacity: 0.42 });
+    const ground = new THREE.Mesh(groundGeo, groundMat);
+    ground.rotation.x = -Math.PI/2;
+    ground.position.y = -0.72;
+    scene.add(ground);
+
+    function resizeRenderer() {
+      const w = stage.clientWidth || 170;
+      const h = stage.clientHeight || 170;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.6);
+      renderer.setPixelRatio(dpr);
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      canvas.style.width = w + 'px';
+      canvas.style.height = h + 'px';
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+
+    let startT = performance.now();
+    let lastBlink = startT;
+
+    function animate() {
+      if (isPaused) { rafId = null; return; }
+      rafId = requestAnimationFrame(animate);
+      const now = performance.now();
+      const t = (now - startT) / 1000;
+
+      if (!prefersReduced) {
+        // subtle breathing + head tilt
+        catGroup.position.y = -0.08 + Math.sin(t * 1.25) * 0.035;
+        catGroup.rotation.y = -0.18 + Math.sin(t * 0.65) * 0.10;
+        catGroup.rotation.z = Math.sin(t * 0.42) * 0.025;
+        if (tail) tail.rotation.z = Math.sin(t * 1.9) * 0.12;
+        // occasional blink every 2.8-4.5s
+        if (now - lastBlink > 3200 + Math.random()*1400) {
+          if (leftEye && rightEye) {
+            leftEye.scale.y = 0.12;
+            rightEye.scale.y = 0.12;
+            setTimeout(() => { if (leftEye) leftEye.scale.y = 1.15; if (rightEye) rightEye.scale.y = 1.15; }, 120);
+          }
+          lastBlink = now;
+        }
+      }
+
+      try { renderer.render(scene, camera); } catch (e) {}
+    }
+
+    function updateCollarTheme() {
+      if (!collar) return;
+      const c = getAccentColor();
+      collar.material.color.copy(c);
+      collar.material.emissive.copy(c);
+    }
+
+    // Theme observer
+    if (typeof MutationObserver !== 'undefined') {
+      const obs = new MutationObserver(() => { updateCollarTheme(); });
+      obs.observe(document.body, { attributes: true, attributeFilter: ['data-theme'] });
+    }
+
+    // Show / hide logic
+    function showCat() {
+      if (isVisible || isPaused) return;
+      isVisible = true;
+      // random side
+      const toLeft = Math.random() < 0.22;
+      stage.style.right = toLeft ? 'auto' : '14px';
+      stage.style.left = toLeft ? '14px' : 'auto';
+      stage.classList.add('cat-visible');
+      stage.classList.remove('cat-peeking');
+      // force reflow then add peeking for wiggle
+      void stage.offsetWidth;
+      stage.classList.add('cat-peeking');
+      stage.setAttribute('aria-hidden', 'false');
+      // trigger ripple near stage position
+      try {
+        const r = stage.getBoundingClientRect();
+        if (typeof window.__triggerRipple === 'function') {
+          window.__triggerRipple(r.left + r.width*0.5, r.top + r.height*0.5, 0.85);
+        }
+      } catch(e){}
+      // auto hide after 3800ms
+      setTimeout(hideCat, 3800);
+    }
+
+    function hideCat() {
+      if (!isVisible) return;
+      isVisible = false;
+      stage.classList.remove('cat-visible', 'cat-peeking');
+      stage.setAttribute('aria-hidden', 'true');
+      scheduleNext();
+    }
+
+    function scheduleNext() {
+      window.clearTimeout(timeoutId);
+      const next = 22000 + Math.random() * 35000; // 22-57s
+      timeoutId = window.setTimeout(showCat, next);
+    }
+
+    // Click to pet
+    canvas.addEventListener('click', () => {
+      if (!isVisible) return;
+      // quick bounce
+      catGroup.scale.set(1.08, 1.08, 1.08);
+      setTimeout(() => catGroup.scale.set(1,1,1), 180);
+      try {
+        const r = stage.getBoundingClientRect();
+        window.__triggerRipple && window.__triggerRipple(r.left + r.width*0.5, r.top + r.height*0.5, 1.0);
+      } catch(e){}
+      // keep visible a bit longer
+      window.clearTimeout(timeoutId);
+      // hide after short extra
+      setTimeout(hideCat, 900);
+    });
+
+    // Pause when tab hidden or reduced motion
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        isPaused = true;
+        if (rafId) cancelAnimationFrame(rafId);
+        rafId = null;
+      } else {
+        isPaused = false;
+        startT = performance.now();
+        if (!rafId) rafId = requestAnimationFrame(animate);
+      }
+    });
+
+    window.addEventListener('resize', () => {
+      try { resizeRenderer(); } catch(e){}
+    }, { passive: true });
+
+    // Init
+    try { resizeRenderer(); } catch(e){}
+    rafId = requestAnimationFrame(animate);
+    // first appearance after 12-18s
+    timeoutId = window.setTimeout(showCat, 12000 + Math.random()*6000);
+
+    // expose for manual testing
+    window.__summonCat = showCat;
+    window.__hideCat = hideCat;
+
+    // Also show once when user idles 18s (reuses lastInteractionTime from cyber engine if available)
+    let idleTimer = window.setTimeout(() => { if (!isVisible) showCat(); }, 18000);
+    ['pointermove','pointerdown','keydown','scroll'].forEach(ev => {
+      window.addEventListener(ev, () => {
+        window.clearTimeout(idleTimer);
+        idleTimer = window.setTimeout(() => { if (!isVisible) showCat(); }, 18000);
+      }, { passive: true });
+    });
+  } catch (e) {
+    // graceful fallback — no cat if anything fails
+  }
 }
