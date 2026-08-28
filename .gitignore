@@ -23,3 +23,9 @@ desktop.ini
 .env.local
 .env.*.local
 *.tmp
+
+# Agent & Test caches
+.playwright-cli/
+graphify-out/
+.gitnexus/
+

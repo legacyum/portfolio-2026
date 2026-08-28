@@ -556,9 +556,16 @@ async function runAdversarialTests() {
   console.log(`${COLORS.cyan}${COLORS.bright}  STARTING EMPIRICAL ADVERSARIAL STRESS TEST HARNESS (CHALLENGER 2)${COLORS.reset}`);
   console.log(`${COLORS.cyan}${COLORS.bright}=====================================================================${COLORS.reset}\n`);
 
-  const htmlPath = path.join(ROOT_DIR, 'index.html');
-  const cssPath = path.join(ROOT_DIR, 'styles.css');
-  const jsPath = path.join(ROOT_DIR, 'script.js');
+  const SRC_DIR = path.join(ROOT_DIR, 'src');
+  const htmlPath = fs.existsSync(path.join(SRC_DIR, 'index.html'))
+    ? path.join(SRC_DIR, 'index.html')
+    : path.join(ROOT_DIR, 'index.html');
+  const cssPath = fs.existsSync(path.join(SRC_DIR, 'styles.css'))
+    ? path.join(SRC_DIR, 'styles.css')
+    : path.join(ROOT_DIR, 'styles.css');
+  const jsPath = fs.existsSync(path.join(SRC_DIR, 'script.js'))
+    ? path.join(SRC_DIR, 'script.js')
+    : path.join(ROOT_DIR, 'script.js');
 
   const cssContent = fs.readFileSync(cssPath, 'utf8');
 

@@ -56,12 +56,14 @@ El sistema de fondo interactivo Cyber-Industrial se estructura en una arquitectu
   - `window.__replayPreloader()`: Reinicia preloader 3D.
 
 ### Code Layout
-- `index.html`: Estructura HTML modular con capas de fondo, preloader, lanyard, terminal y modales.
-- `styles.css`: Estilos del portafolio, variables CSS de temas, clases del preloader, terminal, lanyard y canvas.
-- `script.js`: Lógica interactiva modular (i18n, CLI terminal, ROI calculator, Lanyard 3D, Background Engine).
-- `portfolio-mejorado.html`: Versión empaquetada monolítica generada automáticamente por `tests/build-dist.js`.
+- `src/index.html`: Estructura HTML modular con capas de fondo, preloader, lanyard, terminal y modales.
+- `src/styles.css`: Estilos del portafolio, variables CSS de temas, clases del preloader, terminal, lanyard y canvas.
+- `src/script.js`: Lógica interactiva modular (i18n, CLI terminal, ROI calculator, Lanyard 3D, Background Engine).
+- `src/assets/`: Recursos multimedia y texturas.
+- `src/vendor/`: Motores externos (Three.js, OrbitControls, asciify, cosmos, glyph.css).
+- `dist/portfolio-mejorado.html`: Versión empaquetada monolítica generada automáticamente por `tests/build-dist.js`.
 - `tests/run-e2e-tests.js`: Suite automatizada E2E con 4 Tiers de validación y aserciones completas (103/103 tests pass).
-- `tests/build-dist.js`: Script de empaquetado para mantener sincronizado `portfolio-mejorado.html`.
+- `tests/build-dist.js`: Script de empaquetado para mantener sincronizado `dist/portfolio-mejorado.html`.
 
 
 # E2E Test Infra: Cyber-Industrial Interactive Background

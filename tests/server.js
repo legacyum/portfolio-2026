@@ -16,10 +16,22 @@ const MIME = {
   '.pdf': 'application/pdf'
 };
 
+const ROOT_DIR = path.resolve(__dirname, '..');
+const SRC_DIR = path.join(ROOT_DIR, 'src');
+const DIST_DIR = path.join(ROOT_DIR, 'dist');
+
 const server = http.createServer((req, res) => {
   let reqPath = req.url.split('?')[0];
   if (reqPath === '/') reqPath = '/index.html';
-  const filePath = path.join(__dirname, '..', reqPath);
+  
+  // Resolve priority: src/ -> dist/ -> root
+  let filePath = path.join(SRC_DIR, reqPath);
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    filePath = path.join(DIST_DIR, reqPath);
+  }
+  if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+    filePath = path.join(ROOT_DIR, reqPath);
+  }
 
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
     const ext = path.extname(filePath).toLowerCase();

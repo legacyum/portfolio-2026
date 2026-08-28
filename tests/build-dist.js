@@ -2,10 +2,17 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
-const indexHtml = fs.readFileSync(path.join(ROOT_DIR, 'index.html'), 'utf8');
-const stylesCss = fs.readFileSync(path.join(ROOT_DIR, 'styles.css'), 'utf8');
-const scriptJs = fs.readFileSync(path.join(ROOT_DIR, 'script.js'), 'utf8');
-const asciifyJs = fs.readFileSync(path.join(ROOT_DIR, 'vendor', 'asciify-vanilla.js'), 'utf8');
+const SRC_DIR = path.join(ROOT_DIR, 'src');
+const DIST_DIR = path.join(ROOT_DIR, 'dist');
+
+if (!fs.existsSync(DIST_DIR)) {
+  fs.mkdirSync(DIST_DIR, { recursive: true });
+}
+
+const indexHtml = fs.readFileSync(path.join(SRC_DIR, 'index.html'), 'utf8');
+const stylesCss = fs.readFileSync(path.join(SRC_DIR, 'styles.css'), 'utf8');
+const scriptJs = fs.readFileSync(path.join(SRC_DIR, 'script.js'), 'utf8');
+const asciifyJs = fs.readFileSync(path.join(SRC_DIR, 'vendor', 'asciify-vanilla.js'), 'utf8');
 
 let distHtml = indexHtml;
 
@@ -16,7 +23,7 @@ distHtml = distHtml.replace(
 );
 // Inline vendor glyph.css (glyphcat) if present — after main styles
 try {
-  const glyphCss = fs.readFileSync(path.join(ROOT_DIR, 'vendor', 'glyph.css'), 'utf8');
+  const glyphCss = fs.readFileSync(path.join(SRC_DIR, 'vendor', 'glyph.css'), 'utf8');
   distHtml = distHtml.replace(
     /<link rel="stylesheet" href="vendor\/glyph\.css"\s*\/?>/i,
     () => `<style data-vendor="glyph">\n${glyphCss}\n  </style>`
@@ -25,14 +32,14 @@ try {
 
 // Inline vendor scripts with data-vendor marker so they are NOT picked as the
 // first plain <script> (E2E harness executes the first plain script as the app).
-function inlineVendor(srcPath, dataAttr) {
+function inlineVendor(relPath, dataAttr) {
   try {
-    const content = fs.readFileSync(path.join(ROOT_DIR, srcPath), 'utf8');
-    const escaped = srcPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const content = fs.readFileSync(path.join(SRC_DIR, relPath), 'utf8');
+    const escaped = relPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const re = new RegExp(`<script src="${escaped}"[^>]*><\\/script>`, 'i');
     distHtml = distHtml.replace(re, () => `<script ${dataAttr}>\n${content}\n  </script>`);
   } catch (e) {
-    console.warn(`Warning: could not inline ${srcPath}: ${e.message}`);
+    console.warn(`Warning: could not inline ${relPath}: ${e.message}`);
   }
 }
 
@@ -54,5 +61,7 @@ distHtml = distHtml.replace(
   () => `<script>\n${scriptJs}\n  </script>`
 );
 
-fs.writeFileSync(path.join(ROOT_DIR, 'portfolio-mejorado.html'), distHtml, 'utf8');
-console.log(`✓ Generated portfolio-mejorado.html (${distHtml.length} bytes)`);
+const outPath = path.join(DIST_DIR, 'portfolio-mejorado.html');
+fs.writeFileSync(outPath, distHtml, 'utf8');
+console.log(`✓ Generated ${path.relative(ROOT_DIR, outPath)} (${distHtml.length} bytes)`);
+

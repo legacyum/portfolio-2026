@@ -829,10 +829,24 @@ function createBrowserContext(docHtml) {
 }
 
 // Load main source files
-const portfolioHtmlPath = path.join(ROOT_DIR, 'portfolio-mejorado.html');
-const indexHtmlPath = path.join(ROOT_DIR, 'index.html');
-const scriptJsPath = path.join(ROOT_DIR, 'script.js');
-const stylesCssPath = path.join(ROOT_DIR, 'styles.css');
+const SRC_DIR = path.join(ROOT_DIR, 'src');
+const DIST_DIR = path.join(ROOT_DIR, 'dist');
+
+const portfolioHtmlPath = fs.existsSync(path.join(DIST_DIR, 'portfolio-mejorado.html'))
+  ? path.join(DIST_DIR, 'portfolio-mejorado.html')
+  : path.join(ROOT_DIR, 'portfolio-mejorado.html');
+
+const indexHtmlPath = fs.existsSync(path.join(SRC_DIR, 'index.html'))
+  ? path.join(SRC_DIR, 'index.html')
+  : path.join(ROOT_DIR, 'index.html');
+
+const scriptJsPath = fs.existsSync(path.join(SRC_DIR, 'script.js'))
+  ? path.join(SRC_DIR, 'script.js')
+  : path.join(ROOT_DIR, 'script.js');
+
+const stylesCssPath = fs.existsSync(path.join(SRC_DIR, 'styles.css'))
+  ? path.join(SRC_DIR, 'styles.css')
+  : path.join(ROOT_DIR, 'styles.css');
 
 const portfolioHtmlContent = fs.readFileSync(portfolioHtmlPath, 'utf8');
 const indexHtmlContent = fs.existsSync(indexHtmlPath) ? fs.readFileSync(indexHtmlPath, 'utf8') : null;
