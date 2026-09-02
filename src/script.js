@@ -849,9 +849,32 @@ function translate() {
 }
 
 // --- CV Modal Control ---
+let cvBlobUrl = null;
+
 function openCvModal() {
   const modal = document.querySelector('#cvModal');
   if (!modal) return;
+
+  const iframe = modal.querySelector('iframe');
+  if (iframe && !cvBlobUrl && typeof fetch === 'function') {
+    fetch('CV_Alessandro_Altamirano_Salazar_2026.pdf')
+      .then(res => {
+        if (!res.ok) throw new Error('Network response: ' + res.status);
+        return res.blob();
+      })
+      .then(blob => {
+        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+        cvBlobUrl = URL.createObjectURL(pdfBlob);
+        if (iframe) iframe.src = cvBlobUrl;
+      })
+      .catch(err => {
+        // En caso de entorno sin fetch o error de red, conserva el src estático
+        if (typeof console !== 'undefined' && console.warn) {
+          console.warn('PDF blob fallback:', err.message);
+        }
+      });
+  }
+
   if (typeof modal.showModal === 'function') {
     modal.showModal();
   } else {

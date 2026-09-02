@@ -17,7 +17,7 @@
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta name="robots" content="index, follow" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.vercel-insights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://vitals.vercel-insights.com; object-src 'self'; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'self'; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.vercel-insights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://vitals.vercel-insights.com; frame-src 'self' blob:; object-src 'self' blob:; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'self'; upgrade-insecure-requests" />
   <link rel="canonical" href="https://portfolio-alessandro-2026.vercel.app/" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -505,7 +505,14 @@
         </div>
       </div>
       <div class="cv-modal-body">
-        <iframe src="CV_Alessandro_Altamirano_Salazar_2026.pdf" title="Currículum Vitae - Alessandro Altamirano"></iframe>
+        <iframe src="CV_Alessandro_Altamirano_Salazar_2026.pdf" title="Currículum Vitae - Alessandro Altamirano">
+          <p style="padding: 24px; text-align: center; color: var(--muted, #888);">
+            Tu navegador no admite la visualización directa de documentos PDF.<br><br>
+            <a class="button ghost" href="CV_Alessandro_Altamirano_Salazar_2026.pdf" download target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 10px;">
+              Descargar o abrir CV en nueva pestaña ↗
+            </a>
+          </p>
+        </iframe>
       </div>
     </div>
   </dialog>
