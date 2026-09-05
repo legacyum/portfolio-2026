@@ -73,12 +73,13 @@ function createCatSandbox(opts) {
   }
 
   const byId = {};
-  ['scene', 'stats', 'fps', 'tris', 'calls', 'speed', 'panel', 'furSw', 'themeRow', 'btnMeow', 'btnPet',
+  ['scene', 'stats', 'fps', 'tris', 'calls', 'speed', 'panel', 'furSw', 'themeRow', 'asciiRow', 'asciiCell', 'btnMeow', 'btnPet',
    'btnStartle', 'btnHome', 'btnWire', 'btnSpin', 'btnSound', 'btnReset', 'bubble', 'boot', 'bootMsg']
     .forEach(id => { byId[id] = mkEl(id === 'scene' ? 'canvas' : 'div', id); });
 
   const poseButtons = ['sit', 'sleep', 'play', 'walk'].map(p => { const b = mkEl('button'); b.dataset.pose = p; return b; });
   const themeButtons = ['', 'cyan', 'amber'].map(t => { const b = mkEl('button'); b.dataset.theme = t; return b; });
+  const asciiButtons = ['ascii', 'hybrid', 'off'].map(m => { const b = mkEl('button'); b.dataset.ascii = m; return b; });
   const furSwButtons = [];
   // el script crea los swatches con createElement + appendChild: los capturamos aquí
   const furSw0 = byId.furSw;
@@ -95,6 +96,7 @@ function createCatSandbox(opts) {
     querySelectorAll: sel => {
       if (/\[data-pose\]/.test(sel)) return poseButtons;
       if (/#themeRow/.test(sel)) return themeButtons;
+      if (/#asciiRow/.test(sel)) return asciiButtons;
       if (/\.sw/.test(sel)) return furSwButtons;
       return [];
     },
@@ -164,6 +166,7 @@ function createCatSandbox(opts) {
   byId.scene.removeEventListener = () => {};
   byId.scene.ownerDocument = documentStub;   // OrbitControls escucha pointermove/up en ownerDocument
   byId.scene.style = { setProperty() {} };
+  byId.asciiCell.value = '9';
   byId.scene.clientWidth = 1280;
   byId.scene.clientHeight = 720;
 
@@ -251,7 +254,7 @@ function createCatSandbox(opts) {
   }
 
   return {
-    sandbox, ctx, byId, poseButtons, themeButtons, furSwButtons,
+    sandbox, ctx, byId, poseButtons, themeButtons, asciiButtons, furSwButtons,
     documentStub, docHandlers, winHandlers, rafQueue, errors, stepFrames, shortStack,
     THREE: sandbox.THREE, REVISION: sandbox.THREE.REVISION,
     now: () => now

@@ -49,7 +49,8 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
     mix-blend-mode: overlay;
   }
-  #scene { position: fixed; inset: 0; z-index: 1; display: block; touch-action: none; cursor: grab; }
+  #scene { position: fixed; inset: 0; z-index: 1; display: block; touch-action: none; cursor: grab; image-rendering: auto; }
+  #scene.is-ascii { image-rendering: pixelated; }
   #scene:active { cursor: grabbing; }
 
   .hud { position: fixed; z-index: 4; }
@@ -133,6 +134,11 @@
     color: var(--muted); border-radius: 2px;
   }
 
+  .slider {
+    flex: 1 1 auto; display: flex; align-items: center; gap: 8px;
+    font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  }
+  .slider input[type="range"] { flex: 1; accent-color: var(--accent); height: 18px; margin: 0; }
   .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
   .sw {
     width: 26px; height: 26px; padding: 0; cursor: pointer;
@@ -206,9 +212,9 @@
 
 <div class="hud hud-top">
   <div class="badge">
-    <p class="kick">proto-lab · three.js r128 · 0 dependencias externas</p>
-    <h1>Gato 3D low-poly procedural</h1>
-    <p>Geometría 100% generada por código (sin GLTF). Arrastra para orbitar; haz clic sobre el gato para interactuar o sobre el suelo para que camine hasta ahí.</p>
+    <p class="kick">proto-lab · three.js r128 · render ascii en glsl · 0 dependencias externas</p>
+    <h1>Gato 3D procedural · ASCII</h1>
+    <p>Geometría 100% generada por código (sin GLTF) y rasterizada a glifos en un shader. Arrastra para orbitar; haz clic sobre el gato para interactuar o sobre el suelo para que camine hasta ahí.</p>
     <a class="back" href="/index.html">← volver al portafolio</a>
   </div>
   <div class="stats" id="stats">fps <b id="fps">--</b> · tris <b id="tris">--</b> · calls <b id="calls">--</b> · vel <b id="speed">0.0</b></div>
@@ -243,6 +249,17 @@
       <button class="btn active" data-theme="" type="button">verde</button>
       <button class="btn" data-theme="cyan" type="button">cyan</button>
       <button class="btn" data-theme="amber" type="button">ámbar</button>
+    </div>
+  </section>
+  <section>
+    <h2>render ascii</h2>
+    <div class="row" id="asciiRow">
+      <button class="btn active" data-ascii="ascii" type="button">ascii<kbd>g</kbd></button>
+      <button class="btn" data-ascii="hybrid" type="button">híbrido</button>
+      <button class="btn" data-ascii="off" type="button">3d puro</button>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="slider"><span>densidad</span><input id="asciiCell" type="range" min="6" max="16" step="1" value="9" aria-label="Tamaño de celda ASCII"></label>
     </div>
   </section>
   <section>
@@ -573,6 +590,19 @@
   var haunchR = mesh(new THREE.SphereGeometry(0.56, 22, 16), mats.fur, 'body', bodyG);
   haunchR.position.set(-0.62, -0.18, -0.76); haunchR.scale.set(0.84, 1.02, 1.0);
 
+  // lomo continuo: un "puente" elipsoidal une pecho y ancas para que la espalda
+  // no se lea como dos esferas, y las escápulas dan volumen a los hombros
+  var spine = mesh(new THREE.SphereGeometry(0.82, 26, 18), mats.fur, 'body', bodyG);
+  spine.position.set(0, 0.12, -0.22); spine.scale.set(1.02, 0.92, 1.62);
+  var scapL = mesh(new THREE.SphereGeometry(0.4, 18, 14), mats.fur, 'body', bodyG);
+  scapL.position.set(0.5, 0.18, 0.78); scapL.scale.set(0.9, 1.0, 1.15);
+  var scapR = mesh(new THREE.SphereGeometry(0.4, 18, 14), mats.fur, 'body', bodyG);
+  scapR.position.set(-0.5, 0.18, 0.78); scapR.scale.set(0.9, 1.0, 1.15);
+  // tripa clara continua bajo el lomo
+  var bellyFur = mesh(new THREE.SphereGeometry(0.66, 22, 16), mats.belly, 'body', bodyG);
+  bellyFur.position.set(0, -0.52, 0.02); bellyFur.scale.set(0.9, 0.62, 1.55);
+  bellyFur.castShadow = false;
+
   // franjas atigradas del lomo
   var stripes = new THREE.Group();
   bodyG.add(stripes);
@@ -618,6 +648,13 @@
     var paw = mesh(new THREE.SphereGeometry(0.21, 18, 14), mats.furDark, tag, knee);
     paw.position.set(0, -def.L2 - 0.03, 0.05);
     paw.scale.set(1.05, 0.72, 1.3);
+    // dedos: 3 bultos al frente de la garra
+    for (var td = -1; td <= 1; td++) {
+      var toe = mesh(new THREE.SphereGeometry(0.075, 10, 8), mats.furDark, tag, knee);
+      toe.position.set(td * 0.1, -def.L2 - 0.09, 0.3 + (td === 0 ? 0.03 : 0));
+      toe.scale.set(1, 0.8, 1.25);
+      toe.castShadow = false;
+    }
     return {
       def: def, hip: hip, knee: knee, paw: paw,
       // estado de marcha
@@ -680,22 +717,59 @@
     var seg = new THREE.Group();
     seg.position.z = ti === 0 ? 0 : -0.27;
     parent.add(seg);
-    var r = 0.2 - ti * 0.0125;
-    var tip = ti >= TAIL_N - 2;
-    var sm = mesh(new THREE.SphereGeometry(Math.max(r, 0.06), 14, 12), tip ? mats.furDark : mats.fur, 'tail', seg);
-    sm.position.z = -0.135;
-    sm.scale.set(1, 1, 1.5);
+    // articulaciones: esferas pequeñas que rellenan los huecos del tubo al doblarse
+    var r = 0.19 - ti * 0.0115;
+    var joint = mesh(new THREE.SphereGeometry(Math.max(r * 0.92, 0.055), 10, 8), mats.fur, 'tail', seg);
+    joint.position.z = -0.27;
+    joint.castShadow = false;
     tailSegs.push(seg);
     parent = seg;
   }
   var tailTip = mesh(new THREE.SphereGeometry(0.085, 12, 10), mats.furDark, 'tail', parent);
-  tailTip.position.z = -0.15;
-  tailTip.scale.set(1, 1, 1.6);
+  tailTip.position.z = -0.32;
+  tailTip.scale.set(1, 1, 1.5);
+  // Tubo continuo: TubeGeometry a lo largo de una Catmull-Rom por las
+  // articulaciones, regenerado cada frame en coordenadas de `rig` (barato:
+  // 12 puntos × 8 lados). Se le añaden anillos atigrados con vertex colors
+  // vía un segundo tubo más fino (furDark) desplazado en radio: 3 anillos.
+  var tailPts = [];
+  for (var tp = 0; tp <= TAIL_N; tp++) tailPts.push(new THREE.Vector3());
+  var tailCurve = new THREE.CatmullRomCurve3(tailPts, false, 'catmullrom', 0.5);
+  var TAIL_TUBE_SEGS = 36, TAIL_TUBE_SIDES = 9;
+  var tailTube = mesh(new THREE.TubeGeometry(tailCurve, TAIL_TUBE_SEGS, 0.18, TAIL_TUBE_SIDES, false), mats.fur, 'tail', rig);
+  tailTube.frustumCulled = false;
+  var tailTubePos0 = null;
+  // radio variable: escalamos los anillos del tubo tras generarlo (grueso en la base, fino en la punta)
+  function rebuildTailTube() {
+    tailRoot.updateMatrixWorld(true);
+    for (var i = 0; i < tailSegs.length; i++) {
+      tailSegs[i].getWorldPosition(tailPts[i]);
+      rig.worldToLocal(tailPts[i]);
+    }
+    tailTip.getWorldPosition(tailPts[TAIL_N]); rig.worldToLocal(tailPts[TAIL_N]);
+    tailCurve.needsUpdate = true;
+    var g = new THREE.TubeGeometry(tailCurve, TAIL_TUBE_SEGS, 1, TAIL_TUBE_SIDES, false);
+    var pos = g.attributes.position;
+    var nor = g.attributes.normal;
+    var ring = TAIL_TUBE_SIDES + 1;
+    for (var v = 0; v < pos.count; v++) {
+      var t = Math.floor(v / ring) / TAIL_TUBE_SEGS;              // 0 base → 1 punta
+      var rad = 0.19 * (1 - t * 0.55) + 0.02 * Math.sin(t * 3.14159);
+      // posición = centro + normal * radio (TubeGeometry con radio 1 ⇒ normal unitaria)
+      var cx = pos.getX(v) - nor.getX(v), cy = pos.getY(v) - nor.getY(v), cz = pos.getZ(v) - nor.getZ(v);
+      pos.setXYZ(v, cx + nor.getX(v) * rad, cy + nor.getY(v) * rad, cz + nor.getZ(v) * rad);
+    }
+    var old = tailTube.geometry;
+    tailTube.geometry = g;
+    old.dispose();
+  }
 
   // --- cuello ------------------------------------------------------
-  var neck = mesh(new THREE.CylinderGeometry(0.4, 0.48, 0.62, 20), mats.fur, 'body', rig);
-  neck.position.set(0, 2.96, 0.86);
+  var neck = mesh(new THREE.CylinderGeometry(0.42, 0.56, 0.78, 20), mats.fur, 'body', rig);
+  neck.position.set(0, 2.9, 0.84);
   neck.rotation.x = 0.46;
+  var ruff = mesh(new THREE.SphereGeometry(0.5, 20, 14), mats.fur, 'body', rig);  // gola/pechera
+  ruff.position.set(0, 2.72, 1.02); ruff.scale.set(1.1, 0.8, 0.9);
 
   var collar = mesh(new THREE.TorusGeometry(0.45, 0.068, 12, 34), mats.collar, 'collar', rig);
   collar.position.set(0, 3.08, 0.96);
@@ -1666,6 +1740,8 @@
     mats.yarn.color.set(th.accent);
     mats.yarn.emissive.set(th.accent);
     navMarker.material.color.set(th.accent);
+    asciiUniforms.accent.value.set(th.accent);
+    asciiUniforms.bg.value.set(th.bg);
     if (gridTex) {
       gridTex.dispose();
       gridTex = gridTexture(th.rgb);
@@ -1734,6 +1810,7 @@
     else if (k === '3') setPose('play');
     else if (k === '4') setPose('walk');
     else if (k === 'h') goHome();
+    else if (k === 'g') { var mo = ['ascii', 'hybrid', 'off']; setAscii(mo[(mo.indexOf(state.ascii) + 1) % mo.length]); }
     else if (k === 'm') doMeow();
     else if (k === 'p') doPet();
     else if (k === 'r') btnSpin.click();
@@ -1751,6 +1828,221 @@
   });
 
   // ------------------------------------------------------------------
+  // 14b. Post-proceso ASCII (GLSL, r128)
+  //   La escena se renderiza a un WebGLRenderTarget y un quad de pantalla
+  //   completa la convierte en glifos: por cada celda de `cell` px toma la
+  //   luminancia del render, elige un glifo de una rampa de densidad y lo
+  //   dibuja desde un atlas (canvas 2D → textura). El color del glifo viene
+  //   del tema activo (verde / cyan / ámbar), con matiz del pelaje en modo
+  //   "híbrido". Un pase de bordes (Sobel) sobre la profundidad convierte
+  //   las siluetas en glifos de contorno (| / - \\) para que el gato se lea
+  //   aunque la celda sea gruesa. Es el look "glyphcat" del portafolio.
+  // ------------------------------------------------------------------
+  // rampa de densidad (oscuro → claro). Los glifos de contorno | / - \ se
+  // buscan por índice en JS y se pasan como uniform (nada hardcodeado en GLSL).
+  var ASCII_RAMP = ' .`-\':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@\\';
+  var EDGE_GLYPHS = new THREE.Vector4(ASCII_RAMP.indexOf('|'), ASCII_RAMP.indexOf('/'), ASCII_RAMP.indexOf('-'), ASCII_RAMP.indexOf('\\'));
+  var GLYPH_COLS = 16;
+  var GLYPH_ROWS = Math.ceil(ASCII_RAMP.length / GLYPH_COLS);
+  var GLYPH_PX = 32;
+  function glyphAtlas() {
+    var c = document.createElement('canvas');
+    c.width = GLYPH_COLS * GLYPH_PX;
+    c.height = GLYPH_ROWS * GLYPH_PX;
+    var g = c.getContext('2d');
+    g.fillStyle = '#000';
+    g.fillRect(0, 0, c.width, c.height);
+    g.fillStyle = '#fff';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.font = 'bold ' + Math.round(GLYPH_PX * 0.92) + 'px ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace';
+    for (var i = 0; i < ASCII_RAMP.length; i++) {
+      var cx = (i % GLYPH_COLS) * GLYPH_PX + GLYPH_PX / 2;
+      var cy = Math.floor(i / GLYPH_COLS) * GLYPH_PX + GLYPH_PX / 2 + 1;
+      g.fillText(ASCII_RAMP[i], cx, cy);
+    }
+    var t = new THREE.CanvasTexture(c);
+    t.minFilter = THREE.LinearFilter;
+    t.magFilter = THREE.LinearFilter;
+    t.generateMipmaps = false;
+    t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+    return t;
+  }
+  var glyphTex = glyphAtlas();
+
+  // Render targets: color (con depth texture para el pase de bordes)
+  var rtColor = new THREE.WebGLRenderTarget(2, 2, {
+    minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat,
+    depthBuffer: true, stencilBuffer: false
+  });
+  rtColor.texture.encoding = THREE.LinearEncoding;
+  rtColor.depthTexture = new THREE.DepthTexture();
+  rtColor.depthTexture.type = THREE.UnsignedIntType;
+
+  var asciiUniforms = {
+    tScene:     { value: rtColor.texture },
+    tDepth:     { value: rtColor.depthTexture },
+    tGlyph:     { value: glyphTex },
+    resolution: { value: new THREE.Vector2(2, 2) },
+    cell:       { value: 9 },
+    glyphGrid:  { value: new THREE.Vector2(GLYPH_COLS, GLYPH_ROWS) },
+    glyphCount: { value: ASCII_RAMP.length },
+    accent:     { value: new THREE.Color(THEMES[''].accent) },
+    bg:         { value: new THREE.Color(THEMES[''].bg) },
+    tint:       { value: 0 },        // 0 = monocromo tema, 1 = matiz del color de la escena
+    edgeMix:    { value: 1 },        // fuerza de glifos de contorno
+    edgeGlyphs: { value: EDGE_GLYPHS }, // índices de | / - \ en la rampa
+    cameraNear: { value: camera.near },
+    cameraFar:  { value: camera.far },
+    time:       { value: 0 },
+    glow:       { value: 1 }
+  };
+  var ASCII_VERT = [
+    'varying vec2 vUv;',
+    'void main() {',
+    '  vUv = uv;',
+    '  gl_Position = vec4(position.xy, 0.0, 1.0);',
+    '}'
+  ].join('\n');
+  var ASCII_FRAG = [
+    'precision highp float;',
+    'uniform sampler2D tScene;',
+    'uniform sampler2D tDepth;',
+    'uniform sampler2D tGlyph;',
+    'uniform vec2 resolution;',
+    'uniform float cell;',
+    'uniform vec2 glyphGrid;',
+    'uniform float glyphCount;',
+    'uniform vec3 accent;',
+    'uniform vec3 bg;',
+    'uniform float tint;',
+    'uniform float edgeMix;',
+    'uniform vec4 edgeGlyphs;',
+    'uniform float cameraNear;',
+    'uniform float cameraFar;',
+    'uniform float time;',
+    'uniform float glow;',
+    'varying vec2 vUv;',
+    THREE.ShaderChunk.packing,
+    'float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }',
+    'float linDepth(vec2 uv) {',
+    '  float z = texture2D(tDepth, uv).x;',
+    '  float vz = perspectiveDepthToViewZ(z, cameraNear, cameraFar);',
+    '  return viewZToOrthographicDepth(vz, cameraNear, cameraFar);',
+    '}',
+    // muestrea el glifo `idx` (0..glyphCount-1) en la coordenada local `p` (0..1) de la celda
+    'float glyph(float idx, vec2 p) {',
+    '  idx = clamp(floor(idx + 0.5), 0.0, glyphCount - 1.0);',
+    '  float gx = mod(idx, glyphGrid.x);',
+    '  float gy = floor(idx / glyphGrid.x);',
+    '  vec2 uv = (vec2(gx, gy) + clamp(p, 0.02, 0.98)) / glyphGrid;',
+    '  uv.y = 1.0 - uv.y;',
+    '  return texture2D(tGlyph, uv).r;',
+    '}',
+    'void main() {',
+    '  vec2 frag = vUv * resolution;',
+    '  vec2 cellId = floor(frag / cell);',
+    '  vec2 cellUv = (cellId + 0.5) * cell / resolution;',       // centro de la celda
+    '  vec2 local = fract(frag / cell);',                         // 0..1 dentro de la celda
+    // luminancia media de la celda (5 taps: centro + 4 diagonales)
+    '  vec2 px = cell * 0.25 / resolution;',
+    '  vec3 c0 = texture2D(tScene, cellUv).rgb;',
+    '  vec3 c = c0 * 0.4',
+    '    + texture2D(tScene, cellUv + vec2( px.x,  px.y)).rgb * 0.15',
+    '    + texture2D(tScene, cellUv + vec2(-px.x,  px.y)).rgb * 0.15',
+    '    + texture2D(tScene, cellUv + vec2( px.x, -px.y)).rgb * 0.15',
+    '    + texture2D(tScene, cellUv + vec2(-px.x, -px.y)).rgb * 0.15;',
+    '  float l = luma(c);',
+    // curva: más contraste en medios tonos y piso para el fondo casi negro
+    '  float lv = pow(clamp(l * 1.28, 0.0, 1.0), 1.15);',
+    '  lv = lv * 0.55 + 0.45 * smoothstep(0.12, 0.5, l);',           // aplasta el suelo, conserva el gato
+    // bordes por profundidad (Sobel sobre celdas vecinas) → glifos de contorno
+    '  vec2 cs = cell / resolution;',
+    '  float d00 = linDepth(cellUv + vec2(-cs.x, -cs.y)), d10 = linDepth(cellUv + vec2(0.0, -cs.y)), d20 = linDepth(cellUv + vec2(cs.x, -cs.y));',
+    '  float d01 = linDepth(cellUv + vec2(-cs.x, 0.0)),                                          d21 = linDepth(cellUv + vec2(cs.x, 0.0));',
+    '  float d02 = linDepth(cellUv + vec2(-cs.x,  cs.y)), d12 = linDepth(cellUv + vec2(0.0,  cs.y)), d22 = linDepth(cellUv + vec2(cs.x,  cs.y));',
+    '  float dC = linDepth(cellUv);',
+    // Discontinuidad: una superficie continua (suelo) tiene d10+d12 ≈ 2·dC (segunda
+    // derivada ~0); una silueta la rompe. Umbral relativo a la profundidad.
+    '  float lap = abs(d10 + d12 - 2.0 * dC) + abs(d01 + d21 - 2.0 * dC) + 0.5 * (abs(d00 + d22 - 2.0 * dC) + abs(d20 + d02 - 2.0 * dC));',
+    '  float edge = clamp((lap - 0.0025 - dC * 0.02) * 90.0, 0.0, 1.0) * edgeMix;',
+    // solo la cara cercana de la silueta (la celda más próxima a cámara) dibuja el contorno
+    '  float dMin = min(min(min(d00, d10), min(d20, d01)), min(min(d21, d02), min(d12, d22)));',
+    '  if (dC > dMin + 0.004) edge = 0.0;',
+    '  if (dC > 0.995) edge = 0.0;',                              // cielo
+    // orientación del borde: gradiente Sobel (solo se usa para elegir el glifo)
+    '  float gxs = (d20 + 2.0 * d21 + d22) - (d00 + 2.0 * d01 + d02);',
+    '  float gys = (d02 + 2.0 * d12 + d22) - (d00 + 2.0 * d10 + d20);',
+    // elección de glifo: rampa por luminancia, o contorno según la orientación del borde
+    '  float idx = lv * (glyphCount - 1.0);',
+    '  if (edge > 0.42) {',
+    '    float ang = atan(gys, gxs);',                             // -pi..pi
+    '    float a = mod(ang + 3.14159265, 3.14159265);',            // 0..pi (sin signo)
+    // glifos de contorno: | (0/pi) / (pi/4) - (pi/2) \\ (3pi/4)   → índices fijos de la rampa
+    // el gradiente apunta *a través* del borde: la línea de contorno es perpendicular.
+    // gradiente horizontal (a≈0) → borde vertical "|"; gradiente vertical (a≈pi/2) → "-".
+    '    if (a < 0.3927 || a > 2.7489) idx = edgeGlyphs.x;',        // |
+    '    else if (a < 1.1781) idx = edgeGlyphs.w;',                 // \  (gradiente a 45° → línea a 135°)
+    '    else if (a < 1.9635) idx = edgeGlyphs.z;',                 // -
+    '    else idx = edgeGlyphs.y;',                                 // /
+    '    lv = max(lv, 0.55);',
+    '  }',
+    // glifo mínimo para el suelo iluminado (que la rejilla no desaparezca)
+    '  float g = glyph(idx, local);',
+    // color: tema (monocromo) o teñido con el color real de la escena
+    '  vec3 sceneCol = c / max(l, 0.0001);',                       // cromaticidad
+    '  vec3 col = mix(accent, normalize(sceneCol + 0.001) * 1.2 * max(accent, vec3(0.6)), tint);',
+    '  float bright = 0.22 + 0.95 * lv;',
+    '  if (edge > 0.42) bright = 1.05 + 0.25 * edge;',
+    '  if (dC > 0.995) bright *= 0.55;',                          // cielo/fondo lejano más tenue
+    '  vec3 ink = col * bright;',
+    // glow suave del glifo (halo en la celda) + scanline muy leve
+    '  float halo = glyph(idx, (local - 0.5) * 0.72 + 0.5) * 0.28 * glow;',
+    '  float scan = 0.97 + 0.03 * sin(frag.y * 1.7 + time * 2.0);',
+    '  vec3 outc = bg * 0.9 + ink * (g + halo * lv) * scan;',
+    // los píxeles muy oscuros de fondo se quedan en bg puro
+    '  outc = mix(bg, outc, smoothstep(0.015, 0.06, l + edge * 0.2));',
+    '  gl_FragColor = vec4(outc, 1.0);',
+    '}'
+  ].join('\n');
+  var asciiMat = new THREE.ShaderMaterial({
+    uniforms: asciiUniforms, vertexShader: ASCII_VERT, fragmentShader: ASCII_FRAG,
+    depthTest: false, depthWrite: false
+  });
+  var postScene = new THREE.Scene();
+  var postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  var postQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), asciiMat);
+  postQuad.frustumCulled = false;
+  postScene.add(postQuad);
+
+  var ASCII_MODES = { ascii: { tint: 0 }, hybrid: { tint: 1 }, off: null };
+  state.ascii = 'ascii';
+  state.asciiCell = 9;
+  var ASCII_MIN_DPR_SCALE = 1;   // el RT se renderiza a resolución de pantalla
+  function setAscii(mode) {
+    if (!(mode in ASCII_MODES)) return;
+    state.ascii = mode;
+    if (ASCII_MODES[mode]) asciiUniforms.tint.value = ASCII_MODES[mode].tint;
+    document.querySelectorAll('#asciiRow .btn').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.ascii === mode);
+    });
+    canvas.classList.toggle('is-ascii', mode !== 'off');
+    blip(mode === 'off' ? 420 : 780, 0.06, 'square', 0.04);
+  }
+  function setAsciiCell(px) {
+    px = THREE.MathUtils.clamp(Math.round(+px || 9), 4, 24);
+    state.asciiCell = px;
+    asciiUniforms.cell.value = px * Math.min(window.devicePixelRatio || 1, 2) * ASCII_MIN_DPR_SCALE;
+    var sl = document.getElementById('asciiCell');
+    if (sl && +sl.value !== px) sl.value = String(px);
+  }
+  document.querySelectorAll('#asciiRow .btn').forEach(function (b) {
+    b.addEventListener('click', function () { setAscii(b.dataset.ascii); });
+  });
+  var asciiSlider = document.getElementById('asciiCell');
+  if (asciiSlider) asciiSlider.addEventListener('input', function () { setAsciiCell(asciiSlider.value); });
+
+  // ------------------------------------------------------------------
   // 15. Resize / visibilidad
   // ------------------------------------------------------------------
   function resize() {
@@ -1758,6 +2050,12 @@
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
+    var pr = Math.min(window.devicePixelRatio || 1, 2);
+    rtColor.setSize(Math.max(2, Math.floor(w * pr)), Math.max(2, Math.floor(h * pr)));
+    asciiUniforms.resolution.value.set(rtColor.width, rtColor.height);
+    asciiUniforms.cameraNear.value = camera.near;
+    asciiUniforms.cameraFar.value = camera.far;
+    setAsciiCell(state.asciiCell);
   }
   window.addEventListener('resize', resize);
   resize();
@@ -1773,6 +2071,7 @@
   // ------------------------------------------------------------------
   var clock = new THREE.Clock();
   var elapsed = 0;
+  renderer.info.autoReset = false;   // dos pases por frame: reseteamos a mano en el loop
   var fpsAcc = 0, fpsFrames = 0, fpsTimer = 0;
   var elFps = document.getElementById('fps');
   var elTris = document.getElementById('tris');
@@ -1785,6 +2084,7 @@
   function tick() {
     requestAnimationFrame(tick);
     if (paused) return;
+    renderer.info.reset();
     var dt = Math.min(clock.getDelta(), 0.05);
     var speed = reduced ? 0.25 : 1;
     dt *= speed;
@@ -1954,6 +2254,8 @@
       seg.scale.set(s, s, 1);
     }
 
+    rebuildTailTube();
+
     // orejas y bigotes con micro-vibración
     whiskL.rotation.z = Math.sin(elapsed * 1.6) * 0.03;
     whiskR.rotation.z = -Math.sin(elapsed * 1.6 + 0.4) * 0.03;
@@ -2018,7 +2320,16 @@
       navMarker.scale.set(ms, ms, 1);
     }
 
-    renderer.render(scene, camera);
+    if (state.ascii !== 'off') {
+      asciiUniforms.time.value = elapsed;
+      renderer.setRenderTarget(rtColor);
+      renderer.clear();
+      renderer.render(scene, camera);
+      renderer.setRenderTarget(null);
+      renderer.render(postScene, postCam);
+    } else {
+      renderer.render(scene, camera);
+    }
 
     // stats
     fpsAcc += dt; fpsFrames++; fpsTimer += dt;
@@ -2042,6 +2353,10 @@
     setTheme: setTheme,
     setFur: setFur,
     toggleWireframe: function () { btnWire.click(); },
+    // render ascii
+    setAscii: setAscii,         // 'ascii' | 'hybrid' | 'off'
+    setAsciiCell: setAsciiCell, // px por celda (4..24)
+    asciiUniforms: asciiUniforms,
     // locomoción
     goTo: goTo,                 // goTo(x, z, {then, heading})
     goHome: goHome,
@@ -2067,7 +2382,7 @@
     controls: controls,
     renderer: renderer,
     root: root,
-    version: '0.2.0-prototype',
+    version: '0.3.0-prototype',
     isReady: true
   };
   window.__catMeow = doMeow;
@@ -2080,7 +2395,8 @@
   setFur('tabby');
   syncButtons();
   renderer.compile(scene, camera);
-  renderer.render(scene, camera);
+  renderer.compile(postScene, postCam);
+  setAscii('ascii');
   tick();
 
   setTimeout(function () {

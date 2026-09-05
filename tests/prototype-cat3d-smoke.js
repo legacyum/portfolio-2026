@@ -9,7 +9,7 @@ const assert = require('assert');
 const { createCatSandbox } = require('./prototype-cat3d-harness');
 
 const H = createCatSandbox();
-const { sandbox, byId, poseButtons, themeButtons, furSwButtons, documentStub, docHandlers, winHandlers, errors, stepFrames, REVISION } = H;
+const { sandbox, byId, poseButtons, themeButtons, asciiButtons, furSwButtons, documentStub, docHandlers, winHandlers, errors, stepFrames, REVISION } = H;
 const log = (...a) => console.log(...a);
 
 let passed = 0;
@@ -22,7 +22,7 @@ function check(name, fn) {
 assert.ok(sandbox.__cat3D, 'window.__cat3D no está expuesto');
 const cat = sandbox.__cat3D;
 assert.ok(cat.isReady === true, '__cat3D.isReady !== true');
-assert.strictEqual(cat.version, '0.2.0-prototype');
+assert.strictEqual(cat.version, '0.3.0-prototype');
 assert.ok(cat.scene && cat.camera && cat.renderer, 'faltan scene/camera/renderer');
 
 const scene = cat.scene;
@@ -93,6 +93,68 @@ assert.strictEqual(cat.state.wire, true);
 stepFrames(10);
 cat.toggleWireframe();
 assert.strictEqual(cat.state.wire, false);
+
+// ---------- render ASCII ----------
+log('\n— render ascii (post-proceso GLSL) —');
+check('arranca en modo ascii con render target + shader listos', () => {
+  assert.strictEqual(cat.state.ascii, 'ascii');
+  const u = cat.asciiUniforms;
+  assert.ok(u.tScene.value && u.tDepth.value && u.tGlyph.value, 'faltan texturas del post-proceso');
+  assert.ok(u.tDepth.value.isDepthTexture, 'tDepth no es DepthTexture');
+  assert.deepStrictEqual([u.resolution.value.x, u.resolution.value.y], [2560, 1440], 'RT no sigue al viewport × dpr');
+  assert.strictEqual(u.cell.value, 18, 'celda 9 px × dpr 2');
+  assert.ok(u.glyphCount.value >= 64, 'rampa muy corta');
+  assert.ok(u.edgeGlyphs.value.x >= 0 && u.edgeGlyphs.value.y >= 0 && u.edgeGlyphs.value.z >= 0 && u.edgeGlyphs.value.w >= 0, 'faltan glifos de contorno en la rampa');
+  assert.ok(byId.scene._classes.has('is-ascii'));
+});
+check('modos ascii / híbrido / 3d puro (botones + tecla G) y densidad por slider', () => {
+  asciiButtons[1].dispatch('click', {});
+  assert.strictEqual(cat.state.ascii, 'hybrid');
+  assert.strictEqual(cat.asciiUniforms.tint.value, 1);
+  asciiButtons[2].dispatch('click', {});
+  assert.strictEqual(cat.state.ascii, 'off');
+  assert.ok(!byId.scene._classes.has('is-ascii'));
+  stepFrames(5);
+  (winHandlers.keydown || []).forEach(fn => fn({ key: 'g', target: { tagName: 'BODY' }, preventDefault() {} }));
+  assert.strictEqual(cat.state.ascii, 'ascii');
+  assert.strictEqual(cat.asciiUniforms.tint.value, 0);
+  byId.asciiCell.value = '14';
+  byId.asciiCell.dispatch('input', {});
+  assert.strictEqual(cat.state.asciiCell, 14);
+  assert.strictEqual(cat.asciiUniforms.cell.value, 28);
+  cat.setAsciiCell(9);
+  stepFrames(5);
+});
+check('el tema recolorea los glifos (accent/bg del shader)', () => {
+  cat.setTheme('cyan');
+  assert.strictEqual('#' + cat.asciiUniforms.accent.value.getHexString(), '#7beeff');
+  assert.strictEqual('#' + cat.asciiUniforms.bg.value.getHexString(), '#04080c');
+  cat.setTheme('');
+});
+check('el shader GLSL del post-proceso parsea (GLSL ES 1.00) y declara sus uniforms', () => {
+  const html = require('fs').readFileSync(require('path').join(__dirname, '..', 'prototypes', 'cat3d.html'), 'utf8');
+  const fragArr = html.match(/var ASCII_FRAG = \[([\s\S]*?)\]\.join\('\\n'\);/);
+  const vertArr = html.match(/var ASCII_VERT = \[([\s\S]*?)\]\.join\('\\n'\);/);
+  assert.ok(fragArr && vertArr, 'no se encontró ASCII_FRAG/ASCII_VERT');
+  const vm = require('vm');
+  const frag = vm.runInContext('[' + fragArr[1] + "].join('\\n')", H.ctx);
+  const vert = vm.runInContext('[' + vertArr[1] + "].join('\\n')", H.ctx);
+  // cada uniform JS debe estar declarado en el fragment shader y viceversa
+  Object.keys(cat.asciiUniforms).forEach(u => assert.ok(new RegExp('uniform\\s+\\w+\\s+' + u + '\\s*;').test(frag), 'uniform sin declarar en GLSL: ' + u));
+  (frag.match(/uniform\s+\w+\s+(\w+)\s*;/g) || []).forEach(d => {
+    const name = d.match(/(\w+)\s*;$/)[1];
+    assert.ok(name in cat.asciiUniforms, 'uniform declarado en GLSL sin valor JS: ' + name);
+  });
+  // saneamiento GLSL ES 1.00: sin literales int en aritmética float, sin funciones de ES 3.00
+  assert.ok(!/\btexture\(/.test(frag) && !/\bin\s+vec2\s+vUv/.test(frag) && !/#version/.test(frag), 'sintaxis ES 3.00 en shader WebGL1');
+  assert.ok(/perspectiveDepthToViewZ/.test(frag) && /viewZToOrthographicDepth/.test(frag), 'falta el chunk packing de three');
+  assert.ok(/gl_FragColor/.test(frag) && /gl_Position/.test(vert));
+  assert.ok(!/\b(idx|lv|edge|bright)\s*=\s*\d+\s*;/.test(frag), 'asignación int→float en GLSL');
+  // paréntesis balanceados
+  const bal = str => str.split('').reduce((n, ch) => n + (ch === '(' ? 1 : ch === ')' ? -1 : 0), 0);
+  assert.strictEqual(bal(frag), 0, 'paréntesis desbalanceados en ASCII_FRAG');
+  assert.strictEqual(frag.split('{').length, frag.split('}').length, 'llaves desbalanceadas en ASCII_FRAG');
+});
 
 // ---------- locomoción ----------
 log('\n— locomoción —');

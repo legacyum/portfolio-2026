@@ -8,9 +8,12 @@
      node tests/prototype-cat3d-render.js [--pose walk] [--frames 90] [--shots 6]
           [--every 12] [--out /tmp/cat.png] [--cam 7.6,4.9,10.6] [--look 0,2.25,0]
           [--goto 1.6,-1.2] [--keys ArrowUp:60,ArrowLeft:30] [--w 480] [--h 300]
-          [--actions meow,pet,startle] [--follow]
+          [--actions meow,pet,startle] [--follow] [--ascii] [--cell 9] [--tint]
 
-   Cada "shot" es un tile; se componen en una hoja de contactos (3 columnas). */
+   Cada "shot" es un tile; se componen en una hoja de contactos (3 columnas).
+   --ascii aplica en CPU el mismo post-proceso que el shader GLSL del prototipo
+   (luminancia por celda → rampa de glifos, Sobel sobre profundidad → glifos de
+   contorno), con un atlas de glifos bitmap 5×7 embebido. */
 const fs = require('fs');
 const path = require('path');
 const zlib = require('zlib');
@@ -39,6 +42,9 @@ const KEYS = arg('keys', null);
 const ACTIONS = arg('actions', null);
 const FOLLOW = !!arg('follow', false);
 const COLS = parseInt(arg('cols', '3'), 10);
+const ASCII = !!arg('ascii', false);
+const CELL = parseInt(arg('cell', '9'), 10);
+const TINT = !!arg('tint', false);
 
 const H = createCatSandbox();
 const { sandbox, THREE, stepFrames, winHandlers } = H;
@@ -91,6 +97,195 @@ const SHADOW_Y = 0.26 + 0.002; // tapa de la plataforma (DAIS_H)
 
 function makeTarget(w, h) {
   return { w, h, rgb: Buffer.alloc(w * h * 3), z: new Float32Array(w * h).fill(Infinity) };
+}
+
+// ---------- post-proceso ASCII (réplica CPU del shader) ----------
+// Atlas bitmap 5x7 de los glifos usados por la rampa (subconjunto suficiente para
+// el look; los glifos que no están caen al más cercano por densidad).
+const FONT = {
+  ' ': ['     ','     ','     ','     ','     ','     ','     '],
+  '.': ['     ','     ','     ','     ','     ','  #  ','     '],
+  '`': ['  #  ','   # ','     ','     ','     ','     ','     '],
+  '-': ['     ','     ','     ',' ####','     ','     ','     '],
+  "'": ['  #  ','  #  ','     ','     ','     ','     ','     '],
+  ':': ['     ','  #  ','     ','     ','  #  ','     ','     '],
+  '_': ['     ','     ','     ','     ','     ','     ','#####'],
+  ',': ['     ','     ','     ','     ','  #  ','  #  ',' #   '],
+  '^': ['  #  ',' # # ','     ','     ','     ','     ','     '],
+  '=': ['     ','     ','#####','     ','#####','     ','     '],
+  ';': ['     ','  #  ','     ','     ','  #  ','  #  ',' #   '],
+  '>': ['#    ',' #   ','  #  ','   # ','  #  ',' #   ','#    '],
+  '<': ['    #','   # ','  #  ',' #   ','  #  ','   # ','    #'],
+  '+': ['     ','  #  ','  #  ','#####','  #  ','  #  ','     '],
+  '!': ['  #  ','  #  ','  #  ','  #  ','  #  ','     ','  #  '],
+  'r': ['     ','     ','# ## ','##  #','#    ','#    ','#    '],
+  'c': ['     ','     ',' ### ','#    ','#    ','#    ',' ### '],
+  '*': ['     ','  #  ','# # #',' ### ','# # #','  #  ','     '],
+  '/': ['    #','    #','   # ','  #  ',' #   ','#    ','#    '],
+  'z': ['     ','     ','#####','   # ','  #  ',' #   ','#####'],
+  '?': [' ### ','#   #','    #','   # ','  #  ','     ','  #  '],
+  's': ['     ','     ',' ####','#    ',' ### ','    #','#### '],
+  'L': ['#    ','#    ','#    ','#    ','#    ','#    ','#####'],
+  'T': ['#####','  #  ','  #  ','  #  ','  #  ','  #  ','  #  '],
+  'v': ['     ','     ','#   #','#   #','#   #',' # # ','  #  '],
+  ')': [' #   ','  #  ','   # ','   # ','   # ','  #  ',' #   '],
+  'J': ['  ###','   # ','   # ','   # ','   # ','#  # ',' ##  '],
+  '7': ['#####','    #','   # ','  #  ',' #   ',' #   ',' #   '],
+  '(': ['   # ','  #  ',' #   ',' #   ',' #   ','  #  ','   # '],
+  '|': ['  #  ','  #  ','  #  ','  #  ','  #  ','  #  ','  #  '],
+  'F': ['#####','#    ','#    ','#### ','#    ','#    ','#    '],
+  'i': ['  #  ','     ',' ##  ','  #  ','  #  ','  #  ',' ### '],
+  '{': ['   ##','  #  ','  #  ',' #   ','  #  ','  #  ','   ##'],
+  'C': [' ### ','#   #','#    ','#    ','#    ','#   #',' ### '],
+  '}': ['##   ','  #  ','  #  ','   # ','  #  ','  #  ','##   '],
+  'f': ['  ## ',' #  #',' #   ','###  ',' #   ',' #   ',' #   '],
+  'I': [' ### ','  #  ','  #  ','  #  ','  #  ','  #  ',' ### '],
+  '3': ['#####','    #','   # ','  ## ','    #','#   #',' ### '],
+  '1': ['  #  ',' ##  ','  #  ','  #  ','  #  ','  #  ',' ### '],
+  't': [' #   ',' #   ','###  ',' #   ',' #   ',' #  #','  ## '],
+  'l': [' ##  ','  #  ','  #  ','  #  ','  #  ','  #  ',' ### '],
+  'u': ['     ','     ','#   #','#   #','#   #','#  ##',' ## #'],
+  '[': [' ### ',' #   ',' #   ',' #   ',' #   ',' #   ',' ### '],
+  'n': ['     ','     ','# ## ','##  #','#   #','#   #','#   #'],
+  'e': ['     ','     ',' ### ','#   #','#####','#    ',' ### '],
+  'o': ['     ','     ',' ### ','#   #','#   #','#   #',' ### '],
+  'Z': ['#####','    #','   # ','  #  ',' #   ','#    ','#####'],
+  '5': ['#####','#    ','#### ','    #','    #','#   #',' ### '],
+  'Y': ['#   #','#   #',' # # ','  #  ','  #  ','  #  ','  #  '],
+  'x': ['     ','     ','#   #',' # # ','  #  ',' # # ','#   #'],
+  'j': ['   # ','     ','  ## ','   # ','   # ','#  # ',' ##  '],
+  'y': ['     ','     ','#   #','#   #',' ####','    #',' ### '],
+  'a': ['     ','     ',' ### ','    #',' ####','#   #',' ####'],
+  ']': [' ### ','   # ','   # ','   # ','   # ','   # ',' ### '],
+  '2': [' ### ','#   #','    #','   # ','  #  ',' #   ','#####'],
+  'E': ['#####','#    ','#    ','#### ','#    ','#    ','#####'],
+  'S': [' ####','#    ','#    ',' ### ','    #','    #','#### '],
+  'w': ['     ','     ','#   #','#   #','# # #','# # #',' # # '],
+  'q': ['     ','     ',' ####','#   #',' ####','    #','    #'],
+  'k': ['#    ','#    ','#  # ','# #  ','##   ','# #  ','#  # '],
+  'P': ['#### ','#   #','#   #','#### ','#    ','#    ','#    '],
+  '6': ['  ## ',' #   ','#    ','#### ','#   #','#   #',' ### '],
+  'h': ['#    ','#    ','# ## ','##  #','#   #','#   #','#   #'],
+  '9': [' ### ','#   #','#   #',' ####','    #','   # ',' ##  '],
+  'd': ['    #','    #',' ## #','#  ##','#   #','#   #',' ## #'],
+  '4': ['   # ','  ## ',' # # ','#  # ','#####','   # ','   # '],
+  'V': ['#   #','#   #','#   #','#   #','#   #',' # # ','  #  '],
+  'p': ['     ','     ','# ## ','##  #','#### ','#    ','#    '],
+  'O': [' ### ','#   #','#   #','#   #','#   #','#   #',' ### '],
+  'G': [' ### ','#   #','#    ','# ###','#   #','#   #',' ### '],
+  'b': ['#    ','#    ','# ## ','##  #','#   #','#   #','#### '],
+  'U': ['#   #','#   #','#   #','#   #','#   #','#   #',' ### '],
+  'A': ['  #  ',' # # ','#   #','#   #','#####','#   #','#   #'],
+  'K': ['#   #','#  # ','# #  ','##   ','# #  ','#  # ','#   #'],
+  'X': ['#   #','#   #',' # # ','  #  ',' # # ','#   #','#   #'],
+  'H': ['#   #','#   #','#   #','#####','#   #','#   #','#   #'],
+  'm': ['     ','     ','## # ','# # #','# # #','# # #','# # #'],
+  '8': [' ### ','#   #','#   #',' ### ','#   #','#   #',' ### '],
+  'R': ['#### ','#   #','#   #','#### ','# #  ','#  # ','#   #'],
+  'D': ['#### ','#   #','#   #','#   #','#   #','#   #','#### '],
+  '#': [' # # ',' # # ','#####',' # # ','#####',' # # ',' # # '],
+  '$': ['  #  ',' ####','# #  ',' ### ','  # #','#### ','  #  '],
+  'B': ['#### ','#   #','#   #','#### ','#   #','#   #','#### '],
+  'g': ['     ','     ',' ####','#   #',' ####','    #',' ### '],
+  '0': [' ### ','#   #','#  ##','# # #','##  #','#   #',' ### '],
+  'M': ['#   #','## ##','# # #','# # #','#   #','#   #','#   #'],
+  'N': ['#   #','##  #','# # #','#  ##','#   #','#   #','#   #'],
+  'W': ['#   #','#   #','#   #','# # #','# # #','## ##','#   #'],
+  'Q': [' ### ','#   #','#   #','#   #','# # #','#  # ',' ## #'],
+  '%': ['##   ','##  #','   # ','  #  ',' #   ','#  ##','   ##'],
+  '&': [' ##  ','#  # ','# #  ',' #   ','# # #','#  # ',' ## #'],
+  '@': [' ### ','#   #','# ###','# # #','# ###','#    ',' ### '],
+  '\\': ['#    ','#    ',' #   ','  #  ','   # ','    #','    #']
+};
+const RAMP = ' .`-\':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@\\';
+function glyphBitmap(ch) {
+  if (FONT[ch]) return FONT[ch];
+  // fallback: glifo de densidad similar
+  const dens = c => FONT[c].join('').split('#').length - 1;
+  const target = RAMP.indexOf(ch) / (RAMP.length - 1) * 20;
+  let best = ' ', bd = Infinity;
+  for (const k of Object.keys(FONT)) { const d = Math.abs(dens(k) - target); if (d < bd) { bd = d; best = k; } }
+  return FONT[best];
+}
+function glyphAt(ch, u, v) { // u,v en 0..1 → 1/0
+  const bm = glyphBitmap(ch);
+  const gx = Math.min(4, Math.floor(u * 5)), gy = Math.min(6, Math.floor(v * 7));
+  return bm[gy][gx] === '#' ? 1 : 0;
+}
+function asciiPost(t, cell, accent, bgc, tint) {
+  const W = t.w, Hh = t.h;
+  const out = Buffer.alloc(W * Hh * 3);
+  const cw = Math.ceil(W / cell), chh = Math.ceil(Hh / cell);
+  const lum = new Float32Array(cw * chh), dep = new Float32Array(cw * chh);
+  const col = new Float32Array(cw * chh * 3);
+  for (let cy = 0; cy < chh; cy++) for (let cx = 0; cx < cw; cx++) {
+    let r = 0, g = 0, b = 0, n = 0, zsum = 0, zn = 0;
+    for (let y = cy * cell; y < Math.min(Hh, (cy + 1) * cell); y++) for (let x = cx * cell; x < Math.min(W, (cx + 1) * cell); x++) {
+      const i = y * W + x; r += t.rgb[i * 3]; g += t.rgb[i * 3 + 1]; b += t.rgb[i * 3 + 2]; n++;
+      const z = t.z[i]; zsum += Number.isFinite(z) ? (z * 0.5 + 0.5) : 1; zn++;
+    }
+    const k = cy * cw + cx;
+    r /= n * 255; g /= n * 255; b /= n * 255;
+    col[k * 3] = r; col[k * 3 + 1] = g; col[k * 3 + 2] = b;
+    lum[k] = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    dep[k] = zsum / zn;
+  }
+  const D = (x, y) => dep[Math.min(chh - 1, Math.max(0, y)) * cw + Math.min(cw - 1, Math.max(0, x))];
+  // z ndc no es lineal: convertimos a profundidad "ortográfica" aproximada con near/far de la cámara
+  const near = camera.near, far = camera.far;
+  const lin = zn => { const vz = (near * far) / ((far - near) * zn - far); return (vz + near) / (near - far); };
+  const EDGE = { bar: '|', slash: '/', dash: '-', back: '\\' };
+  for (let cy = 0; cy < chh; cy++) for (let cx = 0; cx < cw; cx++) {
+    const k = cy * cw + cx;
+    const l = lum[k];
+    let lv = Math.pow(Math.min(1, l * 1.28), 1.15);
+    const ss = Math.min(1, Math.max(0, (l - 0.12) / (0.5 - 0.12)));
+    lv = lv * 0.55 + 0.45 * ss * ss * (3 - 2 * ss);
+    const d = (x, y) => lin(D(x, y));
+    const d00 = d(cx - 1, cy - 1), d10 = d(cx, cy - 1), d20 = d(cx + 1, cy - 1);
+    const d01 = d(cx - 1, cy), d21 = d(cx + 1, cy);
+    const d02 = d(cx - 1, cy + 1), d12 = d(cx, cy + 1), d22 = d(cx + 1, cy + 1);
+    const dC = d(cx, cy);
+    const lap = Math.abs(d10 + d12 - 2 * dC) + Math.abs(d01 + d21 - 2 * dC) + 0.5 * (Math.abs(d00 + d22 - 2 * dC) + Math.abs(d20 + d02 - 2 * dC));
+    let edge = Math.min(1, Math.max(0, (lap - 0.0025 - dC * 0.02) * 90));
+    const dMin = Math.min(d00, d10, d20, d01, d21, d02, d12, d22);
+    if (dC > dMin + 0.004) edge = 0;
+    if (dC > 0.995) edge = 0;
+    const gxs = (d20 + 2 * d21 + d22) - (d00 + 2 * d01 + d02);
+    const gys = (d02 + 2 * d12 + d22) - (d00 + 2 * d10 + d20);
+    let ch = RAMP[Math.round(lv * (RAMP.length - 1))];
+    let isEdge = false;
+    if (edge > 0.42) {
+      isEdge = true;
+      const a = ((Math.atan2(gys, gxs) + Math.PI) % Math.PI + Math.PI) % Math.PI;
+      if (a < 0.3927 || a > 2.7489) ch = EDGE.bar;
+      else if (a < 1.1781) ch = EDGE.back;
+      else if (a < 1.9635) ch = EDGE.dash;
+      else ch = EDGE.slash;
+      lv = Math.max(lv, 0.55);
+    }
+    const sc = [col[k * 3], col[k * 3 + 1], col[k * 3 + 2]].map(v => v / Math.max(l, 1e-4));
+    const scn = Math.hypot(sc[0] + 0.001, sc[1] + 0.001, sc[2] + 0.001) || 1;
+    const base = accent.map((av, i) => tint ? ((sc[i] + 0.001) / scn) * 1.2 * Math.max(av, 0.6) : av);
+    let bright = 0.22 + 0.95 * lv;
+    if (isEdge) bright = 1.05 + 0.25 * edge;
+    if (dC > 0.995) bright *= 0.55;
+    const vis = Math.min(1, Math.max(0, (l + edge * 0.2 - 0.015) / (0.06 - 0.015)));
+    const visS = vis * vis * (3 - 2 * vis);
+    for (let y = cy * cell; y < Math.min(Hh, (cy + 1) * cell); y++) for (let x = cx * cell; x < Math.min(W, (cx + 1) * cell); x++) {
+      const u = (x - cx * cell + 0.5) / cell, v = (y - cy * cell + 0.5) / cell;
+      const g = glyphAt(ch, Math.min(0.98, Math.max(0.02, u)), Math.min(0.98, Math.max(0.02, v)));
+      const halo = glyphAt(ch, Math.min(0.98, Math.max(0.02, (u - 0.5) * 0.72 + 0.5)), Math.min(0.98, Math.max(0.02, (v - 0.5) * 0.72 + 0.5))) * 0.28;
+      const i = (y * W + x) * 3;
+      for (let c = 0; c < 3; c++) {
+        const ink = base[c] * bright;
+        let o = bgc[c] * 0.9 + ink * (g + halo * lv);
+        o = bgc[c] + (o - bgc[c]) * visS;
+        out[i + c] = Math.round(Math.min(1, Math.max(0, o)) * 255);
+      }
+    }
+  }
+  out.copy(t.rgb);
 }
 function clear(t, r, g, b) {
   for (let i = 0; i < t.w * t.h; i++) { t.rgb[i * 3] = r; t.rgb[i * 3 + 1] = g; t.rgb[i * 3 + 2] = b; }
@@ -319,6 +514,11 @@ for (let s = 0; s < SHOTS; s++) {
   if (s > 0) stepWithPlan(EVERY);
   aimCamera();
   renderTo(tile);
+  if (ASCII) {
+    const th = { '': ['#c9ff62', '#05070a'], cyan: ['#7beeff', '#04080c'], amber: ['#ffce64', '#0a0704'] }[cat.state.theme || ''];
+    const hex = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16) / 255);
+    asciiPost(tile, CELL, hex(th[0]), hex(th[1]), TINT);
+  }
   // marcadores: pies (verde=apoyado, magenta=en vuelo), objetivo de navegación (amarillo)
   if (cat.walkDebug) {
     const d = cat.walkDebug();
