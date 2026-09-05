@@ -1,6 +1,6 @@
-# Proto-lab · Gato 3D low-poly procedural
+# Proto-lab · Gato 3D procedural · render ASCII
 
-> **Estado: prototipo experimental (`v0.1.0-prototype`)** — no forma parte del sitio publicado.
+> **Estado: prototipo experimental (`v0.3.0-prototype`)** — no forma parte del sitio publicado.
 > `prototypes/` no es leído por `tests/build-dist.js` ni por `tests/run-e2e-tests.js`,
 > así que este archivo no afecta el bundle `dist/` ni los 103 tests E2E.
 
@@ -11,7 +11,10 @@ de Three.js (esferas, conos, cilindros, toros). No hay ningún `.glb`/`.gltf` ex
 ni texturas descargadas, ni dependencias nuevas. Reutiliza el vendor que ya existe en
 el repo (`src/vendor/three.min.js` **r128** + `src/vendor/OrbitControls.js`).
 
-- **74 mallas · ~25 300 triángulos** en escena.
+- **~100 mallas · ~29 000 triángulos** en escena (cola = tubo continuo regenerado por frame).
+- **Render ASCII en GLSL** (post-proceso a pantalla completa): el 3D se convierte en glifos del
+  color del tema, con contornos por profundidad. Es el mismo lenguaje visual del *glyphcat*
+  (`#cat3DStage`) y del `asciify` del portafolio, pero sobre una escena 3D real.
 - Estética *cyber-industrial* alineada al portafolio: plataforma metálica, rejilla
   cuántica en el suelo, aro neón pulsante, jaula esférica wireframe y polvo en suspensión.
 - Las 3 paletas son **las mismas de `src/styles.css`**: verde `#c9ff62`, cyan `#7beeff`,
@@ -28,10 +31,10 @@ node tests/server.js
 
 | Parte | Técnica |
 |---|---|
-| Torso / pecho / ancas | `SphereGeometry` escaladas no uniformemente |
+| Torso / pecho / ancas | `SphereGeometry` escaladas no uniformemente + "puente" dorsal, escápulas y tripa clara para que el lomo sea continuo |
 | Franjas atigradas | `BoxGeometry` finas sobre el lomo |
-| Patas | jerarquía `Group` (cadera → fémur → garra) para rotar desde la articulación |
-| Cola | **cadena de 12 `Group`s anidados**; una onda sinusoidal viajera con desfase por segmento produce el meneo natural |
+| Patas | cadena de **3 huesos** (`cadera → rodilla/corvejón → garra`, con dedos); la cadera usa orden Euler `ZXY` (rz = abducción, rx = balanceo) y la rodilla es una bisagra en X. Las poses estáticas las mueven por FK; la marcha, por **IK analítica de 2 huesos** |
+| Cola | **cadena de 12 `Group`s anidados** (onda sinusoidal viajera) que alimenta cada frame una `CatmullRomCurve3` → `TubeGeometry` con radio variable: una cola **continua** en vez de esferas sueltas |
 | Cabeza / mejillas / hocico | esferas escaladas, `MeshToonMaterial` con `gradientMap` de 4 bandas |
 | Orejas | `ConeGeometry` de 4 lados (low-poly) + cono interno rosa + mechones |
 | Ojos | esfera emisiva + pupila vertical + destrezo especular + **párpado que se cierra por escala Y** |
@@ -61,10 +64,77 @@ En vez de keyframes, hay un **sistema de poses con target + amortiguación expon
 | Dormir | se enrosca, suelta sprites `Z` cada 1.35 s |
 | Jugar | zarpazo sincronizado que **impulsa el ovillo con física simple** (gravedad, rebote 0.44, fricción y retorno elástico a su sitio) |
 | Sobresalto | salto parabólico, lomo arqueado, **cola erizada** (`tailPuff` +0.85), orejas hacia atrás, pupilas dilatadas |
+| Caminar | ver **Locomoción** más abajo |
+
+## Render ASCII (v0.3)
+
+La escena se dibuja en un `WebGLRenderTarget` (color + `DepthTexture`) y un quad de pantalla
+completa con `ShaderMaterial` la convierte en texto:
+
+1. **Celdas**: la pantalla se divide en celdas de `cell` px (slider 6–16, × `devicePixelRatio`).
+   Por celda se promedia la luminancia (5 taps) y se le aplica una curva que aplasta el suelo
+   y conserva el gato.
+2. **Rampa de 93 glifos** (`' .`-':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[...]%&@\'`) dibujada
+   en un atlas 16×6 desde un `<canvas>` 2D con la fuente mono del portafolio. La luminancia
+   elige el glifo; el fragmento muestrea el atlas en la coordenada local de la celda.
+3. **Contornos por profundidad**: sobre la profundidad linealizada (`perspectiveDepthToViewZ`
+   del chunk `packing` de three) se calcula un laplaciano 3×3 entre celdas; una discontinuidad
+   (silueta) fuerza un glifo de contorno `|` `/` `-` `\` según la orientación del gradiente
+   Sobel. Solo dibuja la cara **cercana** de la silueta y nunca el cielo. Así el gato se lee
+   aunque la celda sea gruesa.
+4. **Color**: monocromo del tema (`verde / cyan / ámbar`, mismos hex que `src/styles.css`) o
+   **híbrido** (matiz del color real de la escena: pelaje, ojos, ovillo). Halo suave por glifo
+   y scanline muy leve. `3d puro` desactiva el pase.
+
+Tecla **`G`** cicla `ascii → híbrido → 3d puro`. Todo es WebGL1/GLSL ES 1.00 (r128, sin
+`EffectComposer`).
+
+## Locomoción (v0.2)
+
+El gato **camina de verdad** por la arena (radio 9.5 u): baja de la plataforma, sube el bisel,
+gira, corre, retrocede y vuelve a casa. Es 100 % procedural: no hay clips de animación.
+
+### Capas
+
+1. **Órdenes** (prioridad: teclado > navegación > paseo autónomo)
+   - **Click en el suelo** → `goTo(x, z)`: aparece un aro en el destino y el gato va hasta ahí.
+   - **WASD / flechas** (mantenidas) → manejo directo; **Shift** = correr. Como `W` `S` `A`
+     ya eran atajos de UI (wireframe / asustar / sonido), solo actúan como manejo si se
+     **mantienen ≥ 180 ms**; un toque corto sigue ejecutando el atajo (en `keyup`).
+   - Botón/tecla **`4` caminar** → paseo autónomo por waypoints aleatorios, con pausas y algún maullido.
+   - **`H` a casa** → `goHome()`: vuelve al centro, gira a rumbo 0 y se sienta.
+   - `jugar` estando lejos del ovillo → primero camina hasta él y luego juega.
+   - Tras **4.5 s** quieto en pose `walk` sin órdenes, se sienta solo.
+2. **Cinemática del cuerpo**: velocidad y yaw con aceleración acotada (`WALK 1.6` · `RUN 3.6`
+   · `BACK 0.7` u/s, giro 2.6 rad/s). En navegación primero gira y luego avanza
+   (`desired *= clamp(1.35 - |err|)`).
+3. **Generador de marcha** (`updateLocomotion`): fase global `gaitPhase` con frecuencia
+   `f = clamp(v_eff / stride, 0.9, 2.8)`. Cada pata tiene un desfase:
+
+   | | FL | FR | BL | BR |
+   |---|---|---|---|---|
+   | offset | 0.75 | 0.25 | 0.00 | 0.50 |
+
+   → orden de despegue **BR → FR → BL → FL** = *paso lateral* (tras una trasera, la
+   delantera del mismo lado), que es el andar real del gato. Al correr, `gaitShift → +0.25`
+   en las traseras y el *duty* baja de 0.68 a 0.50 → **trote por pares diagonales** (FL+BR, FR+BL).
+   Girar en el sitio también genera pasitos porque la velocidad de cada huella incluye `ω × r`.
+4. **Huellas**: cada pata alterna *apoyo* (la garra queda **clavada en el mundo**, no patina) y
+   *vuelo* (arco `sin(π·s)` con `smoothstep`, hacia una huella predicha
+   `home + v_huella · (t_restante + ½·duty/f)`). La altura de la huella sale de `groundY(x, z)`
+   (plataforma 0.26 → bisel → suelo 0), así que **sube y baja el escalón** con cabeceo del cuerpo.
+5. **IK** (`solveLegIK`): resuelve `{cadera: [rx, 0, rz], rodilla}` analíticamente contra la huella
+   en coordenadas de `rig`. La articulación visible apunta **hacia atrás** en las 4 patas (codo /
+   corvejón). El peso IK ↔ FK se mezcla exponencialmente (`loco.w`), así que la transición
+   sentado ↔ de pie es continua; durante un salto las garras suben con el cuerpo.
+6. **Secundario**: bamboleo vertical a 2× la frecuencia, roll lateral, inclinación hacia dentro
+   de la curva, cabeza mirando hacia donde gira, cola en alto contrabalanceando y más horizontal al
+   correr. La cámara (`OrbitControls`) y la luz de sombras **siguen al gato**.
 
 ## Interacción
 
 - **Arrastrar** → orbitar · **rueda** → zoom (5–26 u.) · auto-orbit activable.
+- **Click en el suelo** → camina hasta ahí · **WASD / flechas** → manejar (**shift** = correr).
 - **Click sobre el gato** (raycast con `userData.tag` por pieza):
   - cabeza/collar → ronroneo + corazones + audio
   - lomo/cola → sobresalto y salto
@@ -76,8 +146,9 @@ En vez de keyframes, hay un **sistema de poses con target + amortiguación expon
 
 ### Atajos
 
-`1` sentado · `2` dormido · `3` jugar · `M` miau · `P` acariciar · `S` asustar ·
-`W` wireframe · `R` auto-orbit · `A` sonido · `C` reset cámara · `T` ciclar tema
+`1` sentado · `2` dormido · `3` jugar · `4` caminar (paseo) · `H` a casa · `M` miau ·
+`P` acariciar · `S` asustar · `W` wireframe · `R` auto-orbit · `A` sonido · `C` reset cámara ·
+`T` ciclar tema · `G` ciclar render ascii/híbrido/3d · **flechas / WASD (mantener)** manejar · **shift** correr
 
 ## Hooks de prueba
 
@@ -88,23 +159,54 @@ window.__cat3D.meow();            window.__cat3D.setPose('sleep');
 window.__cat3D.pet();             window.__cat3D.setFur('siames');
 window.__cat3D.startle();         window.__cat3D.setTheme('cyan');
 window.__cat3D.toggleWireframe(); window.__cat3D.state;   // estado en vivo
+// render ascii
+window.__cat3D.setAscii('hybrid');                // 'ascii' | 'hybrid' | 'off'
+window.__cat3D.setAsciiCell(12);                  // px por celda (4..24)
+window.__cat3D.asciiUniforms;                     // uniforms vivos del shader
+// locomoción
+window.__cat3D.goTo(3, -2);                       // camina hasta (x, z)
+window.__cat3D.goTo(0, 0, { then: 'sit', heading: 0 });
+window.__cat3D.goHome();                          // = lo anterior
+window.__cat3D.drive({ fwd: true, run: true });   // teclas virtuales (fwd/back/left/right/run)
+window.__cat3D.stop();                            // cancela navegación / paseo
+window.__cat3D.groundY(x, z);                     // altura del terreno
+window.__cat3D.walkDebug();                       // {speed, heading, phase, duty, steps, legs:[{swinging, reachErr, pawWorld…}]}
 window.__catMeow / window.__catPet   // alias cortos
 ```
 
 ## Validación automatizada
 
 ```bash
-node tests/prototype-cat3d-smoke.js
+node tests/prototype-cat3d-smoke.js                    # 27 checks
+node tests/prototype-cat3d-render.js --pose walk --keys ArrowUp:400 --follow --out /tmp/cat.png
+node tests/prototype-cat3d-render.js --pose sit --ascii --cell 8 --w 960 --h 600 --out /tmp/cat-ascii.png
 ```
 
-Harness propio (Node stdlib, sin dependencias): ejecuta el `<script>` inline dentro de un
-`vm.createContext` con **DOM y WebGL stub** + el `three.min.js` real del repo. Cubre:
+`tests/prototype-cat3d-harness.js` es el sandbox compartido (Node stdlib, sin dependencias):
+ejecuta el `<script>` inline dentro de un `vm.createContext` con **DOM y WebGL stub** + el
+`three.min.js` y `OrbitControls.js` reales del repo. El humo cubre:
 
 - ensamblaje completo (>60 mallas, >3000 triángulos) y ausencia de `NaN`/`Inf` en toda la jerarquía;
-- las 3 poses y sus transiciones, ~600 frames simulados;
+- las 4 poses y sus transiciones; la silueta de `sit` es la misma que en v0.1 (altura de garras);
 - las 3 acciones, los 6 pelajes y los 3 temas;
-- clicks de todos los botones, swatches y teclas;
-- `resize`, pausa por `visibilitychange`, y que no queden sprites FX huérfanos (fugas).
+- **render ascii**: RT/DepthTexture/atlas listos, modos y slider, recoloreo por tema, y un
+  chequeo estático del GLSL (uniforms JS ↔ `uniform` GLSL en ambos sentidos, sin sintaxis
+  ES 3.00, paréntesis/llaves balanceados);
+- **locomoción**: `goTo` llega y se orienta; la IK cierra (error < 1e-3); las garras apoyadas
+  **no patinan** (< 0.03 u/frame) y las que vuelan se elevan; secuencia de paso lateral al andar
+  y pares diagonales al correr; giro en el sitio; marcha atrás; límite de arena; `goHome`; reposo
+  automático; paseo autónomo; `jugar` desde lejos; cancelación por pose estática; salto en marcha;
+  teclado (flechas, WASD mantenida vs toque corto, shift, `repeat`); click en el suelo proyectado
+  con la cámara real; seguimiento de cámara; `prefers-reduced-motion`;
+- clicks de todos los botones, swatches y teclas; `resize`, `blur`, pausa por `visibilitychange`,
+  y que no queden sprites FX huérfanos (fugas). ~6000 frames simulados.
+
+`tests/prototype-cat3d-render.js` es un **rasterizador por software** (z-buffer, sombreado
+toon/Lambert, sombra planar, PNG vía `zlib`) que renderiza la escena real del prototipo **sin GPU**
+en una hoja de contactos, con marcadores de garras (verde = apoyada, magenta = en vuelo) y del
+destino de navegación. Con `--ascii` aplica en CPU **la misma lógica del shader** (rampa,
+laplaciano de profundidad, glifos de contorno, atlas bitmap 5×7) para previsualizar el look sin
+navegador. Sirve para revisar marcha y ASCII en CI o desde un agente.
 
 Detalle del harness: `three.min.js` es UMD, así que el sandbox expone
 `exports`/`module`/`define` como `undefined` a propósito para que se cuelgue de `window`;
@@ -133,5 +235,8 @@ El vendor del repo es **r128** (2021). Para no romper compatibilidad:
 1. **Integrarlo al portafolio** reemplazando el easter egg ASCII `#cat3DStage`
    (`initCat3D()` en `src/script.js:3660`) por este gato real en mini-canvas.
 2. Exportar a GLB y cargar con `GLTFLoader` si se quiere un modelo más detallado.
-3. Añadir caminar/`lookAt` con IK en las patas.
+3. ~~Añadir caminar/`lookAt` con IK en las patas.~~ ✅ v0.2 — pendiente: galope (4 tiempos con
+   fase de suspensión), salto a la plataforma en vez de subir el bisel, y evitar el ovillo.
 4. Piel con patrón generado por shader (rayas/Manchas procedurales en GLSL).
+5. ~~Render ASCII~~ ✅ v0.3 — pendiente: temporal-AA de glifos (parpadeo en celdas al borde de
+   dos niveles) y usar el atlas con MSDF para celdas grandes.

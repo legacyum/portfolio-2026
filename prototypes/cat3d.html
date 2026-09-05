@@ -49,7 +49,8 @@
     background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/><feColorMatrix type='saturate' values='0'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
     mix-blend-mode: overlay;
   }
-  #scene { position: fixed; inset: 0; z-index: 1; display: block; touch-action: none; cursor: grab; }
+  #scene { position: fixed; inset: 0; z-index: 1; display: block; touch-action: none; cursor: grab; image-rendering: auto; }
+  #scene.is-ascii { image-rendering: pixelated; }
   #scene:active { cursor: grabbing; }
 
   .hud { position: fixed; z-index: 4; }
@@ -133,6 +134,11 @@
     color: var(--muted); border-radius: 2px;
   }
 
+  .slider {
+    flex: 1 1 auto; display: flex; align-items: center; gap: 8px;
+    font-size: 9.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted);
+  }
+  .slider input[type="range"] { flex: 1; accent-color: var(--accent); height: 18px; margin: 0; }
   .swatches { display: flex; gap: 6px; flex-wrap: wrap; }
   .sw {
     width: 26px; height: 26px; padding: 0; cursor: pointer;
@@ -206,12 +212,12 @@
 
 <div class="hud hud-top">
   <div class="badge">
-    <p class="kick">proto-lab · three.js r128 · 0 dependencias externas</p>
-    <h1>Gato 3D low-poly procedural</h1>
-    <p>Geometría 100% generada por código (sin GLTF). Arrastra para orbitar, haz clic sobre el gato para interactuar.</p>
+    <p class="kick">proto-lab · three.js r128 · render ascii en glsl · 0 dependencias externas</p>
+    <h1>Gato 3D procedural · ASCII</h1>
+    <p>Geometría 100% generada por código (sin GLTF) y rasterizada a glifos en un shader. Arrastra para orbitar; haz clic sobre el gato para interactuar o sobre el suelo para que camine hasta ahí.</p>
     <a class="back" href="/index.html">← volver al portafolio</a>
   </div>
-  <div class="stats" id="stats">fps <b id="fps">--</b> · tris <b id="tris">--</b> · calls <b id="calls">--</b></div>
+  <div class="stats" id="stats">fps <b id="fps">--</b> · tris <b id="tris">--</b> · calls <b id="calls">--</b> · vel <b id="speed">0.0</b></div>
 </div>
 
 <div class="hud panel" id="panel">
@@ -221,6 +227,7 @@
       <button class="btn active" data-pose="sit" type="button">sentado<kbd>1</kbd></button>
       <button class="btn" data-pose="sleep" type="button">dormido<kbd>2</kbd></button>
       <button class="btn" data-pose="play" type="button">jugar<kbd>3</kbd></button>
+      <button class="btn" data-pose="walk" type="button">caminar<kbd>4</kbd></button>
     </div>
   </section>
   <section>
@@ -229,6 +236,7 @@
       <button class="btn" id="btnMeow" type="button">miau<kbd>m</kbd></button>
       <button class="btn" id="btnPet" type="button">acariciar<kbd>p</kbd></button>
       <button class="btn" id="btnStartle" type="button">asustar<kbd>s</kbd></button>
+      <button class="btn" id="btnHome" type="button">a casa<kbd>h</kbd></button>
     </div>
   </section>
   <section>
@@ -244,6 +252,17 @@
     </div>
   </section>
   <section>
+    <h2>render ascii</h2>
+    <div class="row" id="asciiRow">
+      <button class="btn active" data-ascii="ascii" type="button">ascii<kbd>g</kbd></button>
+      <button class="btn" data-ascii="hybrid" type="button">híbrido</button>
+      <button class="btn" data-ascii="off" type="button">3d puro</button>
+    </div>
+    <div class="row" style="margin-top:6px">
+      <label class="slider"><span>densidad</span><input id="asciiCell" type="range" min="6" max="16" step="1" value="9" aria-label="Tamaño de celda ASCII"></label>
+    </div>
+  </section>
+  <section>
     <h2>render</h2>
     <div class="row">
       <button class="btn" id="btnWire" type="button" aria-pressed="false">wireframe<kbd>w</kbd></button>
@@ -255,7 +274,7 @@
 </div>
 
 <div class="hud hint">
-  <b>click</b> cabeza = ronroneo · <b>click</b> lomo/cola = salto · <b>click</b> ovillo = jugar · <b>wheel</b> zoom
+  <b>click</b> cabeza = ronroneo · <b>click</b> lomo/cola = salto · <b>click</b> ovillo = jugar · <b>click suelo</b> = camina hasta ahí · <b>WASD / flechas</b> = manejar (shift = correr) · <b>wheel</b> zoom
 </div>
 
 <div id="bubble" aria-hidden="true">¡miau!</div>
@@ -318,7 +337,15 @@
     nextEarTwitch: 3.5,
     headTargetX: 0,
     headTargetY: 0,
-    pointerActive: false
+    pointerActive: false,
+    // --- locomoción ---
+    speed: 0,          // velocidad lineal actual (u/s), suavizada
+    heading: 0,        // rumbo del cuerpo (rad, yaw sobre Y; 0 = mira hacia +Z)
+    navTarget: null,   // {x, z} destino de "click en el suelo" (null = ninguno)
+    autoWalk: false,   // paseo autónomo (pose walk sin destino ni teclas)
+    gaitPhase: 0,      // fase del ciclo de marcha [0, 1)
+    steps: 0,          // pasos completados (métrica para HUD/tests)
+    running: false
   };
 
   // ------------------------------------------------------------------
@@ -377,6 +404,8 @@
   key.shadow.normalBias = 0.022;
   key.shadow.radius = 2.2;
   scene.add(key);
+  scene.add(key.target);           // el frustum de sombra sigue al gato (ver updateLocomotion)
+  var KEY_OFFSET = key.position.clone();
 
   var fill = new THREE.DirectionalLight(0x9fd8ff, 0.34);
   fill.position.set(-7, 4, -4);
@@ -561,6 +590,19 @@
   var haunchR = mesh(new THREE.SphereGeometry(0.56, 22, 16), mats.fur, 'body', bodyG);
   haunchR.position.set(-0.62, -0.18, -0.76); haunchR.scale.set(0.84, 1.02, 1.0);
 
+  // lomo continuo: un "puente" elipsoidal une pecho y ancas para que la espalda
+  // no se lea como dos esferas, y las escápulas dan volumen a los hombros
+  var spine = mesh(new THREE.SphereGeometry(0.82, 26, 18), mats.fur, 'body', bodyG);
+  spine.position.set(0, 0.12, -0.22); spine.scale.set(1.02, 0.92, 1.62);
+  var scapL = mesh(new THREE.SphereGeometry(0.4, 18, 14), mats.fur, 'body', bodyG);
+  scapL.position.set(0.5, 0.18, 0.78); scapL.scale.set(0.9, 1.0, 1.15);
+  var scapR = mesh(new THREE.SphereGeometry(0.4, 18, 14), mats.fur, 'body', bodyG);
+  scapR.position.set(-0.5, 0.18, 0.78); scapR.scale.set(0.9, 1.0, 1.15);
+  // tripa clara continua bajo el lomo
+  var bellyFur = mesh(new THREE.SphereGeometry(0.66, 22, 16), mats.belly, 'body', bodyG);
+  bellyFur.position.set(0, -0.52, 0.02); bellyFur.scale.set(0.9, 0.62, 1.55);
+  bellyFur.castShadow = false;
+
   // franjas atigradas del lomo
   var stripes = new THREE.Group();
   bodyG.add(stripes);
@@ -572,28 +614,97 @@
     st.castShadow = false;
   }
 
-  // --- patas -------------------------------------------------------
-  function buildLeg(x, z, isFront) {
+  // --- patas: cadena de 3 huesos (cadera → rodilla/corvejón → garra) ----
+  //   hip.rotation  : orden 'ZXY' → rz = abducción (abrir/cerrar), rx = balanceo
+  //   knee.rotation : solo rx (bisagra). Las poses FK "sit/sleep/play" usan
+  //   {hip: [rx, ry, rz], knee: rx}; la marcha resuelve ambos con IK analítica
+  //   de 2 huesos (solveLegIK) sobre la misma jerarquía.
+  var LEG_DEF = {
+    FL: { x:  0.44, z:  0.86, front: true,  L1: 0.82, L2: 0.82, hipY: 1.98 },
+    FR: { x: -0.44, z:  0.86, front: true,  L1: 0.82, L2: 0.82, hipY: 1.98 },
+    BL: { x:  0.60, z: -0.78, front: false, L1: 0.78, L2: 0.72, hipY: 1.78 },
+    BR: { x: -0.60, z: -0.78, front: false, L1: 0.78, L2: 0.72, hipY: 1.78 }
+  };
+  function buildLeg(def) {
     var hip = new THREE.Group();
-    hip.position.set(x, isFront ? 1.98 : 1.78, z);
+    hip.position.set(def.x, def.hipY, def.z);
+    hip.rotation.order = 'ZXY';
     rig.add(hip);
-    var len = isFront ? 1.56 : 1.06;
-    var upper = mesh(new THREE.CylinderGeometry(0.16, 0.14, len, 14), mats.fur, isFront ? 'paw' : 'body', hip);
-    upper.position.y = -len / 2;
-    if (!isFront) {
+    var tag = def.front ? 'paw' : 'body';
+    var upper = mesh(new THREE.CylinderGeometry(0.16, 0.145, def.L1, 14), mats.fur, tag, hip);
+    upper.position.y = -def.L1 / 2;
+    if (!def.front) {
       var thigh = mesh(new THREE.SphereGeometry(0.34, 18, 14), mats.fur, 'body', hip);
       thigh.position.set(0, -0.1, 0);
       thigh.scale.set(1, 1.1, 1.25);
     }
-    var paw = mesh(new THREE.SphereGeometry(0.21, 18, 14), mats.furDark, isFront ? 'paw' : 'body', hip);
-    paw.position.set(0, -len - 0.03, 0.05);
+    var knee = new THREE.Group();
+    knee.position.y = -def.L1;
+    hip.add(knee);
+    var joint = mesh(new THREE.SphereGeometry(0.15, 14, 12), mats.fur, tag, knee);
+    joint.castShadow = false;
+    var lower = mesh(new THREE.CylinderGeometry(0.145, 0.125, def.L2, 14), mats.fur, tag, knee);
+    lower.position.y = -def.L2 / 2;
+    var paw = mesh(new THREE.SphereGeometry(0.21, 18, 14), mats.furDark, tag, knee);
+    paw.position.set(0, -def.L2 - 0.03, 0.05);
     paw.scale.set(1.05, 0.72, 1.3);
-    return hip;
+    // dedos: 3 bultos al frente de la garra
+    for (var td = -1; td <= 1; td++) {
+      var toe = mesh(new THREE.SphereGeometry(0.075, 10, 8), mats.furDark, tag, knee);
+      toe.position.set(td * 0.1, -def.L2 - 0.09, 0.3 + (td === 0 ? 0.03 : 0));
+      toe.scale.set(1, 0.8, 1.25);
+      toe.castShadow = false;
+    }
+    return {
+      def: def, hip: hip, knee: knee, paw: paw,
+      // estado de marcha
+      planted: new THREE.Vector3(),   // huella actual (mundo)
+      from: new THREE.Vector3(),      // huella anterior (origen del paso)
+      swing: 0,                       // progreso del paso [0..1]
+      swinging: false,
+      lift: 0,                        // altura instantánea del pie (para HUD/debug)
+      reachErr: 0                     // |objetivo - alcance| tras la IK (debe ser ~0)
+    };
   }
-  var legFL = buildLeg(0.44, 0.86, true);
-  var legFR = buildLeg(-0.44, 0.86, true);
-  var legBL = buildLeg(0.6, -0.78, false);
-  var legBR = buildLeg(-0.6, -0.78, false);
+  var legFL = buildLeg(LEG_DEF.FL);
+  var legFR = buildLeg(LEG_DEF.FR);
+  var legBL = buildLeg(LEG_DEF.BL);
+  var legBR = buildLeg(LEG_DEF.BR);
+  var LEGS = [legFL, legFR, legBL, legBR];
+  // ángulo de flexión de rodilla que reproduce la longitud efectiva de la pata
+  // original (1.56 delantera / 1.06 trasera) para que las poses FK no cambien de silueta
+  function kneeForLength(def, len) {
+    var c = (def.L1 * def.L1 + def.L2 * def.L2 - len * len) / (2 * def.L1 * def.L2);
+    return -(Math.PI - Math.acos(THREE.MathUtils.clamp(c, -1, 1)));
+  }
+  var KNEE_FRONT_SIT = kneeForLength(LEG_DEF.FL, 1.56);   // ≈ -0.33 rad (casi recta)
+  var KNEE_BACK_SIT  = kneeForLength(LEG_DEF.BL, 1.06);   // ≈ -1.63 rad (doblada = sentado)
+
+  // IK analítica de 2 huesos. target en coordenadas locales de `rig`.
+  // Devuelve {hip:[rx,ry,rz], knee, err}. La rodilla siempre dobla hacia atrás
+  // (delante) o hacia delante (corvejón trasero apunta atrás) según el signo elegido
+  // por la convención de la cadera: rotación X positiva balancea la pata hacia atrás.
+  var _ikV = new THREE.Vector3();
+  function solveLegIK(leg, target) {
+    var def = leg.def, hip = leg.hip;
+    _ikV.set(target.x - hip.position.x, target.y - hip.position.y, target.z - hip.position.z);
+    var d = _ikV.length();
+    var L1 = def.L1, L2 = def.L2;
+    var dc = THREE.MathUtils.clamp(d, Math.abs(L1 - L2) + 0.02, (L1 + L2) * 0.995);
+    // 1) abducción: rz alinea el plano de la pata con el objetivo en XY
+    var rz = Math.atan2(_ikV.x, -_ikV.y);
+    // 2) en ese plano, componentes "hacia abajo" (pd) y "hacia atrás" (pb)
+    var pd = _ikV.x * Math.sin(rz) - _ikV.y * Math.cos(rz);
+    var pb = -_ikV.z;
+    var swing = Math.atan2(pb, pd);
+    var a1 = Math.acos(THREE.MathUtils.clamp((L1 * L1 + dc * dc - L2 * L2) / (2 * L1 * dc), -1, 1));
+    var a2 = Math.acos(THREE.MathUtils.clamp((L1 * L1 + L2 * L2 - dc * dc) / (2 * L1 * L2), -1, 1));
+    // La articulación visible apunta hacia ATRÁS en las 4 patas (codo delante,
+    // corvejón detrás), como en un cuadrúpedo real: cadera = swing - a1,
+    // rodilla positiva. Las poses FK estáticas usan rodilla negativa (hacia
+    // delante, oculta bajo el cuerpo); el blend pasa por la pata recta.
+    return { hip: [swing - a1, 0, rz], knee: (Math.PI - a2), err: Math.abs(d - dc) };
+  }
 
   // --- cola: cadena de 12 segmentos (animación ondular) ------------
   var TAIL_N = 12;
@@ -606,22 +717,59 @@
     var seg = new THREE.Group();
     seg.position.z = ti === 0 ? 0 : -0.27;
     parent.add(seg);
-    var r = 0.2 - ti * 0.0125;
-    var tip = ti >= TAIL_N - 2;
-    var sm = mesh(new THREE.SphereGeometry(Math.max(r, 0.06), 14, 12), tip ? mats.furDark : mats.fur, 'tail', seg);
-    sm.position.z = -0.135;
-    sm.scale.set(1, 1, 1.5);
+    // articulaciones: esferas pequeñas que rellenan los huecos del tubo al doblarse
+    var r = 0.19 - ti * 0.0115;
+    var joint = mesh(new THREE.SphereGeometry(Math.max(r * 0.92, 0.055), 10, 8), mats.fur, 'tail', seg);
+    joint.position.z = -0.27;
+    joint.castShadow = false;
     tailSegs.push(seg);
     parent = seg;
   }
   var tailTip = mesh(new THREE.SphereGeometry(0.085, 12, 10), mats.furDark, 'tail', parent);
-  tailTip.position.z = -0.15;
-  tailTip.scale.set(1, 1, 1.6);
+  tailTip.position.z = -0.32;
+  tailTip.scale.set(1, 1, 1.5);
+  // Tubo continuo: TubeGeometry a lo largo de una Catmull-Rom por las
+  // articulaciones, regenerado cada frame en coordenadas de `rig` (barato:
+  // 12 puntos × 8 lados). Se le añaden anillos atigrados con vertex colors
+  // vía un segundo tubo más fino (furDark) desplazado en radio: 3 anillos.
+  var tailPts = [];
+  for (var tp = 0; tp <= TAIL_N; tp++) tailPts.push(new THREE.Vector3());
+  var tailCurve = new THREE.CatmullRomCurve3(tailPts, false, 'catmullrom', 0.5);
+  var TAIL_TUBE_SEGS = 36, TAIL_TUBE_SIDES = 9;
+  var tailTube = mesh(new THREE.TubeGeometry(tailCurve, TAIL_TUBE_SEGS, 0.18, TAIL_TUBE_SIDES, false), mats.fur, 'tail', rig);
+  tailTube.frustumCulled = false;
+  var tailTubePos0 = null;
+  // radio variable: escalamos los anillos del tubo tras generarlo (grueso en la base, fino en la punta)
+  function rebuildTailTube() {
+    tailRoot.updateMatrixWorld(true);
+    for (var i = 0; i < tailSegs.length; i++) {
+      tailSegs[i].getWorldPosition(tailPts[i]);
+      rig.worldToLocal(tailPts[i]);
+    }
+    tailTip.getWorldPosition(tailPts[TAIL_N]); rig.worldToLocal(tailPts[TAIL_N]);
+    tailCurve.needsUpdate = true;
+    var g = new THREE.TubeGeometry(tailCurve, TAIL_TUBE_SEGS, 1, TAIL_TUBE_SIDES, false);
+    var pos = g.attributes.position;
+    var nor = g.attributes.normal;
+    var ring = TAIL_TUBE_SIDES + 1;
+    for (var v = 0; v < pos.count; v++) {
+      var t = Math.floor(v / ring) / TAIL_TUBE_SEGS;              // 0 base → 1 punta
+      var rad = 0.19 * (1 - t * 0.55) + 0.02 * Math.sin(t * 3.14159);
+      // posición = centro + normal * radio (TubeGeometry con radio 1 ⇒ normal unitaria)
+      var cx = pos.getX(v) - nor.getX(v), cy = pos.getY(v) - nor.getY(v), cz = pos.getZ(v) - nor.getZ(v);
+      pos.setXYZ(v, cx + nor.getX(v) * rad, cy + nor.getY(v) * rad, cz + nor.getZ(v) * rad);
+    }
+    var old = tailTube.geometry;
+    tailTube.geometry = g;
+    old.dispose();
+  }
 
   // --- cuello ------------------------------------------------------
-  var neck = mesh(new THREE.CylinderGeometry(0.4, 0.48, 0.62, 20), mats.fur, 'body', rig);
-  neck.position.set(0, 2.96, 0.86);
+  var neck = mesh(new THREE.CylinderGeometry(0.42, 0.56, 0.78, 20), mats.fur, 'body', rig);
+  neck.position.set(0, 2.9, 0.84);
   neck.rotation.x = 0.46;
+  var ruff = mesh(new THREE.SphereGeometry(0.5, 20, 14), mats.fur, 'body', rig);  // gola/pechera
+  ruff.position.set(0, 2.72, 1.02); ruff.scale.set(1.1, 0.8, 0.9);
 
   var collar = mesh(new THREE.TorusGeometry(0.45, 0.068, 12, 34), mats.collar, 'collar', rig);
   collar.position.set(0, 3.08, 0.96);
@@ -937,14 +1085,43 @@
     setTimeout(function () { blip(760, 0.16, 'square', 0.05); }, 90);
     ripple();
   }
-  function setPose(p) {
+  // setPose(p, internal): `internal` = transición generada por la locomoción
+  // (llegada a destino, reposo) → sin paseo autónomo ni sonidos de UI.
+  function setPose(p, internal) {
     if (!POSES[p]) return;
-    if (p === state.pose) return;
+    if (p === state.pose) {
+      if (p === 'walk' && !internal && !state.navTarget) { state.autoWalk = true; loco.pause = 0; }
+      return;
+    }
+    if (p === 'play' && !internal) {
+      var dxy = root.position.x, dzy = root.position.z;
+      if (Math.sqrt(dxy * dxy + dzy * dzy) > 1.2 || Math.abs(wrapAngle(state.heading)) > 0.5) {
+        // el ovillo está junto a la plataforma: va hasta él y luego juega
+        say('¡ovillo!', 900);
+        goTo(0, 0, { then: 'play', heading: 0 });
+        return;
+      }
+    }
     state.prevPose = state.pose;
     state.pose = p;
-    if (p === 'sleep') { say('z z z…', 1100); blip(320, 0.28, 'sine', 0.05); }
-    if (p === 'play') { blip(720, 0.1, 'triangle', 0.07); }
+    if (p !== 'walk') {
+      // cualquier pose estática cancela navegación/paseo (pero conserva posición y rumbo)
+      state.navTarget = null; state.autoWalk = false;
+      loco.pendingPose = null; loco.finalHeading = null; navMarker.visible = false;
+    } else {
+      loco.idle = 0;
+      if (!internal && !state.navTarget) { state.autoWalk = true; loco.pause = 0.4; }
+    }
+    if (!internal) {
+      if (p === 'sleep') { say('z z z…', 1100); blip(320, 0.28, 'sine', 0.05); }
+      if (p === 'play') { blip(720, 0.1, 'triangle', 0.07); }
+      if (p === 'walk') { blip(540, 0.08, 'triangle', 0.06); }
+    }
     syncButtons();
+  }
+  // Vuelve caminando a la plataforma y se sienta mirando a la cámara inicial.
+  function goHome() {
+    goTo(0, 0, { then: 'sit', heading: 0 });
   }
   function ripple() {
     try {
@@ -985,24 +1162,406 @@
       legBL: [0, 0, 0.26], legBR: [-0.2, 0, -0.2],
       tailBase: [-1.0, 0.24, 0], tailCurl: 0.05, tailWave: 0.42, tailSpeed: 5.2, tailPuff: 1.12,
       eyeOpen: 1, pupil: 0.62
+    },
+    // De pie / caminando. Las patas las resuelve la IK (ver 12b); estos valores
+    // FK solo se usan como base durante el blend de entrada/salida.
+    walk: {
+      bodyPos: [0, 2.18, 0], bodyRot: [0, 0, 0], bodyScale: [1, 1, 1],
+      rigPos: [0, 0, 0], rigRot: [0, 0, 0],
+      headPos: [0, 3.42, 1.12], headRot: [0.04, 0, 0],
+      legFL: [0, 0, 0.05, -0.3], legFR: [0, 0, -0.05, -0.3],
+      legBL: [0.08, 0, 0.1, -0.7], legBR: [0.08, 0, -0.1, -0.7],
+      tailBase: [0.82, 0, 0], tailCurl: 0.1, tailWave: 0.2, tailSpeed: 3.2, tailPuff: 1,
+      eyeOpen: 1, pupil: 0.9, locomotion: true
     }
   };
+
+  // Convierte un target FK de pata [rx, ry, rz, (knee)] — en la semántica del
+  // prototipo original de pata recta — a {hip, knee} para la cadena de 3 huesos:
+  // compensa la cadera con el ángulo a1 para que la garra quede exactamente
+  // en la misma dirección/distancia que antes aunque la rodilla esté doblada.
+  function fkLeg(def, arr) {
+    var kneeA = arr.length > 3 ? arr[3] : (def.front ? KNEE_FRONT_SIT : KNEE_BACK_SIT);
+    var a2 = Math.PI + kneeA;
+    var d = Math.sqrt(Math.max(0.0001, def.L1 * def.L1 + def.L2 * def.L2 - 2 * def.L1 * def.L2 * Math.cos(a2)));
+    var a1 = Math.acos(THREE.MathUtils.clamp((def.L1 * def.L1 + d * d - def.L2 * def.L2) / (2 * def.L1 * d), -1, 1));
+    return { hip: [arr[0] + (kneeA < 0 ? a1 : -a1), arr[1], arr[2]], knee: kneeA };
+  }
+  var POSE_LEGS = {};
+  Object.keys(POSES).forEach(function (k) {
+    var p = POSES[k];
+    POSE_LEGS[k] = {
+      FL: fkLeg(LEG_DEF.FL, p.legFL), FR: fkLeg(LEG_DEF.FR, p.legFR),
+      BL: fkLeg(LEG_DEF.BL, p.legBL), BR: fkLeg(LEG_DEF.BR, p.legBR)
+    };
+  });
 
   // target dinámico (se copia del pose base y se modifica con animaciones)
   var T = {};
   function resetTarget() {
     var p = POSES[state.pose];
+    var pl = POSE_LEGS[state.pose];
     T.bodyPos = p.bodyPos.slice(); T.bodyRot = p.bodyRot.slice(); T.bodyScale = p.bodyScale.slice();
     T.rigPos = p.rigPos.slice(); T.rigRot = p.rigRot.slice();
     T.headPos = p.headPos.slice(); T.headRot = p.headRot.slice();
-    T.legFL = p.legFL.slice(); T.legFR = p.legFR.slice();
-    T.legBL = p.legBL.slice(); T.legBR = p.legBR.slice();
+    T.legFL = { hip: pl.FL.hip.slice(), knee: pl.FL.knee };
+    T.legFR = { hip: pl.FR.hip.slice(), knee: pl.FR.knee };
+    T.legBL = { hip: pl.BL.hip.slice(), knee: pl.BL.knee };
+    T.legBR = { hip: pl.BR.hip.slice(), knee: pl.BR.knee };
     T.tailBase = p.tailBase.slice(); T.tailCurl = p.tailCurl; T.tailWave = p.tailWave;
     T.tailSpeed = p.tailSpeed; T.tailPuff = p.tailPuff;
     T.eyeOpen = p.eyeOpen; T.pupil = p.pupil;
-    T.rootPos = [0, 0, 0]; T.rootRot = [0, 0, 0];
+    T.rootY = 0;                         // canal de salto (root.position.y)
     T.earL = [-0.16, 0, -0.3]; T.earR = [-0.16, 0, 0.3];
     T.mouthOpen = 0;
+    // suelo bajo el gato: las poses FK se apoyan como en el original (rig = suelo - DAIS_H)
+    T.rigPos[1] += groundY(root.position.x, root.position.z) - DAIS_H;
+  }
+
+  // ------------------------------------------------------------------
+  // 12b. Locomoción: terreno, navegación, marcha procedural e IK
+  // ------------------------------------------------------------------
+  var DAIS_R = 3.5, DAIS_R_BOTTOM = 3.72;
+  var ARENA_R = 9.5;                 // radio máximo de paseo (antes de la niebla)
+  var WALK_SPEED = 1.6, RUN_SPEED = 3.6, BACK_SPEED = 0.7;
+  var TURN_RATE = 2.6;               // rad/s con teclado
+  var WALK_RIG_DROP = -0.40;         // rig respecto al suelo cuando está de pie (patas ~85% extendidas)
+  var PAW_H = 0.18;                  // altura del extremo de la cadena IK sobre el suelo (media garra)
+  var HOME = { FL: [0.46, 0.84], FR: [-0.46, 0.84], BL: [0.6, -0.78], BR: [-0.6, -0.78] }; // huella neutra (x, z) en local
+  // Desfases de fase. El swing de cada pata ocurre cuando (fase + offset) ∈ [duty, 1):
+  // a mayor offset, antes despega. Orden temporal resultante: BR → FR → BL → FL
+  // = "paso lateral" (tras una trasera, la delantera del MISMO lado), el andar
+  // real del gato. Al correr, gaitShift = +0.25 en las traseras → pares
+  // diagonales (FL+BR, FR+BL) = trote.
+  var GAIT_OFFSET = { FL: 0.75, FR: 0.25, BL: 0.0, BR: 0.5 };
+
+  function groundY(x, z) {
+    var r = Math.sqrt(x * x + z * z);
+    if (r <= DAIS_R) return DAIS_H;
+    if (r < DAIS_R_BOTTOM) return DAIS_H * (DAIS_R_BOTTOM - r) / (DAIS_R_BOTTOM - DAIS_R); // bisel
+    return 0;
+  }
+  function wrapAngle(a) {
+    a = (a + Math.PI) % (Math.PI * 2);
+    if (a < 0) a += Math.PI * 2;
+    return a - Math.PI;
+  }
+  function smoothstep(t) { t = THREE.MathUtils.clamp(t, 0, 1); return t * t * (3 - 2 * t); }
+
+  var loco = {
+    w: 0,                 // peso IK (0 = FK puro, 1 = marcha)
+    yawRate: 0,
+    duty: 0.68,
+    gaitShift: 0,         // 0 = paso lateral (walk), +0.25 = trote
+    freq: 0,
+    idle: 0,              // segundos quieto en pose walk sin órdenes
+    pause: 0,             // pausa entre waypoints del paseo autónomo
+    pendingPose: null,    // pose a adoptar al llegar (goTo(..., {then}))
+    finalHeading: null,   // rumbo a adoptar al llegar
+    keys: { fwd: false, back: false, left: false, right: false, run: false },
+    vel: new THREE.Vector3(),
+    fwd: new THREE.Vector3(0, 0, 1)
+  };
+  LEGS.forEach(function (leg) {
+    leg.key = leg === legFL ? 'FL' : leg === legFR ? 'FR' : leg === legBL ? 'BL' : 'BR';
+    leg.offset = GAIT_OFFSET[leg.key];
+    leg.fk = { hip: new THREE.Vector3(), knee: 0 };
+    leg.ik = { hip: [0, 0, 0], knee: 0 };
+    leg.prevPhase = 0;
+    leg.swingStart = 0;
+    leg.duty = loco.duty;
+    leg.pos = new THREE.Vector3();          // posición actual del pie (mundo, sobre el suelo)
+    leg.target = new THREE.Vector3();
+    leg.home = new THREE.Vector3();
+    leg.vfoot = new THREE.Vector3();
+    var pl = POSE_LEGS.sit[leg.key];
+    leg.fk.hip.fromArray(pl.hip); leg.fk.knee = pl.knee;
+  });
+
+  // marcador de destino en el suelo
+  var navMarker = new THREE.Mesh(
+    new THREE.TorusGeometry(0.3, 0.022, 8, 40),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(THEMES[''].accent), transparent: true, opacity: 0.8, depthWrite: false })
+  );
+  navMarker.rotation.x = -Math.PI / 2;
+  navMarker.visible = false;
+  scene.add(navMarker);
+
+  function clampArena(x, z, r) {
+    var d = Math.sqrt(x * x + z * z);
+    if (d > r) { x *= r / d; z *= r / d; }
+    return { x: x, z: z };
+  }
+
+  // Camina hasta (x, z). opts: { then: pose al llegar, heading: rumbo final, quiet: sin blip }
+  function goTo(x, z, opts) {
+    opts = opts || {};
+    var c = clampArena(+x || 0, +z || 0, ARENA_R - 0.4);
+    state.navTarget = { x: c.x, z: c.z };
+    state.autoWalk = false;
+    loco.pendingPose = opts.then || null;
+    loco.finalHeading = (typeof opts.heading === 'number') ? opts.heading : null;
+    loco.idle = 0;
+    navMarker.position.set(c.x, groundY(c.x, c.z) + 0.03, c.z);
+    navMarker.visible = true;
+    if (state.pose !== 'walk') setPose('walk', true);
+    if (!opts.quiet) blip(660, 0.06, 'triangle', 0.05);
+  }
+  function stopWalking() {
+    state.navTarget = null;
+    state.autoWalk = false;
+    loco.pendingPose = null;
+    loco.finalHeading = null;
+    navMarker.visible = false;
+  }
+  // Estado de teclas (flechas / hook drive())
+  function drive(k) {
+    var any = false;
+    ['fwd', 'back', 'left', 'right', 'run'].forEach(function (n) {
+      if (k && n in k) loco.keys[n] = !!k[n];
+      if (n !== 'run' && loco.keys[n]) any = true;
+    });
+    if (any) {
+      if (state.navTarget || state.autoWalk) stopWalking();
+      loco.idle = 0;
+      if (state.pose !== 'walk') setPose('walk', true);
+    }
+  }
+  function pickWaypoint() {
+    // punto aleatorio del ruedo, preferentemente hacia delante y a ≥2.2 u de distancia
+    for (var i = 0; i < 8; i++) {
+      var ang = state.heading + (Math.random() - 0.5) * (i < 4 ? 2.4 : Math.PI * 2);
+      var dist = 2.2 + Math.random() * 4.6;
+      var x = root.position.x + Math.sin(ang) * dist, z = root.position.z + Math.cos(ang) * dist;
+      if (x * x + z * z < (ARENA_R - 1.2) * (ARENA_R - 1.2)) {
+        state.navTarget = { x: x, z: z };
+        navMarker.visible = false;
+        return;
+      }
+    }
+    state.navTarget = { x: 0, z: 0 };
+  }
+
+  var _foot = new THREE.Vector3();
+  var _homeL = new THREE.Vector3();
+  var _tmpQ = new THREE.Quaternion();
+  var _up = new THREE.Vector3(0, 1, 0);
+
+  function updateLocomotion(dt) {
+    var walking = state.pose === 'walk';
+    var k = loco.keys;
+    var desired = 0, yawTarget = 0;
+
+    // ---- 1. órdenes: teclado > navegación > paseo autónomo ---------------
+    if (walking && (k.fwd || k.back || k.left || k.right)) {
+      desired = k.fwd ? (k.run ? RUN_SPEED : WALK_SPEED) : (k.back ? -BACK_SPEED : 0);
+      yawTarget = ((k.left ? 1 : 0) - (k.right ? 1 : 0)) * TURN_RATE * (k.back ? -1 : 1);
+    } else if (walking && state.navTarget) {
+      var dx = state.navTarget.x - root.position.x, dz = state.navTarget.z - root.position.z;
+      var dist = Math.sqrt(dx * dx + dz * dz);
+      if (dist < 0.22) {
+        // llegada
+        var arrivedTarget = state.navTarget;
+        state.navTarget = null;
+        navMarker.visible = false;
+        if (state.autoWalk) {
+          loco.pause = 1.2 + Math.random() * 2.2;
+          if (Math.random() < 0.3) doMeow();
+        } else if (loco.pendingPose && loco.finalHeading === null) {
+          var pp = loco.pendingPose; loco.pendingPose = null;
+          setPose(pp, true);
+        }
+        void arrivedTarget;
+      } else {
+        var want = Math.atan2(dx, dz);
+        var err = wrapAngle(want - state.heading);
+        yawTarget = THREE.MathUtils.clamp(err * 4.2, -3.2, 3.2);
+        desired = Math.min(k.run ? RUN_SPEED : WALK_SPEED, dist * 2.2);
+        desired *= THREE.MathUtils.clamp(1.35 - Math.abs(err), 0.12, 1); // primero gira, luego avanza
+        if (dist > 6.5) desired = Math.max(desired, WALK_SPEED * 1.35);  // apura si está lejos
+      }
+    } else if (walking && loco.finalHeading !== null) {
+      var errF = wrapAngle(loco.finalHeading - state.heading);
+      yawTarget = THREE.MathUtils.clamp(errF * 4.2, -3.2, 3.2);
+      if (Math.abs(errF) < 0.035) {
+        state.heading = loco.finalHeading; loco.yawRate = 0; yawTarget = 0;
+        loco.finalHeading = null;
+        if (loco.pendingPose) { var pp2 = loco.pendingPose; loco.pendingPose = null; setPose(pp2, true); }
+      }
+    } else if (walking && state.autoWalk) {
+      loco.pause -= dt;
+      if (loco.pause <= 0) pickWaypoint();
+    }
+
+    // ---- 2. integración de velocidad / rumbo / posición --------------------
+    var accel = desired > state.speed ? 4.5 : 6.5;
+    state.speed += THREE.MathUtils.clamp(desired - state.speed, -accel * dt, accel * dt);
+    if (Math.abs(state.speed) < 0.004 && desired === 0) state.speed = 0;
+    loco.yawRate += (yawTarget - loco.yawRate) * (1 - Math.exp(-8 * dt));
+    if (Math.abs(loco.yawRate) < 0.002 && yawTarget === 0) loco.yawRate = 0;
+    state.heading = wrapAngle(state.heading + loco.yawRate * dt);
+    loco.fwd.set(Math.sin(state.heading), 0, Math.cos(state.heading));
+    loco.vel.copy(loco.fwd).multiplyScalar(state.speed);
+    root.position.x += loco.vel.x * dt;
+    root.position.z += loco.vel.z * dt;
+    var cl = clampArena(root.position.x, root.position.z, ARENA_R);
+    root.position.x = cl.x; root.position.z = cl.z;
+    root.rotation.y = state.heading;
+    state.running = state.speed > WALK_SPEED + 0.4;
+
+    // ---- 3. reposo en pose walk: tras un rato se sienta solo --------------
+    var busy = !!(state.navTarget || state.autoWalk || loco.pendingPose || loco.finalHeading !== null ||
+                  k.fwd || k.back || k.left || k.right);
+    if (walking && !busy && state.speed === 0) {
+      loco.idle += dt;
+      if (loco.idle > 4.5) { loco.idle = 0; setPose('sit', true); }
+    } else loco.idle = 0;
+
+    // ---- 4. peso IK ---------------------------------------------------------
+    var wantIK = walking || Math.abs(state.speed) > 0.15;
+    var prevW = loco.w;
+    loco.w += ((wantIK ? 1 : 0) - loco.w) * (1 - Math.exp(-7 * dt));
+    if (loco.w < 0.001) loco.w = 0;
+    if (loco.w > 0.999) loco.w = 1;
+    if (prevW === 0 && loco.w > 0) {
+      // al levantarse: huellas en la posición neutra bajo las caderas
+      root.updateMatrixWorld(true);
+      LEGS.forEach(function (leg) {
+        _homeL.set(HOME[leg.key][0], 0, HOME[leg.key][1]);
+        root.localToWorld(_homeL);
+        _homeL.y = groundY(_homeL.x, _homeL.z);
+        leg.planted.copy(_homeL); leg.from.copy(_homeL); leg.pos.copy(_homeL);
+        leg.swinging = false; leg.swing = 0; leg.prevPhase = 0;
+      });
+      state.gaitPhase = 0;
+    }
+    if (loco.w === 0) return;
+
+    // ---- 5. marcha: fase, duty y desfase (walk ↔ trote) ---------------------
+    var speedAbs = Math.abs(state.speed);
+    var speedEff = speedAbs + Math.abs(loco.yawRate) * 0.7;
+    var runness = THREE.MathUtils.clamp((speedAbs - WALK_SPEED) / (RUN_SPEED - WALK_SPEED), 0, 1);
+    loco.duty += ((0.68 - 0.18 * runness) - loco.duty) * (1 - Math.exp(-3 * dt));
+    loco.gaitShift += ((0.25 * runness) - loco.gaitShift) * (1 - Math.exp(-3 * dt));
+    var stride = 0.8 + speedAbs * 0.25;
+    var anySwing = false, anyNeed = false;
+    root.updateMatrixWorld(true);
+    LEGS.forEach(function (leg) {
+      _homeL.set(HOME[leg.key][0], 0, HOME[leg.key][1]);
+      leg.home.copy(root.localToWorld(_homeL));
+      leg.home.y = groundY(leg.home.x, leg.home.z);
+      // velocidad del punto "home" en el mundo = v + ω × r
+      var rx = HOME[leg.key][0], rz = HOME[leg.key][1];
+      var wx = rx * Math.cos(state.heading) + rz * Math.sin(state.heading);   // r en mundo
+      var wz = -rx * Math.sin(state.heading) + rz * Math.cos(state.heading);
+      leg.vfoot.set(loco.vel.x + loco.yawRate * wz, 0, loco.vel.z - loco.yawRate * wx);
+      if (leg.swinging) anySwing = true;
+      else if (leg.planted.distanceTo(leg.home) > 0.1) anyNeed = true;
+    });
+    var moving = speedEff > 0.05;
+    var f = 0;
+    if (moving || anySwing || anyNeed) f = THREE.MathUtils.clamp(speedEff / stride, 0.9, 2.8);
+    loco.freq = f;
+    state.gaitPhase = (state.gaitPhase + f * dt) % 1;
+
+    LEGS.forEach(function (leg) {
+      var off = leg.offset + (leg.def.front ? 0 : loco.gaitShift);
+      var ph = ((state.gaitPhase + off) % 1 + 1) % 1;
+      var wrapped = ph < leg.prevPhase - 0.5;   // pasó por 1 → 0
+      leg.prevPhase = ph;
+      var needStep = moving || leg.planted.distanceTo(leg.home) > 0.1;
+      if (!leg.swinging) {
+        var winStart = loco.duty, winLen = 1 - loco.duty;
+        if (f > 0 && needStep && ph >= winStart && ph < winStart + winLen * 0.35) {
+          leg.swinging = true;
+          leg.swing = 0;
+          leg.swingStart = ph;
+          leg.from.copy(leg.planted);
+          leg.duty = loco.duty;
+        }
+      }
+      if (leg.swinging) {
+        if (wrapped || ph < leg.duty) {
+          // aterrizaje
+          leg.swinging = false;
+          leg.planted.copy(leg.target);
+          leg.planted.y = groundY(leg.planted.x, leg.planted.z);
+          leg.swing = 1;
+          state.steps++;
+          if (Math.abs(state.speed) > 2.4 && state.sound && Math.random() < 0.5) blip(120 + Math.random() * 40, 0.03, 'sine', 0.012);
+        } else {
+          var span = Math.max(0.05, 1 - leg.swingStart);
+          leg.swing = THREE.MathUtils.clamp((ph - leg.swingStart) / span, 0, 1);
+          var tRemain = (1 - leg.swing) * span / Math.max(f, 0.001);
+          // aterriza medio ciclo de apoyo por delante de la huella neutra futura
+          leg.target.copy(leg.home).addScaledVector(leg.vfoot, tRemain + 0.5 * leg.duty / Math.max(f, 0.001));
+          leg.target.y = groundY(leg.target.x, leg.target.z);
+        }
+      }
+      if (leg.swinging) {
+        var s = smoothstep(leg.swing);
+        leg.pos.lerpVectors(leg.from, leg.target, s);
+        var arcH = 0.15 + 0.12 * runness + Math.max(0, leg.target.y - leg.from.y) * 0.7;
+        leg.lift = Math.sin(Math.PI * leg.swing) * arcH;
+        leg.pos.y += leg.lift;
+      } else {
+        leg.pos.copy(leg.planted);
+        leg.lift = 0;
+      }
+    });
+
+    // ---- 6. cuerpo: altura sobre el terreno, cabeceo en escalones, bamboleo ----
+    var gF = (legFL.pos.y - legFL.lift + legFR.pos.y - legFR.lift) * 0.5;
+    var gB = (legBL.pos.y - legBL.lift + legBR.pos.y - legBR.lift) * 0.5;
+    var gAvg = (gF + gB) * 0.5;
+    var wT = loco.w;
+    var rigYWalk = gAvg + WALK_RIG_DROP;
+    T.rigPos[1] = T.rigPos[1] * (1 - wT) + rigYWalk * wT;
+    var pitch = Math.atan2(gB - gF, 1.64) * 0.75;
+    T.rigRot[0] += pitch * wT;
+    var g2 = state.gaitPhase * Math.PI * 2;
+    var bob = (0.025 + 0.05 * runness) * Math.sin(g2 * 2) * Math.min(1, speedEff);
+    T.bodyPos[1] += bob * wT;
+    T.rigRot[2] += Math.sin(g2) * (0.035 + 0.02 * runness) * Math.min(1, speedEff) * wT;
+    T.rigRot[2] += -loco.yawRate * 0.03 * wT;                 // se inclina hacia dentro de la curva
+    T.bodyRot[0] += -runness * 0.06 * wT;                       // estira el lomo al correr
+    T.headPos[1] += -bob * 0.5 * wT;
+    T.headRot[1] += THREE.MathUtils.clamp(loco.yawRate * 0.12, -0.3, 0.3) * wT; // mira hacia donde gira
+    // cola: en alto, contrabalanceo lateral con la marcha
+    T.tailBase[1] += Math.sin(g2) * 0.22 * Math.min(1, speedEff) * wT;
+    T.tailBase[0] += -runness * 0.35 * wT;                      // más horizontal al correr
+    T.tailWave += speedAbs * 0.05 * wT;
+    T.tailSpeed = T.tailSpeed * (1 - wT) + Math.max(3.2, f * Math.PI * 2) * wT;
+    // orejas hacia delante al andar
+    T.earL[0] += -0.08 * wT * Math.min(1, speedEff); T.earR[0] += -0.08 * wT * Math.min(1, speedEff);
+  }
+
+  // Resuelve la IK de cada pata contra su huella (en mundo) y mezcla con el FK.
+  function applyLegs(dt) {
+    var L = 9, w = loco.w;
+    if (w > 0) { root.updateMatrixWorld(true); }
+    LEGS.forEach(function (leg) {
+      var tgt = T['leg' + leg.key];
+      dampV3(leg.fk.hip, tgt.hip, L, dt);
+      leg.fk.knee += (tgt.knee - leg.fk.knee) * (1 - Math.exp(-L * dt));
+      var h = leg.hip.rotation;
+      if (w > 0) {
+        _foot.copy(leg.pos); _foot.y += PAW_H + root.position.y * 0.85; // en un salto las patas suben con el cuerpo
+        rig.worldToLocal(_foot);
+        var sol = solveLegIK(leg, _foot);
+        leg.ik.hip = sol.hip; leg.ik.knee = sol.knee; leg.reachErr = sol.err;
+        h.set(
+          leg.fk.hip.x + (sol.hip[0] - leg.fk.hip.x) * w,
+          leg.fk.hip.y + (sol.hip[1] - leg.fk.hip.y) * w,
+          leg.fk.hip.z + (sol.hip[2] - leg.fk.hip.z) * w
+        );
+        leg.knee.rotation.x = leg.fk.knee + (sol.knee - leg.fk.knee) * w;
+      } else {
+        h.set(leg.fk.hip.x, leg.fk.hip.y, leg.fk.hip.z);
+        leg.knee.rotation.x = leg.fk.knee;
+        leg.reachErr = 0;
+      }
+    });
   }
 
   function damp(obj, prop, target, lambda, dt) {
@@ -1046,16 +1605,30 @@
     if (quick && !dragged) handleClick(e.clientX, e.clientY);
     downPos = null;
   }
+  var groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  var daisPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -DAIS_H);
+  var groundHit = new THREE.Vector3();
+  function pickGround(ray) {
+    if (ray.intersectPlane(daisPlane, groundHit) && groundHit.x * groundHit.x + groundHit.z * groundHit.z <= DAIS_R * DAIS_R) return true;
+    return !!ray.intersectPlane(groundPlane, groundHit);
+  }
   function handleClick(x, y) {
     var ndc = new THREE.Vector2((x / window.innerWidth) * 2 - 1, -(y / window.innerHeight) * 2 + 1);
     raycaster.setFromCamera(ndc, camera);
     var hits = raycaster.intersectObjects(pickTargets, false);
-    if (!hits.length) return;
+    if (!hits.length) {
+      // click en el suelo → camina hasta ahí (si está dormido, primero se despierta)
+      if (pickGround(raycaster.ray) && Math.sqrt(groundHit.x * groundHit.x + groundHit.z * groundHit.z) < ARENA_R + 3) {
+        goTo(groundHit.x, groundHit.z);
+        say(['¿ahí?', 'voy~', 'mrp'][(Math.random() * 3) | 0], 800);
+      }
+      return;
+    }
     var tag = hits[0].object.userData.tag;
     if (tag === 'head' || tag === 'collar') doPet();
     else if (tag === 'tail') { doStartle(); }
-    else if (tag === 'yarn') { setPose('play'); batYarn(); }
-    else if (tag === 'paw') { setPose('play'); say('¡toma!', 900); blip(560, 0.09, 'triangle', 0.07); }
+    else if (tag === 'yarn') { setPose('play'); if (state.pose === 'play') batYarn(); }
+    else if (tag === 'paw') { setPose('play'); if (state.pose === 'play') { say('¡toma!', 900); blip(560, 0.09, 'triangle', 0.07); } }
     else if (tag === 'body') doStartle();
   }
   var yarnImpulse = 0, yarnVel = new THREE.Vector3();
@@ -1085,6 +1658,7 @@
   document.getElementById('btnMeow').addEventListener('click', doMeow);
   document.getElementById('btnPet').addEventListener('click', doPet);
   document.getElementById('btnStartle').addEventListener('click', doStartle);
+  document.getElementById('btnHome').addEventListener('click', goHome);
 
   var btnWire = document.getElementById('btnWire');
   btnWire.addEventListener('click', function () {
@@ -1110,8 +1684,8 @@
   });
 
   document.getElementById('btnReset').addEventListener('click', function () {
-    camera.position.copy(CAM_HOME);
-    if (controls) { controls.target.set(0, 2.25, 0); controls.update(); }
+    camera.position.set(CAM_HOME.x + root.position.x, CAM_HOME.y, CAM_HOME.z + root.position.z);
+    if (controls) { controls.target.set(root.position.x, 2.25, root.position.z); controls.update(); }
     blip(520, 0.08, 'sine', 0.06);
   });
 
@@ -1165,6 +1739,9 @@
     mats.collar.emissive.set(th.accent);
     mats.yarn.color.set(th.accent);
     mats.yarn.emissive.set(th.accent);
+    navMarker.material.color.set(th.accent);
+    asciiUniforms.accent.value.set(th.accent);
+    asciiUniforms.bg.value.set(th.bg);
     if (gridTex) {
       gridTex.dispose();
       gridTex = gridTexture(th.rgb);
@@ -1181,24 +1758,289 @@
     b.addEventListener('click', function () { setTheme(b.dataset.theme); });
   });
 
+  // Teclas de manejo: WASD / flechas (mantener) + shift para correr.
+  var DRIVE_KEYS = {
+    arrowup: 'fwd', w: 'fwd', arrowdown: 'back', s: 'back',
+    arrowleft: 'left', a: 'left', arrowright: 'right', d: 'right', shift: 'run'
+  };
+  // 'w' 's' 'a' también son atajos de UI (wireframe/asustar/sonido): solo actúan
+  // como manejo si se MANTIENEN pulsadas ≥ 180 ms o si hay una flecha activa.
+  var holdTimers = {};
+  function driveKey(e, down) {
+    var k = e.key.length === 1 ? e.key.toLowerCase() : e.key.toLowerCase();
+    var fn = DRIVE_KEYS[k];
+    if (!fn) return false;
+    var isArrow = k.indexOf('arrow') === 0 || k === 'shift';
+    if (down) {
+      if (e.repeat) return true;
+      if (isArrow) {
+        var o = {}; o[fn] = true; drive(o);
+        if (k !== 'shift' && e.preventDefault) e.preventDefault();
+      } else if (!holdTimers[k]) {
+        holdTimers[k] = setTimeout(function () {
+          holdTimers[k] = 'held';
+          var o2 = {}; o2[fn] = true; drive(o2);
+        }, 180);
+      }
+      return isArrow;
+    }
+    // keyup
+    if (isArrow) { var r = {}; r[fn] = false; drive(r); return true; }
+    var t = holdTimers[k];
+    delete holdTimers[k];
+    if (t === 'held') { var r2 = {}; r2[fn] = false; drive(r2); return true; }
+    if (t) clearTimeout(t);
+    return false; // toque corto: cae al atajo de UI en keyup (ver abajo)
+  }
+  window.addEventListener('keyup', function (e) {
+    if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+    if (driveKey(e, false)) return;
+    var k = e.key.toLowerCase();
+    // atajos de una letra que colisionan con WASD se ejecutan en keyup (toque corto)
+    if (k === 'w') btnWire.click();
+    else if (k === 's') doStartle();
+    else if (k === 'a') btnSound.click();
+  });
   window.addEventListener('keydown', function (e) {
     if (e.target && /input|textarea/i.test(e.target.tagName)) return;
+    if (driveKey(e, true)) return;
     var k = e.key.toLowerCase();
     if (k === '1') setPose('sit');
     else if (k === '2') setPose('sleep');
     else if (k === '3') setPose('play');
+    else if (k === '4') setPose('walk');
+    else if (k === 'h') goHome();
+    else if (k === 'g') { var mo = ['ascii', 'hybrid', 'off']; setAscii(mo[(mo.indexOf(state.ascii) + 1) % mo.length]); }
     else if (k === 'm') doMeow();
     else if (k === 'p') doPet();
-    else if (k === 's') doStartle();
-    else if (k === 'w') btnWire.click();
     else if (k === 'r') btnSpin.click();
-    else if (k === 'a') btnSound.click();
     else if (k === 'c') document.getElementById('btnReset').click();
     else if (k === 't') {
       var order = ['', 'cyan', 'amber'];
       setTheme(order[(order.indexOf(state.theme) + 1) % order.length]);
     }
   });
+  window.addEventListener('blur', function () {
+    // soltar todas las teclas de manejo si la ventana pierde el foco
+    drive({ fwd: false, back: false, left: false, right: false, run: false });
+    Object.keys(holdTimers).forEach(function (k) { if (holdTimers[k] !== 'held') clearTimeout(holdTimers[k]); });
+    holdTimers = {};
+  });
+
+  // ------------------------------------------------------------------
+  // 14b. Post-proceso ASCII (GLSL, r128)
+  //   La escena se renderiza a un WebGLRenderTarget y un quad de pantalla
+  //   completa la convierte en glifos: por cada celda de `cell` px toma la
+  //   luminancia del render, elige un glifo de una rampa de densidad y lo
+  //   dibuja desde un atlas (canvas 2D → textura). El color del glifo viene
+  //   del tema activo (verde / cyan / ámbar), con matiz del pelaje en modo
+  //   "híbrido". Un pase de bordes (Sobel) sobre la profundidad convierte
+  //   las siluetas en glifos de contorno (| / - \\) para que el gato se lea
+  //   aunque la celda sea gruesa. Es el look "glyphcat" del portafolio.
+  // ------------------------------------------------------------------
+  // rampa de densidad (oscuro → claro). Los glifos de contorno | / - \ se
+  // buscan por índice en JS y se pasan como uniform (nada hardcodeado en GLSL).
+  var ASCII_RAMP = ' .`-\':_,^=;><+!rc*/z?sLTv)J7(|Fi{C}fI31tlu[neoZ5Yxjya]2ESwqkP6h9d4VpOGbUAKXHm8RD#$Bg0MNWQ%&@\\';
+  var EDGE_GLYPHS = new THREE.Vector4(ASCII_RAMP.indexOf('|'), ASCII_RAMP.indexOf('/'), ASCII_RAMP.indexOf('-'), ASCII_RAMP.indexOf('\\'));
+  var GLYPH_COLS = 16;
+  var GLYPH_ROWS = Math.ceil(ASCII_RAMP.length / GLYPH_COLS);
+  var GLYPH_PX = 32;
+  function glyphAtlas() {
+    var c = document.createElement('canvas');
+    c.width = GLYPH_COLS * GLYPH_PX;
+    c.height = GLYPH_ROWS * GLYPH_PX;
+    var g = c.getContext('2d');
+    g.fillStyle = '#000';
+    g.fillRect(0, 0, c.width, c.height);
+    g.fillStyle = '#fff';
+    g.textAlign = 'center';
+    g.textBaseline = 'middle';
+    g.font = 'bold ' + Math.round(GLYPH_PX * 0.92) + 'px ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace';
+    for (var i = 0; i < ASCII_RAMP.length; i++) {
+      var cx = (i % GLYPH_COLS) * GLYPH_PX + GLYPH_PX / 2;
+      var cy = Math.floor(i / GLYPH_COLS) * GLYPH_PX + GLYPH_PX / 2 + 1;
+      g.fillText(ASCII_RAMP[i], cx, cy);
+    }
+    var t = new THREE.CanvasTexture(c);
+    t.minFilter = THREE.LinearFilter;
+    t.magFilter = THREE.LinearFilter;
+    t.generateMipmaps = false;
+    t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+    return t;
+  }
+  var glyphTex = glyphAtlas();
+
+  // Render targets: color (con depth texture para el pase de bordes)
+  var rtColor = new THREE.WebGLRenderTarget(2, 2, {
+    minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, format: THREE.RGBAFormat,
+    depthBuffer: true, stencilBuffer: false
+  });
+  rtColor.texture.encoding = THREE.LinearEncoding;
+  rtColor.depthTexture = new THREE.DepthTexture();
+  rtColor.depthTexture.type = THREE.UnsignedIntType;
+
+  var asciiUniforms = {
+    tScene:     { value: rtColor.texture },
+    tDepth:     { value: rtColor.depthTexture },
+    tGlyph:     { value: glyphTex },
+    resolution: { value: new THREE.Vector2(2, 2) },
+    cell:       { value: 9 },
+    glyphGrid:  { value: new THREE.Vector2(GLYPH_COLS, GLYPH_ROWS) },
+    glyphCount: { value: ASCII_RAMP.length },
+    accent:     { value: new THREE.Color(THEMES[''].accent) },
+    bg:         { value: new THREE.Color(THEMES[''].bg) },
+    tint:       { value: 0 },        // 0 = monocromo tema, 1 = matiz del color de la escena
+    edgeMix:    { value: 1 },        // fuerza de glifos de contorno
+    edgeGlyphs: { value: EDGE_GLYPHS }, // índices de | / - \ en la rampa
+    cameraNear: { value: camera.near },
+    cameraFar:  { value: camera.far },
+    time:       { value: 0 },
+    glow:       { value: 1 }
+  };
+  var ASCII_VERT = [
+    'varying vec2 vUv;',
+    'void main() {',
+    '  vUv = uv;',
+    '  gl_Position = vec4(position.xy, 0.0, 1.0);',
+    '}'
+  ].join('\n');
+  var ASCII_FRAG = [
+    'precision highp float;',
+    'uniform sampler2D tScene;',
+    'uniform sampler2D tDepth;',
+    'uniform sampler2D tGlyph;',
+    'uniform vec2 resolution;',
+    'uniform float cell;',
+    'uniform vec2 glyphGrid;',
+    'uniform float glyphCount;',
+    'uniform vec3 accent;',
+    'uniform vec3 bg;',
+    'uniform float tint;',
+    'uniform float edgeMix;',
+    'uniform vec4 edgeGlyphs;',
+    'uniform float cameraNear;',
+    'uniform float cameraFar;',
+    'uniform float time;',
+    'uniform float glow;',
+    'varying vec2 vUv;',
+    THREE.ShaderChunk.packing,
+    'float luma(vec3 c) { return dot(c, vec3(0.2126, 0.7152, 0.0722)); }',
+    'float linDepth(vec2 uv) {',
+    '  float z = texture2D(tDepth, uv).x;',
+    '  float vz = perspectiveDepthToViewZ(z, cameraNear, cameraFar);',
+    '  return viewZToOrthographicDepth(vz, cameraNear, cameraFar);',
+    '}',
+    // muestrea el glifo `idx` (0..glyphCount-1) en la coordenada local `p` (0..1) de la celda
+    'float glyph(float idx, vec2 p) {',
+    '  idx = clamp(floor(idx + 0.5), 0.0, glyphCount - 1.0);',
+    '  float gx = mod(idx, glyphGrid.x);',
+    '  float gy = floor(idx / glyphGrid.x);',
+    '  vec2 uv = (vec2(gx, gy) + clamp(p, 0.02, 0.98)) / glyphGrid;',
+    '  uv.y = 1.0 - uv.y;',
+    '  return texture2D(tGlyph, uv).r;',
+    '}',
+    'void main() {',
+    '  vec2 frag = vUv * resolution;',
+    '  vec2 cellId = floor(frag / cell);',
+    '  vec2 cellUv = (cellId + 0.5) * cell / resolution;',       // centro de la celda
+    '  vec2 local = fract(frag / cell);',                         // 0..1 dentro de la celda
+    // luminancia media de la celda (5 taps: centro + 4 diagonales)
+    '  vec2 px = cell * 0.25 / resolution;',
+    '  vec3 c0 = texture2D(tScene, cellUv).rgb;',
+    '  vec3 c = c0 * 0.4',
+    '    + texture2D(tScene, cellUv + vec2( px.x,  px.y)).rgb * 0.15',
+    '    + texture2D(tScene, cellUv + vec2(-px.x,  px.y)).rgb * 0.15',
+    '    + texture2D(tScene, cellUv + vec2( px.x, -px.y)).rgb * 0.15',
+    '    + texture2D(tScene, cellUv + vec2(-px.x, -px.y)).rgb * 0.15;',
+    '  float l = luma(c);',
+    // curva: más contraste en medios tonos y piso para el fondo casi negro
+    '  float lv = pow(clamp(l * 1.28, 0.0, 1.0), 1.15);',
+    '  lv = lv * 0.55 + 0.45 * smoothstep(0.12, 0.5, l);',           // aplasta el suelo, conserva el gato
+    // bordes por profundidad (Sobel sobre celdas vecinas) → glifos de contorno
+    '  vec2 cs = cell / resolution;',
+    '  float d00 = linDepth(cellUv + vec2(-cs.x, -cs.y)), d10 = linDepth(cellUv + vec2(0.0, -cs.y)), d20 = linDepth(cellUv + vec2(cs.x, -cs.y));',
+    '  float d01 = linDepth(cellUv + vec2(-cs.x, 0.0)),                                          d21 = linDepth(cellUv + vec2(cs.x, 0.0));',
+    '  float d02 = linDepth(cellUv + vec2(-cs.x,  cs.y)), d12 = linDepth(cellUv + vec2(0.0,  cs.y)), d22 = linDepth(cellUv + vec2(cs.x,  cs.y));',
+    '  float dC = linDepth(cellUv);',
+    // Discontinuidad: una superficie continua (suelo) tiene d10+d12 ≈ 2·dC (segunda
+    // derivada ~0); una silueta la rompe. Umbral relativo a la profundidad.
+    '  float lap = abs(d10 + d12 - 2.0 * dC) + abs(d01 + d21 - 2.0 * dC) + 0.5 * (abs(d00 + d22 - 2.0 * dC) + abs(d20 + d02 - 2.0 * dC));',
+    '  float edge = clamp((lap - 0.0025 - dC * 0.02) * 90.0, 0.0, 1.0) * edgeMix;',
+    // solo la cara cercana de la silueta (la celda más próxima a cámara) dibuja el contorno
+    '  float dMin = min(min(min(d00, d10), min(d20, d01)), min(min(d21, d02), min(d12, d22)));',
+    '  if (dC > dMin + 0.004) edge = 0.0;',
+    '  if (dC > 0.995) edge = 0.0;',                              // cielo
+    // orientación del borde: gradiente Sobel (solo se usa para elegir el glifo)
+    '  float gxs = (d20 + 2.0 * d21 + d22) - (d00 + 2.0 * d01 + d02);',
+    '  float gys = (d02 + 2.0 * d12 + d22) - (d00 + 2.0 * d10 + d20);',
+    // elección de glifo: rampa por luminancia, o contorno según la orientación del borde
+    '  float idx = lv * (glyphCount - 1.0);',
+    '  if (edge > 0.42) {',
+    '    float ang = atan(gys, gxs);',                             // -pi..pi
+    '    float a = mod(ang + 3.14159265, 3.14159265);',            // 0..pi (sin signo)
+    // glifos de contorno: | (0/pi) / (pi/4) - (pi/2) \\ (3pi/4)   → índices fijos de la rampa
+    // el gradiente apunta *a través* del borde: la línea de contorno es perpendicular.
+    // gradiente horizontal (a≈0) → borde vertical "|"; gradiente vertical (a≈pi/2) → "-".
+    '    if (a < 0.3927 || a > 2.7489) idx = edgeGlyphs.x;',        // |
+    '    else if (a < 1.1781) idx = edgeGlyphs.w;',                 // \  (gradiente a 45° → línea a 135°)
+    '    else if (a < 1.9635) idx = edgeGlyphs.z;',                 // -
+    '    else idx = edgeGlyphs.y;',                                 // /
+    '    lv = max(lv, 0.55);',
+    '  }',
+    // glifo mínimo para el suelo iluminado (que la rejilla no desaparezca)
+    '  float g = glyph(idx, local);',
+    // color: tema (monocromo) o teñido con el color real de la escena
+    '  vec3 sceneCol = c / max(l, 0.0001);',                       // cromaticidad
+    '  vec3 col = mix(accent, normalize(sceneCol + 0.001) * 1.2 * max(accent, vec3(0.6)), tint);',
+    '  float bright = 0.22 + 0.95 * lv;',
+    '  if (edge > 0.42) bright = 1.05 + 0.25 * edge;',
+    '  if (dC > 0.995) bright *= 0.55;',                          // cielo/fondo lejano más tenue
+    '  vec3 ink = col * bright;',
+    // glow suave del glifo (halo en la celda) + scanline muy leve
+    '  float halo = glyph(idx, (local - 0.5) * 0.72 + 0.5) * 0.28 * glow;',
+    '  float scan = 0.97 + 0.03 * sin(frag.y * 1.7 + time * 2.0);',
+    '  vec3 outc = bg * 0.9 + ink * (g + halo * lv) * scan;',
+    // los píxeles muy oscuros de fondo se quedan en bg puro
+    '  outc = mix(bg, outc, smoothstep(0.015, 0.06, l + edge * 0.2));',
+    '  gl_FragColor = vec4(outc, 1.0);',
+    '}'
+  ].join('\n');
+  var asciiMat = new THREE.ShaderMaterial({
+    uniforms: asciiUniforms, vertexShader: ASCII_VERT, fragmentShader: ASCII_FRAG,
+    depthTest: false, depthWrite: false
+  });
+  var postScene = new THREE.Scene();
+  var postCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  var postQuad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), asciiMat);
+  postQuad.frustumCulled = false;
+  postScene.add(postQuad);
+
+  var ASCII_MODES = { ascii: { tint: 0 }, hybrid: { tint: 1 }, off: null };
+  state.ascii = 'ascii';
+  state.asciiCell = 9;
+  var ASCII_MIN_DPR_SCALE = 1;   // el RT se renderiza a resolución de pantalla
+  function setAscii(mode) {
+    if (!(mode in ASCII_MODES)) return;
+    state.ascii = mode;
+    if (ASCII_MODES[mode]) asciiUniforms.tint.value = ASCII_MODES[mode].tint;
+    document.querySelectorAll('#asciiRow .btn').forEach(function (b) {
+      b.classList.toggle('active', b.dataset.ascii === mode);
+    });
+    canvas.classList.toggle('is-ascii', mode !== 'off');
+    blip(mode === 'off' ? 420 : 780, 0.06, 'square', 0.04);
+  }
+  function setAsciiCell(px) {
+    px = THREE.MathUtils.clamp(Math.round(+px || 9), 4, 24);
+    state.asciiCell = px;
+    asciiUniforms.cell.value = px * Math.min(window.devicePixelRatio || 1, 2) * ASCII_MIN_DPR_SCALE;
+    var sl = document.getElementById('asciiCell');
+    if (sl && +sl.value !== px) sl.value = String(px);
+  }
+  document.querySelectorAll('#asciiRow .btn').forEach(function (b) {
+    b.addEventListener('click', function () { setAscii(b.dataset.ascii); });
+  });
+  var asciiSlider = document.getElementById('asciiCell');
+  if (asciiSlider) asciiSlider.addEventListener('input', function () { setAsciiCell(asciiSlider.value); });
 
   // ------------------------------------------------------------------
   // 15. Resize / visibilidad
@@ -1208,6 +2050,12 @@
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h, false);
+    var pr = Math.min(window.devicePixelRatio || 1, 2);
+    rtColor.setSize(Math.max(2, Math.floor(w * pr)), Math.max(2, Math.floor(h * pr)));
+    asciiUniforms.resolution.value.set(rtColor.width, rtColor.height);
+    asciiUniforms.cameraNear.value = camera.near;
+    asciiUniforms.cameraFar.value = camera.far;
+    setAsciiCell(state.asciiCell);
   }
   window.addEventListener('resize', resize);
   resize();
@@ -1223,10 +2071,12 @@
   // ------------------------------------------------------------------
   var clock = new THREE.Clock();
   var elapsed = 0;
+  renderer.info.autoReset = false;   // dos pases por frame: reseteamos a mano en el loop
   var fpsAcc = 0, fpsFrames = 0, fpsTimer = 0;
   var elFps = document.getElementById('fps');
   var elTris = document.getElementById('tris');
   var elCalls = document.getElementById('calls');
+  var elSpeed = document.getElementById('speed');
   var zzzTimer = 0;
   var tmpV = new THREE.Vector3();
   var tmpV2 = new THREE.Vector3();
@@ -1234,6 +2084,7 @@
   function tick() {
     requestAnimationFrame(tick);
     if (paused) return;
+    renderer.info.reset();
     var dt = Math.min(clock.getDelta(), 0.05);
     var speed = reduced ? 0.25 : 1;
     dt *= speed;
@@ -1321,7 +2172,7 @@
       var s = Math.max(0, state.startle);
       var jump = Math.sin(Math.min(1, (1.15 - s) / 0.62) * Math.PI);
       if (s < 0.53) jump = 0;
-      T.rootPos[1] += jump * 1.05;
+      T.rootY += jump * 1.05;
       T.rigRot[0] += -0.26 * jump;
       T.bodyScale[1] += 0.1 * jump;
       T.bodyScale[0] -= 0.06 * jump;
@@ -1329,8 +2180,11 @@
       T.tailBase[0] -= 0.9 * jump;
       T.earL[0] -= 0.5 * jump; T.earR[0] -= 0.5 * jump;
       T.headPos[1] += 0.1 * jump;
-      T.legFL[0] -= 0.5 * jump; T.legFR[0] -= 0.5 * jump;
+      T.legFL.hip[0] -= 0.5 * jump; T.legFR.hip[0] -= 0.5 * jump;
     }
+
+    // --- locomoción (navegación, marcha, IK) ---------------------------
+    updateLocomotion(dt);
 
     // --- dormir: Zzz ---------------------------------------------------
     if (p.zzz) {
@@ -1345,16 +2199,18 @@
     // --- jugar: golpear el ovillo --------------------------------------
     if (state.pose === 'play') {
       var swat = Math.sin(elapsed * 5.4);
-      T.legFR[0] += -0.9 * Math.max(0, swat);
-      T.legFR[1] += 0.35 * Math.max(0, swat);
+      T.legFR.hip[0] += -0.9 * Math.max(0, swat);
+      T.legFR.hip[1] += 0.35 * Math.max(0, swat);
       T.headRot[0] += 0.16 * Math.max(0, swat);
-      if (swat > 0.985 && yarn.position.distanceTo(YARN_HOME) < 0.6) batYarn();
+      // el ovillo sigue al gato: solo lo golpea si está cerca de él
+      root.getWorldPosition(tmpV);
+      if (swat > 0.985 && yarn.position.distanceTo(YARN_HOME) < 0.6 && tmpV.distanceTo(YARN_HOME) < 3.4) batYarn();
     }
 
     // ================= aplicación del target =====================
     var L = 9;   // lambda de suavizado
-    dampV3(root.position, T.rootPos, 14, dt);
-    dampV3(root.rotation, T.rootRot, 12, dt);
+    // root.x/z y root.rotation.y los gobierna la locomoción; aquí solo el salto
+    damp(root.position, 'y', T.rootY, 14, dt);
     dampV3(rig.position, T.rigPos, L, dt);
     dampV3(rig.rotation, T.rigRot, L, dt);
     dampV3(bodyG.position, T.bodyPos, L, dt);
@@ -1362,10 +2218,7 @@
     dampV3(bodyG.scale, T.bodyScale, L, dt);
     dampV3(head.position, T.headPos, L + 2, dt);
     dampV3(head.rotation, T.headRot, L + 2, dt);
-    dampV3(legFL.rotation, T.legFL, L, dt);
-    dampV3(legFR.rotation, T.legFR, L, dt);
-    dampV3(legBL.rotation, T.legBL, L, dt);
-    dampV3(legBR.rotation, T.legBR, L, dt);
+    applyLegs(dt);
     dampV3(earL.rotation, T.earL, 13, dt);
     dampV3(earR.rotation, T.earR, 13, dt);
 
@@ -1400,6 +2253,8 @@
       var s = puff * (1 + Math.sin(ph * 1.7) * 0.02);
       seg.scale.set(s, s, 1);
     }
+
+    rebuildTailTube();
 
     // orejas y bigotes con micro-vibración
     whiskL.rotation.z = Math.sin(elapsed * 1.6) * 0.03;
@@ -1445,8 +2300,36 @@
     updateFX(dt);
     placeBubble();
 
-    if (controls) controls.update();
-    renderer.render(scene, camera);
+    // la cámara orbita alrededor del gato (el pivote se desplaza con él, suave)
+    // y la luz principal lo acompaña para que nunca salga del frustum de sombra
+    if (controls) {
+      var kf = 1 - Math.exp(-3.2 * dt);
+      var pdx = (root.position.x - controls.target.x) * kf;
+      var pdz = (root.position.z - controls.target.z) * kf;
+      if (Math.abs(pdx) > 1e-5 || Math.abs(pdz) > 1e-5) {
+        controls.target.x += pdx; controls.target.z += pdz;
+        camera.position.x += pdx; camera.position.z += pdz;
+      }
+      controls.update();
+    }
+    key.target.position.set(root.position.x, 0, root.position.z);
+    key.position.set(KEY_OFFSET.x + root.position.x, KEY_OFFSET.y, KEY_OFFSET.z + root.position.z);
+    if (navMarker.visible) {
+      navMarker.material.opacity = 0.55 + Math.sin(elapsed * 6) * 0.3;
+      var ms = 1 + Math.sin(elapsed * 6) * 0.12;
+      navMarker.scale.set(ms, ms, 1);
+    }
+
+    if (state.ascii !== 'off') {
+      asciiUniforms.time.value = elapsed;
+      renderer.setRenderTarget(rtColor);
+      renderer.clear();
+      renderer.render(scene, camera);
+      renderer.setRenderTarget(null);
+      renderer.render(postScene, postCam);
+    } else {
+      renderer.render(scene, camera);
+    }
 
     // stats
     fpsAcc += dt; fpsFrames++; fpsTimer += dt;
@@ -1454,6 +2337,7 @@
       elFps.textContent = Math.round(fpsFrames / Math.max(fpsAcc, 0.0001));
       elTris.textContent = renderer.info.render.triangles.toLocaleString('es-PE');
       elCalls.textContent = renderer.info.render.calls;
+      if (elSpeed) elSpeed.textContent = Math.abs(state.speed).toFixed(1);
       fpsAcc = 0; fpsFrames = 0; fpsTimer = 0;
     }
   }
@@ -1469,12 +2353,36 @@
     setTheme: setTheme,
     setFur: setFur,
     toggleWireframe: function () { btnWire.click(); },
+    // render ascii
+    setAscii: setAscii,         // 'ascii' | 'hybrid' | 'off'
+    setAsciiCell: setAsciiCell, // px por celda (4..24)
+    asciiUniforms: asciiUniforms,
+    // locomoción
+    goTo: goTo,                 // goTo(x, z, {then, heading})
+    goHome: goHome,
+    drive: drive,               // drive({fwd, back, left, right, run})
+    stop: stopWalking,
+    groundY: groundY,
+    walkDebug: function () {
+      return {
+        speed: state.speed, heading: state.heading, phase: state.gaitPhase, freq: loco.freq,
+        ikWeight: loco.w, steps: state.steps, duty: loco.duty,
+        pos: [root.position.x, root.position.y, root.position.z],
+        target: state.navTarget,
+        legs: LEGS.map(function (l) {
+          var pw = new THREE.Vector3(); l.paw.getWorldPosition(pw);
+          return { key: l.key, swinging: l.swinging, swing: l.swing, lift: l.lift, reachErr: l.reachErr,
+                   planted: l.planted.clone(), pawWorld: pw, hip: [l.hip.rotation.x, l.hip.rotation.y, l.hip.rotation.z], knee: l.knee.rotation.x };
+        })
+      };
+    },
     state: state,
     scene: scene,
     camera: camera,
+    controls: controls,
     renderer: renderer,
     root: root,
-    version: '0.1.0-prototype',
+    version: '0.3.0-prototype',
     isReady: true
   };
   window.__catMeow = doMeow;
@@ -1487,7 +2395,8 @@
   setFur('tabby');
   syncButtons();
   renderer.compile(scene, camera);
-  renderer.render(scene, camera);
+  renderer.compile(postScene, postCam);
+  setAscii('ascii');
   tick();
 
   setTimeout(function () {
