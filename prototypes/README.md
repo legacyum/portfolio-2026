@@ -59,7 +59,7 @@ En vez de keyframes, hay un **sistema de poses con target + amortiguación expon
 | Tics de oreja | cada 4–11 s |
 | Cola | onda viajera; velocidad y amplitud cambian por pose (1.5 sentado → 5.2 jugando) |
 | Dormir | se enrosca, suelta sprites `Z` cada 1.35 s |
-| Jugar | zarpazo sincronizado que **impulsa el ovillo con física simple** (gravedad, rebote 0.44, fricción y retorno elástico a su sitio) |
+| Jugar | secuencia en bucle con anticipación, mini-salto, zarpazos alternados, patas traseras de apoyo, mirada que sigue el ovillo y golpe sincronizado con física simple (gravedad, rebote 0.44, fricción y retorno elástico a su sitio); cada impacto emite una nota y un destello |
 | Sobresalto | salto parabólico, lomo arqueado, **cola erizada** (`tailPuff` +0.85), orejas hacia atrás, pupilas dilatadas |
 
 ## Interacción
