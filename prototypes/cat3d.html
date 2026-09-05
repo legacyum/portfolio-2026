@@ -316,6 +316,8 @@
     petFlash: 0,
     playPulse: 0,       // destello/impacto del último zarpazo
     playHitCooldown: 0, // evita golpear el ovillo varias veces por frame
+    walking: false,
+    walkBlend: 0,
     earTwitch: 0,
     nextEarTwitch: 3.5,
     headTargetX: 0,
@@ -596,6 +598,12 @@
   var legFR = buildLeg(-0.44, 0.86, true);
   var legBL = buildLeg(0.6, -0.78, false);
   var legBR = buildLeg(-0.6, -0.78, false);
+  // Posiciones neutras de las caderas: el solver de pasos las usa como
+  // referencia para levantar y adelantar cada pata sin romper la pose.
+  var LEG_HOME_POS = {
+    FL: legFL.position.clone(), FR: legFR.position.clone(),
+    BL: legBL.position.clone(), BR: legBR.position.clone()
+  };
 
   // --- cola: cadena de 12 segmentos (animación ondular) ------------
   var TAIL_N = 12;
@@ -1004,6 +1012,10 @@
     T.headPos = p.headPos.slice(); T.headRot = p.headRot.slice();
     T.legFL = p.legFL.slice(); T.legFR = p.legFR.slice();
     T.legBL = p.legBL.slice(); T.legBR = p.legBR.slice();
+    T.legFLPos = [LEG_HOME_POS.FL.x, LEG_HOME_POS.FL.y, LEG_HOME_POS.FL.z];
+    T.legFRPos = [LEG_HOME_POS.FR.x, LEG_HOME_POS.FR.y, LEG_HOME_POS.FR.z];
+    T.legBLPos = [LEG_HOME_POS.BL.x, LEG_HOME_POS.BL.y, LEG_HOME_POS.BL.z];
+    T.legBRPos = [LEG_HOME_POS.BR.x, LEG_HOME_POS.BR.y, LEG_HOME_POS.BR.z];
     T.tailBase = p.tailBase.slice(); T.tailCurl = p.tailCurl; T.tailWave = p.tailWave;
     T.tailSpeed = p.tailSpeed; T.tailPuff = p.tailPuff;
     T.eyeOpen = p.eyeOpen; T.pupil = p.pupil;
@@ -1021,6 +1033,20 @@
     v.x += (arr[0] - v.x) * k;
     v.y += (arr[1] - v.y) * k;
     v.z += (arr[2] - v.z) * k;
+  }
+
+  // Solver de pisada procedural: mueve la cadera durante el paso y calcula
+  // pequeños offsets de rotación para que la pata acompañe la dirección.
+  // No depende de IK externo y funciona con la jerarquía simple del prototipo.
+  function solveFootIK(posTarget, rotTarget, home, phase, stride, lift, dirX, dirZ, blend) {
+    var swing = Math.sin(phase) * stride * blend;
+    var liftAmount = Math.max(0, Math.sin(phase)) * lift * blend;
+    var legLength = 1.55;
+    posTarget[0] = home.x + dirX * swing;
+    posTarget[1] = home.y + liftAmount;
+    posTarget[2] = home.z + dirZ * swing;
+    rotTarget[2] += THREE.MathUtils.clamp((dirX * swing) / legLength, -0.34, 0.34);
+    rotTarget[0] += THREE.MathUtils.clamp((-dirZ * swing - liftAmount * 0.22) / legLength, -0.34, 0.34);
   }
 
   // ------------------------------------------------------------------
@@ -1271,6 +1297,30 @@
       var anticipation = Math.max(0, -playWave);
       var pounce = Math.pow(Math.max(0, Math.sin(playClock - 0.72)), 2);
 
+      // El gato se acerca al ovillo, pero permanece dentro de la plataforma.
+      // El margen deja la distancia justa para que la pata llegue al juguete.
+      var chaseTargetX = THREE.MathUtils.clamp(yarn.position.x - 1.15, -1.35, 1.35);
+      var chaseTargetZ = THREE.MathUtils.clamp(yarn.position.z - 0.95, -0.85, 0.85);
+      var chaseDx = chaseTargetX - root.position.x;
+      var chaseDz = chaseTargetZ - root.position.z;
+      var chaseDistance = Math.sqrt(chaseDx * chaseDx + chaseDz * chaseDz);
+      var chaseInv = chaseDistance > 0.001 ? 1 / chaseDistance : 0;
+      var walkDirX = chaseDx * chaseInv;
+      var walkDirZ = chaseDz * chaseInv;
+      T.rootPos[0] = chaseTargetX;
+      T.rootPos[2] = chaseTargetZ;
+      state.walking = chaseDistance > 0.055;
+      state.walkBlend += ((state.walking ? 1 : 0) - state.walkBlend) * (1 - Math.exp(-9 * dt));
+
+      // La pisada alterna las cuatro patas: dos diagonales trabajan juntas,
+      // levantan la cadera y rotan en dirección al desplazamiento.
+      var walkPhase = elapsed * 8.2;
+      var walkBlend = state.walkBlend;
+      solveFootIK(T.legFLPos, T.legFL, LEG_HOME_POS.FL, walkPhase, 0.25, 0.16, walkDirX, walkDirZ, walkBlend);
+      solveFootIK(T.legBRPos, T.legBR, LEG_HOME_POS.BR, walkPhase, 0.25, 0.14, walkDirX, walkDirZ, walkBlend);
+      solveFootIK(T.legFRPos, T.legFR, LEG_HOME_POS.FR, walkPhase + Math.PI, 0.25, 0.16, walkDirX, walkDirZ, walkBlend);
+      solveFootIK(T.legBLPos, T.legBL, LEG_HOME_POS.BL, walkPhase + Math.PI, 0.25, 0.14, walkDirX, walkDirZ, walkBlend);
+
       // El cuerpo se agacha antes del golpe y sale disparado hacia el ovillo.
       T.bodyPos[1] += pounce * 0.16 + anticipation * 0.055;
       T.bodyPos[2] += pounce * 0.16;
@@ -1291,6 +1341,9 @@
       T.legBL[0] += 0.2 * pounce;
       T.legBR[0] += 0.14 * pounce;
       T.headRot[0] += 0.12 * (rightSwat + leftSwat) - pounce * 0.12;
+    } else {
+      state.walking = false;
+      state.walkBlend += (0 - state.walkBlend) * (1 - Math.exp(-9 * dt));
     }
 
     // --- seguimiento del puntero con la cabeza --------------------
@@ -1411,6 +1464,10 @@
     dampV3(bodyG.scale, T.bodyScale, L, dt);
     dampV3(head.position, T.headPos, L + 2, dt);
     dampV3(head.rotation, T.headRot, L + 2, dt);
+    dampV3(legFL.position, T.legFLPos, 12, dt);
+    dampV3(legFR.position, T.legFRPos, 12, dt);
+    dampV3(legBL.position, T.legBLPos, 12, dt);
+    dampV3(legBR.position, T.legBRPos, 12, dt);
     dampV3(legFL.rotation, T.legFL, L, dt);
     dampV3(legFR.rotation, T.legFR, L, dt);
     dampV3(legBL.rotation, T.legBL, L, dt);

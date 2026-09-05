@@ -277,6 +277,14 @@ stepFrames(40);
   stepFrames(30);
 });
 
+// --- verificar seguimiento del ovillo + pisada procedural ------------
+sandbox.__cat3D.setPose('play');
+stepFrames(36);
+assert.strictEqual(typeof sandbox.__cat3D.state.walking, 'boolean', 'el estado walking no está expuesto');
+assert.ok(Number.isFinite(sandbox.__cat3D.state.walkBlend), 'walkBlend inválido');
+assert.ok(sandbox.__cat3D.state.walkBlend >= 0 && sandbox.__cat3D.state.walkBlend <= 1.001, 'walkBlend fuera de rango');
+assert.ok(Number.isFinite(sandbox.__cat3D.root.position.x + sandbox.__cat3D.root.position.z), 'el root no sigue el ovillo');
+
 // --- probar acciones ---
 sandbox.__cat3D.meow(); stepFrames(30);
 sandbox.__cat3D.pet(); stepFrames(60);
