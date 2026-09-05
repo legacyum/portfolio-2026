@@ -1,8 +1,9 @@
 # Proto-lab · Gato 3D low-poly procedural
 
-> **Estado: prototipo experimental (`v0.1.0-prototype`)** — no forma parte del sitio publicado.
-> `prototypes/` no es leído por `tests/build-dist.js` ni por `tests/run-e2e-tests.js`,
-> así que este archivo no afecta el bundle `dist/` ni los 103 tests E2E.
+> **Estado: prototipo experimental (`v0.1.0-prototype`)** — el modelo completo vive aquí para pruebas.
+> El sitio publicado usa una versión mini optimizada en `src/cat3d-mini.js`, integrada como
+> easter egg cerca de las tarjetas; `prototypes/` no es leído por `tests/build-dist.js` ni
+> por `tests/run-e2e-tests.js`, así que este archivo no afecta el bundle `dist/`.
 
 ## Qué es
 

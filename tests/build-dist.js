@@ -12,6 +12,7 @@ if (!fs.existsSync(DIST_DIR)) {
 const indexHtml = fs.readFileSync(path.join(SRC_DIR, 'index.html'), 'utf8');
 const stylesCss = fs.readFileSync(path.join(SRC_DIR, 'styles.css'), 'utf8');
 const scriptJs = fs.readFileSync(path.join(SRC_DIR, 'script.js'), 'utf8');
+const cat3dMiniJs = fs.readFileSync(path.join(SRC_DIR, 'cat3d-mini.js'), 'utf8');
 const asciifyJs = fs.readFileSync(path.join(SRC_DIR, 'vendor', 'asciify-vanilla.js'), 'utf8');
 
 let distHtml = indexHtml;
@@ -46,6 +47,12 @@ function inlineVendor(relPath, dataAttr) {
 inlineVendor('vendor/three.min.js', 'data-vendor="three"');
 inlineVendor('vendor/OrbitControls.js', 'data-vendor="orbit-controls"');
 inlineVendor('vendor/cosmos-engine.js', 'data-vendor="cosmos"');
+
+// Inline the lightweight procedural cat before script.js initializes its Easter egg.
+distHtml = distHtml.replace(
+  /<script src="cat3d-mini\.js"[^>]*><\/script>/i,
+  () => `<script data-vendor="cat3d-mini">\n${cat3dMiniJs}\n  </script>`
+);
 
 // Inline the Asciify vendor engine. The data-canvasui-asciify attribute is
 // load-bearing for the E2E suite: run-e2e-tests.js executes the FIRST plain
