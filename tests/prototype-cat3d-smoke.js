@@ -1,247 +1,31 @@
 'use strict';
 /* Harness de humo para prototypes/cat3d.html (NO es parte del sitio).
-   Corre el script inline en un VM con DOM/WebGL stub + three.min.js real.
-   Validación: construcción de geometría, sistema de poses, FX, interacciones y loop. */
-const fs = require('fs');
-const path = require('path');
-const vm = require('vm');
+   Corre el script inline en un VM con DOM/WebGL stub + three.min.js real
+   (sandbox compartido en tests/prototype-cat3d-harness.js).
+   Validación: geometría, sistema de poses, FX, interacciones, loop y
+   — desde v0.2 — locomoción: IK de patas, ciclo de marcha, navegación,
+   manejo por teclado, paseo autónomo y regreso a casa. */
 const assert = require('assert');
+const { createCatSandbox } = require('./prototype-cat3d-harness');
 
-const ROOT = path.resolve(__dirname, '..');
-const html = fs.readFileSync(path.join(ROOT, 'prototypes', 'cat3d.html'), 'utf8');
-const threeSrc = fs.readFileSync(path.join(ROOT, 'src', 'vendor', 'three.min.js'), 'utf8');
-const inline = (html.match(/<script>([\s\S]*?)<\/script>/) || [])[1];
-if (!inline) throw new Error('no se encontró el script inline');
+const H = createCatSandbox();
+const { sandbox, byId, poseButtons, themeButtons, furSwButtons, documentStub, docHandlers, winHandlers, errors, stepFrames, REVISION } = H;
+const log = (...a) => console.log(...a);
 
-// ---------- stubs DOM ----------
-function mkEl(tag, id) {
-  const el = {
-    tagName: (tag || 'div').toUpperCase(),
-    id: id || '',
-    dataset: {},
-    children: [],
-    parentNode: null,
-    style: { setProperty() {}, removeProperty() {} },
-    textContent: '',
-    innerHTML: '',
-    offsetWidth: 100,
-    _attrs: {},
-    _handlers: {},
-    _classes: new Set(),
-    classList: {
-      add: (...c) => c.forEach(x => el._classes.add(x)),
-      remove: (...c) => c.forEach(x => el._classes.delete(x)),
-      contains: c => el._classes.has(c),
-      toggle: (c, on) => { if (on === undefined) on = !el._classes.has(c); on ? el._classes.add(c) : el._classes.delete(c); return on; }
-    },
-    setAttribute(k, v) { el._attrs[k] = String(v); if (k === 'class') String(v).split(/\s+/).forEach(c => c && el._classes.add(c)); },
-    getAttribute(k) { return el._attrs[k] === undefined ? null : el._attrs[k]; },
-    removeAttribute(k) { delete el._attrs[k]; },
-    appendChild(c) { c.parentNode = el; el.children.push(c); return c; },
-    removeChild(c) { el.children = el.children.filter(x => x !== c); c.parentNode = null; return c; },
-    addEventListener(t, fn) { (el._handlers[t] = el._handlers[t] || []).push(fn); },
-    removeEventListener(t, fn) { el._handlers[t] = (el._handlers[t] || []).filter(f => f !== fn); },
-    dispatch(t, ev) { (el._handlers[t] || []).forEach(f => f.call(el, ev || {})); },
-    getBoundingClientRect() { return { left: 0, top: 0, right: 100, bottom: 100, width: 100, height: 100 }; },
-    querySelector() { return null; },
-    querySelectorAll() { return []; },
-    focus() {}, blur() {}, click() { el.dispatch('click', {}); },
-    getContext() { return ctx2d; },
-    width: 256, height: 256
-  };
-  return el;
-}
-const ctx2d = new Proxy({
-  canvas: null,
-  measureText: () => ({ width: 10 })
-}, {
-  get(t, k) {
-    if (k in t) return t[k];
-    return typeof k === 'string' ? function () {} : undefined;
-  },
-  set(t, k, v) { t[k] = v; return true; }
-});
-
-const byId = {};
-['scene', 'stats', 'fps', 'tris', 'calls', 'panel', 'furSw', 'themeRow', 'btnMeow', 'btnPet',
- 'btnStartle', 'btnWire', 'btnSpin', 'btnSound', 'btnReset', 'bubble', 'boot', 'bootMsg']
-  .forEach(id => { byId[id] = mkEl(id === 'scene' ? 'canvas' : 'div', id); });
-
-const poseButtons = ['sit', 'sleep', 'play'].map(p => { const b = mkEl('button'); b.dataset.pose = p; return b; });
-const themeButtons = ['', 'cyan', 'amber'].map(t => { const b = mkEl('button'); b.dataset.theme = t; return b; });
-// el script crea los swatches con createElement + appendChild: los capturamos aquí
-const furSw0 = byId.furSw;
-furSw0.appendChild = function (c) { c.parentNode = furSw0; furSw0.children.push(c); furSwButtons.push(c); return c; };
-
-const documentStub = {
-  documentElement: mkEl('html'),
-  body: mkEl('body'),
-  getElementById: id => byId[id] || null,
-  createElement: t => mkEl(t),
-  createElementNS: (ns, t) => mkEl(t),
-  querySelector: sel => (sel === '#scene' ? byId.scene : null),
-  querySelectorAll: sel => {
-    if (/\[data-pose\]/.test(sel)) return poseButtons;
-    if (/#themeRow/.test(sel)) return themeButtons;
-    if (/\.sw/.test(sel)) return furSwButtons;
-    return [];
-  },
-  addEventListener(t, fn) { (docHandlers[t] = docHandlers[t] || []).push(fn); },
-  visibilityState: 'visible',
-  hidden: false
-};
-const docHandlers = {};
-const furSwButtons = [];
-
-// WebGL stub: Proxy que auto-resuelve cualquier llamada GL que three r128 necesite.
-// Solo se especializan los métodos cuyo *valor de retorno* importa de verdad.
-function mkGL() {
-  const target = {
-    canvas: byId.scene,
-    drawingBufferWidth: 1280,
-    drawingBufferHeight: 720,
-    // three r128 hace getParameter(VERSION).indexOf('WebGL'): los params de
-    // texto deben devolver string; el resto, números plausibles.
-    getParameter(pname) {
-      if (pname === 7938) return 'WebGL 1.0 (stub)';           // VERSION
-      if (pname === 35724) return 'WebGL GLSL ES 1.0 (stub)';  // SHADING_LANGUAGE_VERSION
-      if (pname === 7936) return 'stub-vendor';                // VENDOR
-      if (pname === 7937) return 'stub-renderer';              // RENDERER
-      if (pname === 36347 || pname === 36348 || pname === 36349) return 1024; // MAX_*_UNIFORM_VECTORS
-      if (pname === 35661 || pname === 34930 || pname === 35071) return 32;    // MAX_*_LENGTH / TEXTURE_UNITS
-      if (pname === 3379 || pname === 34076) return 16384;     // MAX_TEXTURE_SIZE
-      return 4096;
-    },
-    getShaderPrecisionFormat() { return { rangeMin: 127, rangeMax: 127, precision: 23 }; },
-    // retornamos 0 uniforms/atributos activos => three no itera getActiveUniform
-    getProgramParameter(prog, pname) {
-      if (pname === 35714 || pname === 35713) return true;                     // LINK/VALIDATE_STATUS
-      if (pname === 35718 || pname === 35721 || pname === 34929 || pname === 34928) return 0; // ACTIVE_*
-      if (pname === 35719 || pname === 35722 || pname === 34930 || pname === 34929) return 32; // *_MAX_LENGTH
-      return 0;
-    },
-    getShaderParameter() { return true; },
-    getProgramInfoLog() { return ''; },
-    getShaderInfoLog() { return ''; },
-    getShaderSource() { return ''; },
-    getActiveUniform() { return { name: 'u', size: 1, type: 5126 }; },
-    getActiveAttrib() { return { name: 'a', size: 1, type: 5126 }; },
-    getUniformLocation() { return {}; },
-    getAttribLocation() { return 0; },
-    getError() { return 0; },
-    isContextLost() { return false; },
-    checkFramebufferStatus() { return 36053; },
-    getSupportedExtensions() { return []; },
-    getExtension() { return null; },
-    getContextAttributes() { return { alpha: false, antialias: true, depth: true, stencil: false, premultipliedAlpha: true, preserveDrawingBuffer: false, failIfMajorPerformanceCaveat: false }; },
-    createBuffer() { return {}; }, createTexture() { return {}; },
-    createProgram() { return {}; }, createShader() { return {}; },
-    createFramebuffer() { return {}; }, createRenderbuffer() { return {}; },
-    createQuery() { return {}; }, createSampler() { return {}; }, createVertexArray() { return {}; }
-  };
-  return new Proxy(target, {
-    get(t, k) {
-      if (k in t) return t[k];
-      if (typeof k === 'symbol') return undefined;
-      if (/^[A-Z0-9_]+$/.test(k)) return 0;          // constantes GLenum inexistentes
-      return function () { return undefined; };       // cualquier método GL: no-op
-    },
-    set(t, k, v) { t[k] = v; return true; }
-  });
-}
-byId.scene.getContext = (type) => (type === 'webgl' || type === 'experimental-webgl' || type === 'webgl2') ? mkGL() : ctx2d;
-byId.scene.addEventListener = () => {};
-byId.scene.removeEventListener = () => {};
-byId.scene.style = { setProperty() {} };
-byId.scene.clientWidth = 1280;
-byId.scene.clientHeight = 720;
-
-const rafQueue = [];
-const winHandlers = {};
-let now = 0;
-const sandbox = {
-  console,
-  // three.min.js es UMD: si ve `exports`/`module` se va por la rama CommonJS
-  // y nunca se cuelga de window. Los dejamos undefined a propósito.
-  exports: undefined,
-  module: undefined,
-  define: undefined,
-  performance: { now: () => now },
-  requestAnimationFrame: fn => { rafQueue.push(fn); return rafQueue.length; },
-  cancelAnimationFrame() {},
-  setTimeout: (fn, ms) => setTimeout(fn, 0),
-  clearTimeout,
-  setInterval: () => 0,
-  clearInterval() {},
-  Math, Date, JSON, Object, Array, String, Number, Boolean, Error, Float32Array, Uint8Array, Uint16Array, Int32Array, Promise, Symbol, Map, Set, Proxy, isNaN, parseInt, parseFloat,
-  document: documentStub,
-  navigator: { userAgent: 'node-harness', maxTouchPoints: 0, platform: 'linux' },
-  location: { href: 'http://localhost/prototypes/cat3d.html', protocol: 'http:' },
-  matchMedia: () => ({ matches: false, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} }),
-  innerWidth: 1280,
-  innerHeight: 720,
-  devicePixelRatio: 2,
-  addEventListener: (t, fn) => { (winHandlers[t] = winHandlers[t] || []).push(fn); },
-  removeEventListener() {},
-  AudioContext: function () {
-    const node = () => ({ connect() {}, disconnect() {}, start() {}, stop() {}, frequency: { value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {} }, gain: { value: 0, setValueAtTime() {}, exponentialRampToValueAtTime() {}, linearRampToValueAtTime() {} }, Q: { value: 0 }, type: '', buffer: null });
-    return {
-      currentTime: 0, state: 'running', destination: node(), sampleRate: 44100,
-      resume() {}, createOscillator: node, createGain: node, createBiquadFilter: node,
-      createBufferSource: node,
-      createBuffer: (ch, len) => ({ getChannelData: () => new Float32Array(len) })
-    };
-  },
-  Image: function () { return { addEventListener() {}, removeEventListener() {} }; },
-  self: null
-};
-sandbox.window = sandbox;
-sandbox.globalThis = sandbox;
-sandbox.self = sandbox;
-
-// ---------- cargar three real + script del prototipo ----------
-const ctx = vm.createContext(sandbox);
-function shortStack(err) {
-  const raw = String(err && err.stack || err).split('\n');
-  return raw.map(l => (l.length > 220 ? l.slice(0, 220) + ' …[línea minificada recortada]' : l)).join('\n');
-}
-try {
-  vm.runInContext(threeSrc, ctx, { filename: 'three.min.js' });
-} catch (e) {
-  origLog('FALLÓ al cargar three.min.js:\n' + shortStack(e));
-  process.exit(1);
-}
-assert.ok(sandbox.THREE, 'THREE no se cargó en el sandbox');
-const REVISION = sandbox.THREE.REVISION;
-
-let errors = [];
-const origLog = console.log, origWarn = console.warn, origError = console.error;
-let quiet = true;
-console.log = (...a) => { if (!quiet) origLog(...a); else errors.push('LOG: ' + a.join(' ')); };
-console.warn = (...a) => { errors.push('WARN: ' + a.join(' ')); };
-console.error = (...a) => { errors.push('ERROR: ' + a.join(' ')); };
-
-try {
-  vm.runInContext(inline, ctx, { filename: 'cat3d.html:inline' });
-} catch (e) {
-  quiet = false;
-  origLog('FALLÓ el script del prototipo:\n' + shortStack(e));
-  origLog('\n--- últimos registros internos ---');
-  origLog(errors.slice(-14).map(x => x.slice(0, 300)).join('\n'));
-  process.exit(1);
+let passed = 0;
+function check(name, fn) {
+  try { fn(); passed++; log('  ✔', name); }
+  catch (e) { log('  ✘', name); throw e; }
 }
 
-quiet = false;
-console.log = origLog; console.warn = origWarn; console.error = origError;
-function log(...a) { origLog(...a); }
-
-// ---------- aserciones ----------
+// ---------- aserciones base ----------
 assert.ok(sandbox.__cat3D, 'window.__cat3D no está expuesto');
-assert.ok(sandbox.__cat3D.isReady === true, '__cat3D.isReady !== true');
-assert.strictEqual(sandbox.__cat3D.version, '0.1.0-prototype');
-assert.ok(sandbox.__cat3D.scene && sandbox.__cat3D.camera && sandbox.__cat3D.renderer, 'faltan scene/camera/renderer');
+const cat = sandbox.__cat3D;
+assert.ok(cat.isReady === true, '__cat3D.isReady !== true');
+assert.strictEqual(cat.version, '0.2.0-prototype');
+assert.ok(cat.scene && cat.camera && cat.renderer, 'faltan scene/camera/renderer');
 
-const scene = sandbox.__cat3D.scene;
+const scene = cat.scene;
 let meshes = 0, tris = 0;
 scene.traverse(o => {
   if (o.isMesh) {
@@ -260,99 +44,370 @@ log('triángulos aprox    :', Math.round(tris).toLocaleString('es-PE'));
 assert.ok(meshes > 60, 'muy pocos meshes (' + meshes + ') — el gato no se ensambló completo');
 assert.ok(tris > 3000, 'muy pocos triángulos');
 
-// --- correr frames reales del loop ---
-function stepFrames(n, dtMs) {
-  for (let i = 0; i < n; i++) {
-    now += (dtMs || 16.7);
-    const q = rafQueue.splice(0, rafQueue.length);
-    q.forEach(fn => fn(now));
-  }
-}
 stepFrames(40);
 
-// --- probar todas las poses y transiciones ---
+// ---------- poses estáticas (regresión v0.1) ----------
+log('\n— poses y acciones —');
 ['sleep', 'play', 'sit', 'play', 'sleep', 'sit'].forEach(p => {
-  sandbox.__cat3D.setPose(p);
-  assert.strictEqual(sandbox.__cat3D.state.pose, p, 'setPose falló en ' + p);
+  cat.setPose(p);
+  assert.strictEqual(cat.state.pose, p, 'setPose falló en ' + p);
   stepFrames(30);
 });
+check('las poses estáticas no mueven al gato de la plataforma', () => {
+  assert.ok(Math.hypot(cat.root.position.x, cat.root.position.z) < 1e-6, 'root se desplazó en pose estática');
+  assert.strictEqual(cat.walkDebug().ikWeight, 0, 'IK activa en pose estática');
+});
+check('en "sit" las 4 garras quedan a la altura original (silueta v0.1 intacta)', () => {
+  stepFrames(90);
+  const d = cat.walkDebug();
+  const y = d.legs.map(l => l.pawWorld.y);
+  // medidas del prototipo v0.1 (pata recta): delanteras ≈ 0.40, traseras ≈ 0.72
+  assert.ok(Math.abs(y[0] - 0.40) < 0.06 && Math.abs(y[1] - 0.40) < 0.06, 'garras delanteras: ' + y.slice(0, 2));
+  assert.ok(Math.abs(y[2] - 0.72) < 0.12 && Math.abs(y[3] - 0.72) < 0.12, 'garras traseras: ' + y.slice(2));
+});
 
-// --- probar acciones ---
-sandbox.__cat3D.meow(); stepFrames(30);
-sandbox.__cat3D.pet(); stepFrames(60);
-sandbox.__cat3D.startle(); stepFrames(60);
+cat.meow(); stepFrames(30);
+cat.pet(); stepFrames(60);
+cat.startle(); stepFrames(60);
+check('el sobresalto sigue saltando (root.y > 0.5 en el pico)', () => {
+  cat.startle();
+  let peak = 0;
+  for (let i = 0; i < 50; i++) { stepFrames(1); peak = Math.max(peak, cat.root.position.y); }
+  assert.ok(peak > 0.5, 'pico de salto ' + peak.toFixed(2));
+  stepFrames(60);
+  assert.ok(cat.root.position.y < 0.02, 'no volvió al suelo');
+});
 
-// --- probar todos los pelajes y temas ---
 ['gris', 'negro', 'blanco', 'siames', 'neon', 'tabby'].forEach(f => {
-  sandbox.__cat3D.setFur(f);
-  assert.strictEqual(sandbox.__cat3D.state.fur, f);
+  cat.setFur(f);
+  assert.strictEqual(cat.state.fur, f);
   stepFrames(6);
 });
 ['cyan', 'amber', ''].forEach(t => {
-  sandbox.__cat3D.setTheme(t);
-  assert.strictEqual(sandbox.__cat3D.state.theme, t);
+  cat.setTheme(t);
+  assert.strictEqual(cat.state.theme, t);
   stepFrames(6);
 });
-
-// --- wireframe + UI clicks ---
-sandbox.__cat3D.toggleWireframe();
-assert.strictEqual(sandbox.__cat3D.state.wire, true);
+cat.toggleWireframe();
+assert.strictEqual(cat.state.wire, true);
 stepFrames(10);
-sandbox.__cat3D.toggleWireframe();
-assert.strictEqual(sandbox.__cat3D.state.wire, false);
+cat.toggleWireframe();
+assert.strictEqual(cat.state.wire, false);
 
-poseButtons.forEach(b => { b.dispatch('click', {}); stepFrames(12); });
-themeButtons.forEach(b => { b.dispatch('click', {}); stepFrames(6); });
-['btnMeow', 'btnPet', 'btnStartle', 'btnWire', 'btnSpin', 'btnSound', 'btnReset'].forEach(id => {
-  byId[id].dispatch('click', {});
-  stepFrames(6);
+// ---------- locomoción ----------
+log('\n— locomoción —');
+const THREE = H.THREE;
+const near = (a, b, eps) => Math.abs(a - b) <= eps;
+
+check('groundY(): plataforma 0.26, bisel, suelo 0', () => {
+  assert.strictEqual(cat.groundY(0, 0), 0.26);
+  assert.strictEqual(cat.groundY(3.4, 0), 0.26);
+  assert.strictEqual(cat.groundY(0, 6), 0);
+  const b = cat.groundY(3.61, 0);
+  assert.ok(b > 0 && b < 0.26, 'bisel fuera de rango: ' + b);
 });
-assert.strictEqual(sandbox.__cat3D.state.sound, false, 'el toggle de sonido no funcionó');
-byId.btnSound.dispatch('click', {});
-assert.strictEqual(sandbox.__cat3D.state.sound, true);
 
-// --- swatches de pelaje creados dinámicamente ---
-assert.ok(furSwButtons.length === 0 || furSwButtons.length === 6, 'swatches no registrados (query fallback)');
-
-// --- eventos de ventana: pointer + teclado ---
-(winHandlers.pointermove || []).forEach(fn => fn({ clientX: 900, clientY: 300 }));
-stepFrames(30);
-(winHandlers.pointerdown || []).forEach(fn => fn({ clientX: 640, clientY: 360 }));
-(winHandlers.pointerup || []).forEach(fn => fn({ clientX: 641, clientY: 361 }));
-stepFrames(20);
-['1', '2', '3', 'm', 'p', 's', 'w', 'r', 'a', 'c', 't'].forEach(k => {
-  (winHandlers.keydown || []).forEach(fn => fn({ key: k, target: { tagName: 'BODY' } }));
-  stepFrames(8);
+check('goTo(3,-2): llega (<0.3 u), orientado hacia el destino, con pasos y IK cerrada', () => {
+  cat.setPose('sit');
+  stepFrames(30);
+  const steps0 = cat.walkDebug().steps;
+  cat.goTo(3, -2);
+  assert.strictEqual(cat.state.pose, 'walk');
+  assert.ok(cat.state.navTarget && cat.state.navTarget.x === 3 && cat.state.navTarget.z === -2, 'navTarget ' + JSON.stringify(cat.state.navTarget)); // (objeto de otro contexto VM: sin deepStrictEqual)
+  let maxErr = 0, maxSpeed = 0, headingAtMid = null;
+  for (let i = 0; i < 60 * 6; i++) {
+    stepFrames(1);
+    const d = cat.walkDebug();
+    d.legs.forEach(l => { maxErr = Math.max(maxErr, l.reachErr); });
+    maxSpeed = Math.max(maxSpeed, d.speed);
+    if (i === 90) headingAtMid = d.heading;
+    if (!cat.state.navTarget) break;
+  }
+  const d = cat.walkDebug();
+  assert.ok(Math.hypot(d.pos[0] - 3, d.pos[2] + 2) < 0.3, 'no llegó: ' + d.pos);
+  assert.strictEqual(cat.state.navTarget, null, 'navTarget no se limpió al llegar');
+  assert.ok(near(headingAtMid, Math.atan2(3, -2), 0.25), 'rumbo a mitad de camino ' + headingAtMid.toFixed(2) + ' vs ' + Math.atan2(3, -2).toFixed(2));
+  assert.ok(maxSpeed > 1.4 && maxSpeed <= 1.6 * 1.36 + 1e-6, 'velocidad máx ' + maxSpeed.toFixed(2));
+  assert.ok(maxErr < 1e-3, 'IK no cierra: err máx ' + maxErr);
+  assert.ok(d.steps - steps0 >= 8, 'muy pocos pasos: ' + (d.steps - steps0));
+  assert.strictEqual(d.ikWeight, 1);
 });
-(winHandlers.resize || []).forEach(fn => fn({}));
-stepFrames(5);
 
-// --- pausa por pestaña oculta ---
-documentStub.visibilityState = 'hidden';
-(docHandlers.visibilitychange || []).forEach(fn => fn({}));
-stepFrames(10);
-documentStub.visibilityState = 'visible';
-(docHandlers.visibilitychange || []).forEach(fn => fn({}));
-stepFrames(10);
-
-// --- NaN check final en toda la jerarquía ---
-let nanCount = 0;
-scene.traverse(o => {
-  const v = [o.position.x, o.position.y, o.position.z, o.rotation.x, o.rotation.y, o.rotation.z, o.scale.x, o.scale.y, o.scale.z];
-  if (v.some(n => !Number.isFinite(n))) { nanCount++; }
+check('marcha: las garras apoyadas no patinan y las que vuelan se elevan', () => {
+  cat.drive({ fwd: true });
+  stepFrames(60);
+  let maxSlip = 0, maxLift = 0, swings = 0;
+  const prev = {};
+  for (let i = 0; i < 120; i++) {
+    stepFrames(1);
+    const d = cat.walkDebug();
+    d.legs.forEach(l => {
+      if (!l.swinging) {
+        if (prev[l.key]) maxSlip = Math.max(maxSlip, prev[l.key].distanceTo(l.pawWorld));
+        prev[l.key] = l.pawWorld.clone();
+      } else { prev[l.key] = null; swings++; maxLift = Math.max(maxLift, l.lift); }
+    });
+  }
+  cat.drive({ fwd: false });
+  assert.ok(maxSlip < 0.03, 'las garras apoyadas patinan: ' + maxSlip.toFixed(3) + ' u/frame');
+  assert.ok(maxLift > 0.1, 'el paso no levanta la garra: ' + maxLift.toFixed(3));
+  assert.ok(swings > 40, 'apenas hubo fases de vuelo: ' + swings);
 });
-assert.strictEqual(nanCount, 0, nanCount + ' objetos con NaN/Inf tras la simulación');
 
-// --- no deben quedar FX huérfanos creciendo sin límite ---
-stepFrames(400);
-let fxLeft = 0;
-scene.traverse(o => { if (o.isSprite) fxLeft++; });
-assert.ok(fxLeft < 40, 'fuga de sprites FX: ' + fxLeft);
+check('paso lateral al andar: tras cada trasera despega la delantera del mismo lado', () => {
+  cat.drive({ fwd: true });
+  stepFrames(80);
+  const order = [];
+  let last = {};
+  for (let i = 0; i < 240; i++) {
+    stepFrames(1);
+    cat.walkDebug().legs.forEach(l => { if (l.swinging && !last[l.key]) order.push(l.key); last[l.key] = l.swinging; });
+  }
+  cat.drive({ fwd: false });
+  const seq = order.join(' ');
+  assert.ok(order.length >= 8, 'secuencia corta: ' + seq);
+  let lateral = 0, total = 0;
+  for (let i = 0; i < order.length - 1; i++) {
+    if (order[i][0] === 'B') { total++; if (order[i + 1] === 'F' + order[i][1]) lateral++; }
+  }
+  assert.ok(lateral / Math.max(total, 1) >= 0.75, 'secuencia no lateral: ' + seq);
+});
 
-const fatal = errors.filter(e => !/THREE\.WebGLRenderer|WEBGL|extension|deprecated|WebGL/i.test(e));
-log('frames simulados    : ~600');
-log('sprites FX activos  :', fxLeft);
-log('warnings/errors     :', errors.length, fatal.length ? '(no-WebGL: ' + fatal.length + ')' : '(todos WebGL-stub, esperados)');
-if (fatal.length) log(fatal.slice(0, 12).join('\n'));
-assert.strictEqual(fatal.length, 0, 'hay errores no relacionados con el stub WebGL');
-log('\n✅ HUMO OK — prototipo gato 3D construye, anima e interactúa sin errores.');
+check('correr (shift): ~3.6 u/s, duty baja y pares diagonales (trote)', () => {
+  cat.drive({ fwd: true, run: true });
+  stepFrames(120);
+  const d = cat.walkDebug();
+  assert.ok(near(d.speed, 3.6, 0.05), 'velocidad ' + d.speed);
+  assert.ok(d.duty < 0.56, 'duty al correr ' + d.duty.toFixed(2));
+  assert.ok(cat.state.running === true);
+  // pares diagonales en vuelo simultáneo
+  let diag = 0, frames = 0;
+  for (let i = 0; i < 120; i++) {
+    stepFrames(1);
+    const s = cat.walkDebug().legs.map(l => l.swinging);
+    if ((s[0] && s[3]) || (s[1] && s[2])) diag++;
+    if (s.some(Boolean)) frames++;
+  }
+  cat.drive({ fwd: false, run: false });
+  assert.ok(diag / Math.max(frames, 1) > 0.5, 'no trota en diagonal: ' + diag + '/' + frames);
+});
+
+check('la arena tiene límite: nunca sale de r ≤ 9.5', () => {
+  cat.drive({ fwd: true, run: true });
+  let maxR = 0;
+  for (let i = 0; i < 60 * 8; i++) { stepFrames(1); maxR = Math.max(maxR, Math.hypot(cat.root.position.x, cat.root.position.z)); }
+  cat.drive({ fwd: false, run: false });
+  assert.ok(maxR <= 9.5 + 1e-6, 'se salió: ' + maxR);
+});
+
+check('girar en el sitio (left) rota el rumbo y da pasitos sin patinar', () => {
+  const h0 = cat.state.heading, s0 = cat.walkDebug().steps;
+  cat.drive({ left: true });
+  stepFrames(45);
+  cat.drive({ left: false });
+  stepFrames(30);
+  const dh = ((cat.state.heading - h0 + Math.PI * 3) % (Math.PI * 2)) - Math.PI;
+  assert.ok(dh > 0.8, 'no giró lo suficiente: ' + dh.toFixed(2));
+  assert.ok(cat.walkDebug().steps > s0, 'giró sin dar pasos');
+  assert.ok(Math.abs(cat.state.speed) < 0.05, 'giró avanzando');
+});
+
+check('marcha atrás: velocidad negativa', () => {
+  cat.drive({ back: true });
+  stepFrames(60);
+  assert.ok(cat.state.speed < -0.5, 'speed ' + cat.state.speed);
+  cat.drive({ back: false });
+  stepFrames(40);
+  assert.strictEqual(cat.state.speed, 0);
+});
+
+check('goHome(): vuelve al centro, mira al frente (rumbo 0) y se sienta', () => {
+  cat.goHome();
+  for (let i = 0; i < 60 * 14 && cat.state.pose !== 'sit'; i++) stepFrames(1);
+  assert.strictEqual(cat.state.pose, 'sit', 'no se sentó al llegar');
+  stepFrames(60);
+  const d = cat.walkDebug();
+  assert.ok(Math.hypot(d.pos[0], d.pos[2]) < 0.3, 'no volvió al centro: ' + d.pos);
+  assert.ok(Math.abs(d.heading) < 0.05, 'rumbo final ' + d.heading);
+  assert.strictEqual(d.ikWeight, 0, 'la IK no se desactivó al sentarse');
+});
+
+check('reposo: en pose walk sin órdenes se sienta solo (~4.5 s)', () => {
+  cat.setPose('walk', true);
+  cat.stop();
+  stepFrames(60 * 6);
+  assert.strictEqual(cat.state.pose, 'sit');
+});
+
+check('botón/tecla "caminar" activa el paseo autónomo y se mueve por la arena', () => {
+  cat.setPose('walk');
+  assert.strictEqual(cat.state.autoWalk, true);
+  let maxD = 0;
+  for (let i = 0; i < 60 * 15; i++) { stepFrames(1); maxD = Math.max(maxD, Math.hypot(cat.root.position.x, cat.root.position.z)); }
+  assert.ok(maxD > 1.5, 'no paseó: máx ' + maxD.toFixed(2));
+  assert.ok(maxD <= 9.5, 'salió de la arena');
+});
+
+check('"jugar" lejos del ovillo: primero vuelve caminando y luego juega', () => {
+  cat.goTo(5, 4);
+  for (let i = 0; i < 60 * 8 && cat.state.navTarget; i++) stepFrames(1);
+  cat.setPose('play');
+  assert.strictEqual(cat.state.pose, 'walk', 'debería ir caminando hacia el ovillo');
+  for (let i = 0; i < 60 * 14 && cat.state.pose !== 'play'; i++) stepFrames(1);
+  assert.strictEqual(cat.state.pose, 'play');
+  assert.ok(Math.hypot(cat.root.position.x, cat.root.position.z) < 0.4, 'juega lejos del ovillo');
+});
+
+check('una pose estática cancela la navegación (dormir a medio camino)', () => {
+  cat.goTo(-4, 3);
+  stepFrames(40);
+  cat.setPose('sleep');
+  assert.strictEqual(cat.state.navTarget, null);
+  const p = cat.root.position.clone();
+  stepFrames(90);
+  assert.ok(p.distanceTo(cat.root.position) < 0.3, 'siguió andando dormido');
+  assert.strictEqual(cat.state.pose, 'sleep');
+});
+
+check('sobresalto en marcha: salta y las garras suben con el cuerpo', () => {
+  cat.goTo(2, 2, { quiet: true });
+  stepFrames(50);
+  cat.startle();
+  let minPawY = Infinity, peak = 0;
+  for (let i = 0; i < 40; i++) {
+    stepFrames(1);
+    peak = Math.max(peak, cat.root.position.y);
+    if (cat.root.position.y > 0.6) cat.walkDebug().legs.forEach(l => { minPawY = Math.min(minPawY, l.pawWorld.y - cat.root.position.y); });
+  }
+  assert.ok(peak > 0.5, 'no saltó: ' + peak);
+  assert.ok(minPawY > -0.5, 'las garras se quedaron clavadas al suelo durante el salto: ' + minPawY);
+  stepFrames(120);
+});
+
+check('teclado: flechas y WASD (mantenidas) manejan; toque corto de W/S/A = atajo', () => {
+  cat.setPose('sit'); stepFrames(30);
+  const kd = (key, extra) => (winHandlers.keydown || []).forEach(fn => fn(Object.assign({ key, target: { tagName: 'BODY' }, preventDefault() {} }, extra || {})));
+  const ku = key => (winHandlers.keyup || []).forEach(fn => fn({ key, target: { tagName: 'BODY' }, preventDefault() {} }));
+  kd('ArrowUp'); stepFrames(60);
+  assert.strictEqual(cat.state.pose, 'walk');
+  assert.ok(cat.state.speed > 1, 'ArrowUp no avanza');
+  kd('ArrowUp', { repeat: true });               // auto-repeat no debe romper nada
+  kd('Shift'); stepFrames(60);
+  assert.ok(cat.state.speed > 3, 'Shift no corre: ' + cat.state.speed);
+  ku('Shift'); ku('ArrowUp'); stepFrames(60);
+  assert.strictEqual(cat.state.speed, 0, 'no frenó al soltar');
+  // W mantenida → avanza (el setTimeout del sandbox dispara en el siguiente tick real)
+  const wire0 = cat.state.wire;
+  kd('w');
+  return new Promise(res => setTimeout(res, 5)).then(() => {
+    stepFrames(60);
+    assert.ok(cat.state.speed > 1, 'W mantenida no avanza');
+    ku('w'); stepFrames(60);
+    assert.strictEqual(cat.state.wire, wire0, 'W mantenida no debe alternar wireframe');
+    assert.strictEqual(cat.state.speed, 0);
+  });
+});
+
+// el check anterior devuelve una promesa: el resto va encadenado
+(async () => {
+  await new Promise(res => setTimeout(res, 10));
+
+  check('toque corto de W alterna wireframe (compatibilidad v0.1)', () => {
+    const wire0 = cat.state.wire;
+    const kd = key => (winHandlers.keydown || []).forEach(fn => fn({ key, target: { tagName: 'BODY' }, preventDefault() {} }));
+    const ku = key => (winHandlers.keyup || []).forEach(fn => fn({ key, target: { tagName: 'BODY' }, preventDefault() {} }));
+    kd('w'); ku('w');
+    assert.strictEqual(cat.state.wire, !wire0);
+    kd('w'); ku('w');
+    assert.strictEqual(cat.state.wire, wire0);
+  });
+
+  check('click en el suelo (fuera del gato) lo hace caminar hasta ahí', () => {
+    cat.goHome();
+    for (let i = 0; i < 60 * 14 && cat.state.pose !== 'sit'; i++) stepFrames(1);
+    stepFrames(30);
+    // proyectamos un punto del suelo a pantalla con la cámara real y hacemos click ahí
+    const target = new THREE.Vector3(4.5, 0, 2.5);
+    const v = target.clone().project(cat.camera);
+    const x = (v.x * 0.5 + 0.5) * sandbox.innerWidth, y = (-v.y * 0.5 + 0.5) * sandbox.innerHeight;
+    (winHandlers.pointerdown || []).forEach(fn => fn({ clientX: x, clientY: y }));
+    (winHandlers.pointerup || []).forEach(fn => fn({ clientX: x, clientY: y }));
+    assert.ok(cat.state.navTarget, 'no se fijó destino');
+    assert.ok(Math.hypot(cat.state.navTarget.x - 4.5, cat.state.navTarget.z - 2.5) < 0.3, 'destino equivocado: ' + JSON.stringify(cat.state.navTarget));
+    assert.strictEqual(cat.state.pose, 'walk');
+    for (let i = 0; i < 60 * 10 && cat.state.navTarget; i++) stepFrames(1);
+    assert.ok(Math.hypot(cat.root.position.x - 4.5, cat.root.position.z - 2.5) < 0.35, 'no llegó al click');
+  });
+
+  check('la cámara (OrbitControls) sigue al gato', () => {
+    const t = cat.controls.target;
+    assert.ok(Math.hypot(t.x - cat.root.position.x, t.z - cat.root.position.z) < 0.6, 'pivote lejos del gato: ' + [t.x, t.z]);
+  });
+
+  check('prefers-reduced-motion: la locomoción funciona a 25 % sin romperse', () => {
+    const R = createCatSandbox({ reducedMotion: true });
+    const c2 = R.sandbox.__cat3D;
+    R.stepFrames(30);
+    c2.goTo(2, 0);
+    for (let i = 0; i < 60 * 12 && c2.state.navTarget; i++) R.stepFrames(1);
+    assert.ok(Math.hypot(c2.root.position.x - 2, c2.root.position.z) < 0.4, 'no llegó con reduced motion: ' + c2.root.position.toArray());
+    let nan = 0;
+    c2.scene.traverse(o => { if (![o.position.x, o.position.y, o.position.z, o.rotation.x, o.rotation.y, o.rotation.z].every(Number.isFinite)) nan++; });
+    assert.strictEqual(nan, 0);
+  });
+
+  // ---------- UI clicks / eventos (regresión v0.1) ----------
+  log('\n— UI y eventos —');
+  poseButtons.forEach(b => { b.dispatch('click', {}); stepFrames(12); });
+  themeButtons.forEach(b => { b.dispatch('click', {}); stepFrames(6); });
+  ['btnMeow', 'btnPet', 'btnStartle', 'btnHome', 'btnWire', 'btnSpin', 'btnSound', 'btnReset'].forEach(id => {
+    byId[id].dispatch('click', {});
+    stepFrames(6);
+  });
+  assert.strictEqual(cat.state.sound, false, 'el toggle de sonido no funcionó');
+  byId.btnSound.dispatch('click', {});
+  assert.strictEqual(cat.state.sound, true);
+  assert.ok(furSwButtons.length === 0 || furSwButtons.length === 6, 'swatches no registrados (query fallback)');
+
+  (winHandlers.pointermove || []).forEach(fn => fn({ clientX: 900, clientY: 300 }));
+  stepFrames(30);
+  ['1', '2', '3', '4', 'h', 'm', 'p', 'r', 'c', 't'].forEach(k => {
+    (winHandlers.keydown || []).forEach(fn => fn({ key: k, target: { tagName: 'BODY' }, preventDefault() {} }));
+    (winHandlers.keyup || []).forEach(fn => fn({ key: k, target: { tagName: 'BODY' }, preventDefault() {} }));
+    stepFrames(8);
+  });
+  (winHandlers.resize || []).forEach(fn => fn({}));
+  (winHandlers.blur || []).forEach(fn => fn({}));
+  stepFrames(5);
+
+  documentStub.visibilityState = 'hidden';
+  (docHandlers.visibilitychange || []).forEach(fn => fn({}));
+  stepFrames(10);
+  documentStub.visibilityState = 'visible';
+  (docHandlers.visibilitychange || []).forEach(fn => fn({}));
+  stepFrames(10);
+  log('  ✔ botones, swatches, teclas, resize, blur y visibilitychange');
+
+  // ---------- integridad final ----------
+  let nanCount = 0;
+  scene.traverse(o => {
+    const v = [o.position.x, o.position.y, o.position.z, o.rotation.x, o.rotation.y, o.rotation.z, o.scale.x, o.scale.y, o.scale.z];
+    if (v.some(n => !Number.isFinite(n))) { nanCount++; }
+  });
+  assert.strictEqual(nanCount, 0, nanCount + ' objetos con NaN/Inf tras la simulación');
+
+  stepFrames(400);
+  let fxLeft = 0;
+  scene.traverse(o => { if (o.isSprite) fxLeft++; });
+  assert.ok(fxLeft < 40, 'fuga de sprites FX: ' + fxLeft);
+
+  const fatal = errors.filter(e => !/THREE\.WebGLRenderer|WEBGL|extension|deprecated|WebGL/i.test(e));
+  log('\nframes simulados    : >6000');
+  log('pasos dados         :', cat.walkDebug().steps);
+  log('sprites FX activos  :', fxLeft);
+  log('checks              :', passed + 1);
+  log('warnings/errors     :', errors.length, fatal.length ? '(no-WebGL: ' + fatal.length + ')' : '(todos WebGL-stub, esperados)');
+  if (fatal.length) log(fatal.slice(0, 12).join('\n'));
+  assert.strictEqual(fatal.length, 0, 'hay errores no relacionados con el stub WebGL');
+  log('\n✅ HUMO OK — prototipo gato 3D construye, anima, camina e interactúa sin errores.');
+})().catch(e => { console.error(e); process.exit(1); });
