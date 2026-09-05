@@ -11,7 +11,7 @@ const T = {
     aboutNav: 'acerca de mí',
     casesNav: 'casos de estudio',
     recruiterNav: 'vista reclutador',
-    credentialsNav: 'formación &amp; herramientas',
+    credentialsNav: 'formación & herramientas',
     contactNav: 'contacto',
     recruiterMode: 'modo reclutador',
     hero: 'Convierto procesos<br><em class="accent">en sistemas más claros.</em>',
@@ -101,11 +101,18 @@ const T = {
     send: 'abrir correo',
     note: 'Se abrirá tu cliente de correo; no almacenamos datos.',
     footer: 'Diseñado con intención, datos y café.',
-    termsNav: 'términos &amp; privacidad',
+    termsNav: 'términos & privacidad',
     copiedToast: '✓ Copiado al portapapeles',
-    lanyardRole: 'Ingeniería Industrial · Data &amp; Ops',
+    lanyardRole: 'Ingeniería Industrial · Data & Ops',
     lanyardQr: 'ESCANEAR LINKEDIN ↗',
-    lanyardHint: '✦ ARRASTRA / TIRA DE LA CREDENCIAL',
+        lanyardHint: '✦ ARRASTRA / TIRA DE LA CREDENCIAL',
+    lanyardStageAria: 'Credencial interactiva 3D de Alessandro Altamirano',
+    lanyardCardAria: 'Credencial física 3D de Alessandro Altamirano. Arrastra o gira la tarjeta.',
+    lanyardFlipAria: 'Girar credencial para ver reverso',
+    lanyardBackAria: 'Volver al frente de la credencial',
+    terminalAiTitle: 'Alternar Bitácora Técnica',
+    terminalInputPh: 'escribe un comando...',
+    inProgressBadge: '● En curso (10° Ciclo)',
     lanyardFlipBtn: 'GIRAR CREDENCIAL / FLIP 3D',
     lanyardBackFlipBtn: 'VOLVER AL FRENTE',
     lanyardEduLabel: 'UNIVERSIDAD:',
@@ -114,7 +121,7 @@ const T = {
     lanyardStatusLabel: 'ESTADO:',
     lanyardStatusVal: 'Disponible para retos',
     terminalModeLog: 'BITÁCORA',
-    logPromptsTitle: '// BITÁCORAS &amp; NOTAS DE CAMPO:',
+    logPromptsTitle: '// BITÁCORAS & NOTAS DE CAMPO:',
     logChipPrimax: 'cat primax_log.md',
     logChipEtl: 'cat etl_pipeline.py',
     logChipVasmad: 'cat vasmad_mrp.md',
@@ -128,7 +135,7 @@ const T = {
     aboutNav: 'about me',
     casesNav: 'case studies',
     recruiterNav: 'recruiter view',
-    credentialsNav: 'education &amp; tools',
+    credentialsNav: 'education & tools',
     contactNav: 'contact',
     recruiterMode: 'recruiter mode',
     hero: 'I turn processes<br><em class="accent">into clearer systems.</em>',
@@ -218,11 +225,18 @@ const T = {
     send: 'open email',
     note: 'Your email app will open; no data is stored.',
     footer: 'Designed with intention, data and coffee.',
-    termsNav: 'terms &amp; privacy',
+    termsNav: 'terms & privacy',
     copiedToast: '✓ Copied to clipboard',
-    lanyardRole: 'Industrial Engineering · Data &amp; Ops',
+    lanyardRole: 'Industrial Engineering · Data & Ops',
     lanyardQr: 'SCAN LINKEDIN ↗',
-    lanyardHint: '✦ DRAG / TOSS THE ID BADGE',
+        lanyardHint: '✦ DRAG / TOSS THE ID BADGE',
+    lanyardStageAria: 'Interactive 3D ID badge for Alessandro Altamirano',
+    lanyardCardAria: 'Physical 3D ID badge for Alessandro Altamirano. Drag or flip the card.',
+    lanyardFlipAria: 'Flip badge to see the back',
+    lanyardBackAria: 'Return to the front of the badge',
+    terminalAiTitle: 'Toggle technical log mode',
+    terminalInputPh: 'type a command...',
+    inProgressBadge: '● In progress (10th cycle)',
     lanyardFlipBtn: 'FLIP BADGE 3D',
     lanyardBackFlipBtn: 'FLIP TO FRONT',
     lanyardEduLabel: 'UNIVERSITY:',
@@ -231,7 +245,7 @@ const T = {
     lanyardStatusLabel: 'STATUS:',
     lanyardStatusVal: 'Available for opportunities',
     terminalModeLog: 'DEV LOGS',
-    logPromptsTitle: '// FIELD LOGS &amp; DEV NOTES:',
+    logPromptsTitle: '// FIELD LOGS & DEV NOTES:',
     logChipPrimax: 'cat primax_log.md',
     logChipEtl: 'cat etl_pipeline.py',
     logChipVasmad: 'cat vasmad_mrp.md',
@@ -842,6 +856,25 @@ function translate() {
   
   const langBtn = document.querySelector('#language');
   if (langBtn) langBtn.textContent = lang === 'es' ? 'EN' : 'ES';
+
+  const L = T[lang];
+  const stage = document.querySelector('#lanyardStage');
+  if (stage && L.lanyardStageAria) stage.setAttribute('aria-label', L.lanyardStageAria);
+  const card = document.querySelector('#lanyardCard');
+  if (card && L.lanyardCardAria) card.setAttribute('aria-label', L.lanyardCardAria);
+  const flip = document.querySelector('#lanyardFlipTrigger');
+  if (flip && L.lanyardFlipAria) flip.setAttribute('aria-label', L.lanyardFlipAria);
+  const backFlip = document.querySelector('.back-flip-btn');
+  if (backFlip && L.lanyardBackAria) backFlip.setAttribute('aria-label', L.lanyardBackAria);
+  const aiToggle = document.querySelector('#terminalAiToggle');
+  if (aiToggle && L.terminalAiTitle) {
+    aiToggle.setAttribute('title', L.terminalAiTitle);
+    aiToggle.setAttribute('aria-label', L.terminalAiTitle);
+  }
+  const input = document.querySelector('#input');
+  if (input && L.terminalInputPh) input.setAttribute('placeholder', L.terminalInputPh);
+  const badge = document.querySelector('.badge-status');
+  if (badge && L.inProgressBadge) badge.textContent = L.inProgressBadge;
   
   updateTerminalAiState();
   setView(recruiter?.classList.contains('show') ? 'recruiter' : 'terminal', false);
