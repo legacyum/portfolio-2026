@@ -4487,3 +4487,23 @@ footer p {
   #cat3DStage.cat-visible { transform: none !important; }
   .cat-glyph-loader { animation: none; }
 }
+
+/* P2 mobile hit targets (~44px) — nav + terminal chips */
+@media (max-width: 920px) {
+  .nav a {
+    min-height: 44px;
+    align-items: center;
+    padding: 10px 8px;
+    box-sizing: border-box;
+  }
+  .terminal-mode-btn,
+  .terminal-action-btn,
+  .terminal-clear-btn,
+  .ai-chip,
+  .quick-chip-btn {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 10px 14px;
+    box-sizing: border-box;
+  }
+}
