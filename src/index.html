@@ -31,6 +31,7 @@
   <script src="vendor/OrbitControls.js" defer></script>
   <script src="vendor/cosmos-engine.js" defer></script>
   <script src="vendor/asciify-vanilla.js" defer></script>
+  <script src="cat3d-mini.js" defer></script>
   <script src="script.js" defer></script>
   <!-- Vercel Web Analytics -->
   <script>
@@ -477,6 +478,8 @@
       <footer>
         <p data-t="footer">Diseñado con intención, datos y café.</p>
         <div class="footer-links">
+          <button class="footer-btn link-btn" id="summonCatBtn" type="button" data-t="catNav">gatito 3D</button>
+          <span class="muted">·</span>
           <button class="footer-btn link-btn" id="openTermsBtn" type="button" data-t="termsNav">términos & privacidad</button>
           <span class="muted">·</span>
           <p>© <span id="year"></span> Alessandro Altamirano</p>
@@ -484,15 +487,16 @@
       </footer>
     </section>
   </main>
-  <!-- Glyph Cat Easter — glyphcss loader by cards -->
-  <div id="cat3DStage" aria-hidden="true" role="status" aria-label="Gatito glyphcss sorpresa por los cards">
-    <div class="cat-glyph-box" role="button" tabindex="0" aria-label="Gatito glyphcss, haz clic para acariciar">
-      <pre id="catGlyph" class="cat-glyph glyph-output" aria-hidden="true"> /\_/\ 
+  <!-- Gato 3D Easter — procedural Three.js mini-canvas -->
+  <div id="cat3DStage" aria-hidden="true" role="status" aria-label="Gatito 3D interactivo sorpresa">
+    <div class="cat-glyph-box cat3d-surface" role="button" tabindex="0" aria-label="Gatito 3D, haz clic para jugar">
+      <canvas id="cat3DCanvas" role="img" aria-label="Gatito 3D procedural jugando con un ovillo"></canvas>
+      <pre id="cat3DFallback" class="cat3d-fallback" aria-hidden="true"> /\_/\
 ( o.o )
- > ^ &lt;</pre>
-      <span class="cat-glyph-loader glyph-output" aria-hidden="true">· · ·</span>
+ &gt; ^ &lt;</pre>
+      <span class="cat-glyph-loader" aria-hidden="true">PLAY // 3D</span>
     </div>
-    <div class="cat3d-tooltip" aria-hidden="true">glyphcat · ¡miau! · click</div>
+    <div class="cat3d-tooltip" aria-hidden="true">CAT_3D · ¡miau! · click para jugar</div>
   </div>
   <dialog id="cvModal" class="cv-modal" aria-labelledby="cvModalTitle">
     <div class="cv-modal-box">

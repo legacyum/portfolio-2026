@@ -13,6 +13,7 @@ const T = {
     recruiterNav: 'vista reclutador',
     credentialsNav: 'formación & herramientas',
     contactNav: 'contacto',
+    catNav: 'gatito 3D',
     recruiterMode: 'modo reclutador',
     hero: 'Convierto procesos<br><em class="accent">en sistemas más claros.</em>',
     lead: 'Ingeniero Industrial en formación con experiencia en análisis de datos, automatización, operaciones, Supply Chain y planeamiento.',
@@ -137,6 +138,7 @@ const T = {
     recruiterNav: 'recruiter view',
     credentialsNav: 'education & tools',
     contactNav: 'contact',
+    catNav: '3D cat',
     recruiterMode: 'recruiter mode',
     hero: 'I turn processes<br><em class="accent">into clearer systems.</em>',
     lead: 'Industrial Engineering student with experience in data analytics, automation, operations, Supply Chain, and planning.',
@@ -3652,39 +3654,28 @@ function initScrollReveal() {
 }
 
 // ==========================================================================
-// Cat 3D Easter Peek — Three.js Low-Poly Procedural (no external model)
-// Fixed mini-canvas bottom-corner, random peek every 22-45s, 3.8s visible.
-// Uses window.THREE (vendor/three.min.js) when available; otherwise no-op.
-// Theme-aware collar color via --accent. Completely independent RAF.
+// Cat 3D Easter Peek — procedural Three.js mini-canvas.
+// The renderer lives in cat3d-mini.js; this wrapper keeps the original Easter
+// egg behavior: the cat peeks near cards, plays briefly, and can be clicked.
 // ==========================================================================
 function initCat3D() {
   try {
     const stage = document.getElementById('cat3DStage');
-    const glyph = document.getElementById('catGlyph');
     const box = stage ? stage.querySelector('.cat-glyph-box') : null;
-    if (!stage || !glyph || !box) return;
-    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fallback = stage ? stage.querySelector('#cat3DFallback') : null;
+    const mini = stage && window.Cat3DMini ? window.Cat3DMini.mount(stage) : null;
+    if (!stage || !box || (!mini && !fallback)) return;
+
     let timeoutId = null;
     let isVisible = false;
-    const frames = [
-      " /\\_/\\ \n( o.o )\n > ^ <",
-      " /\\_/\\ \n( -.- )\n > ^ <",
-      " /\\_/\\ \n( o.o )\n > - <",
-      " /\\_/\\ \n( o.o )\n > ^ <"
-    ];
-    let frameIdx = 0;
-    let frameTimer = null;
-    function cycleFrames() {
-      frameIdx = (frameIdx + 1) % frames.length;
-      glyph.textContent = frames[frameIdx];
-    }
+
     function getCardTargets() {
       return Array.from(document.querySelectorAll('.case, .credential-card, .education'));
     }
+
     function positionNearRandomCard() {
       const cards = getCardTargets();
       if (!cards.length) return;
-      // pick a card that is at least partially in viewport
       const inView = cards.filter(c => {
         const r = c.getBoundingClientRect();
         return r.top < window.innerHeight * 0.92 && r.bottom > 80;
@@ -3692,22 +3683,19 @@ function initCat3D() {
       const pool = inView.length ? inView : cards;
       const card = pool[Math.floor(Math.random() * pool.length)];
       const rect = card.getBoundingClientRect();
+      const stageRect = stage.getBoundingClientRect();
+      const stageW = stageRect.width || 190;
+      const stageH = stageRect.height || 148;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const stageW = 148;
-      const stageH = 92;
-      // anchor to top-right corner of card, peeking over its edge (glyphcss loader style)
-      let left = rect.right - 28;
-      let top = rect.top - 18;
-      // keep inside viewport
-      if (left + stageW > vw - 8) left = Math.max(8, rect.left + rect.width * 0.42);
+      let left = rect.right - 40;
+      let top = rect.top - 22;
+      if (left + stageW > vw - 8) left = Math.max(8, rect.left + rect.width * 0.35);
       if (left < 8) left = 8;
-      // if top would be off-screen, place at bottom edge of card
       if (top < 8 || top + stageH > vh - 8) {
         top = rect.top - stageH + 14;
         if (top < 8) top = Math.min(vh - stageH - 10, rect.bottom + 6);
       }
-      // add slight random jitter so it feels alive
       left += (Math.random() - 0.5) * 12;
       top += (Math.random() - 0.5) * 10;
       stage.style.left = Math.round(left) + 'px';
@@ -3715,6 +3703,12 @@ function initCat3D() {
       stage.style.top = Math.round(top) + 'px';
       stage.style.bottom = 'auto';
     }
+
+    function scheduleNext() {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(showCat, 14000 + Math.random() * 22000);
+    }
+
     function showCat() {
       if (isVisible) return;
       positionNearRandomCard();
@@ -3724,36 +3718,32 @@ function initCat3D() {
       void stage.offsetWidth;
       stage.classList.add('cat-peeking');
       stage.setAttribute('aria-hidden', 'false');
-      glyph.textContent = frames[0];
-      if (!prefersReduced) {
-        frameTimer = setInterval(cycleFrames, 420);
-      }
+      if (mini) mini.play();
+      else fallback.classList.add('is-active');
       try {
         const r = stage.getBoundingClientRect();
         if (typeof window.__triggerRipple === 'function') {
           window.__triggerRipple(r.left + r.width * 0.5, r.top + r.height * 0.5, 0.68);
         }
       } catch (e) {}
-      setTimeout(hideCat, 3400);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(hideCat, 3400);
     }
+
     function hideCat() {
       if (!isVisible) return;
       isVisible = false;
       stage.classList.remove('cat-visible', 'cat-peeking');
       stage.setAttribute('aria-hidden', 'true');
-      if (frameTimer) { clearInterval(frameTimer); frameTimer = null; }
-      glyph.textContent = frames[0];
+      if (mini) mini.hide();
+      if (fallback) fallback.classList.remove('is-active', 'fallback-happy');
       scheduleNext();
     }
-    function scheduleNext() {
-      clearTimeout(timeoutId);
-      const next = 14000 + Math.random() * 22000; // 14-36s
-      timeoutId = setTimeout(showCat, next);
-    }
+
     box.addEventListener('click', () => {
       if (!isVisible) return;
-      glyph.textContent = " /\\_/\\ \n( \u2665.\u2665 )\n > ^ <";
-      setTimeout(() => { glyph.textContent = frames[0]; }, 720);
+      if (mini) mini.play();
+      if (fallback) fallback.classList.add('fallback-happy');
       try {
         const r = stage.getBoundingClientRect();
         if (typeof window.__triggerRipple === 'function') {
@@ -3761,25 +3751,34 @@ function initCat3D() {
         }
       } catch (e) {}
       clearTimeout(timeoutId);
-      setTimeout(hideCat, 820);
+      timeoutId = setTimeout(hideCat, 2200);
     });
+
     box.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); box.click(); }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        box.click();
+      }
     });
+
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         clearTimeout(timeoutId);
-        if (frameTimer) { clearInterval(frameTimer); frameTimer = null; }
+        if (mini) mini.pause();
+      } else if (isVisible) {
+        if (mini) mini.resume();
       } else {
-        if (isVisible && !frameTimer && !prefersReduced) frameTimer = setInterval(cycleFrames, 420);
-        else if (!isVisible) scheduleNext();
+        scheduleNext();
       }
     });
-    // first appearance 9-14s
+
+    const summonBtn = document.getElementById('summonCatBtn');
+    if (summonBtn) summonBtn.addEventListener('click', showCat);
+
     timeoutId = setTimeout(showCat, 9000 + Math.random() * 5000);
     window.__summonCat = showCat;
     window.__hideCat = hideCat;
-    // also peek when a card reveals (scroll reveal)
+
     if (typeof IntersectionObserver !== 'undefined') {
       const obs = new IntersectionObserver((entries) => {
         entries.forEach(en => {

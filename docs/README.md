@@ -58,7 +58,8 @@ El sistema de fondo interactivo Cyber-Industrial se estructura en una arquitectu
 ### Code Layout
 - `src/index.html`: Estructura HTML modular con capas de fondo, preloader, lanyard, terminal y modales.
 - `src/styles.css`: Estilos del portafolio, variables CSS de temas, clases del preloader, terminal, lanyard y canvas.
-- `src/script.js`: Lógica interactiva modular (i18n, CLI terminal, ROI calculator, Lanyard 3D, Background Engine).
+- `src/script.js`: Lógica interactiva modular (i18n, CLI terminal, ROI calculator, Lanyard 3D, Background Engine y wrapper del Easter egg).
+- `src/cat3d-mini.js`: Gatito 3D procedural liviano para el portafolio principal, con botón de invocación y fallback ASCII cuando WebGL no está disponible.
 - `src/assets/`: Recursos multimedia y texturas.
 - `src/vendor/`: Motores externos (Three.js, OrbitControls, asciify, cosmos, glyph.css).
 - `dist/portfolio-mejorado.html`: Versión empaquetada monolítica generada automáticamente por `tests/build-dist.js`.

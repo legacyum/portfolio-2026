@@ -1,8 +1,9 @@
 # Proto-lab · Gato 3D low-poly procedural
 
-> **Estado: prototipo experimental (`v0.1.0-prototype`)** — no forma parte del sitio publicado.
-> `prototypes/` no es leído por `tests/build-dist.js` ni por `tests/run-e2e-tests.js`,
-> así que este archivo no afecta el bundle `dist/` ni los 103 tests E2E.
+> **Estado: prototipo experimental (`v0.1.0-prototype`)** — el modelo completo vive aquí para pruebas.
+> El sitio publicado usa una versión mini optimizada en `src/cat3d-mini.js`, integrada como
+> easter egg cerca de las tarjetas; `prototypes/` no es leído por `tests/build-dist.js` ni
+> por `tests/run-e2e-tests.js`, así que este archivo no afecta el bundle `dist/`.
 
 ## Qué es
 
@@ -55,11 +56,11 @@ En vez de keyframes, hay un **sistema de poses con target + amortiguación expon
 |---|---|
 | Respiración | escala Y del torso ±0.026 (±0.055 dormido) |
 | Parpadeo | aleatorio cada 2.4–6.6 s, con 14 % de doble parpadeo |
-| Seguimiento de mirada | la cabeza apunta al `Raycaster` sobre un plano, clampeado a ±0.42 rad |
+| Seguimiento de mirada | la cabeza apunta al `Raycaster` sobre un plano, clampeado a ±0.42 rad; durante `play` sigue el ovillo |
 | Tics de oreja | cada 4–11 s |
 | Cola | onda viajera; velocidad y amplitud cambian por pose (1.5 sentado → 5.2 jugando) |
 | Dormir | se enrosca, suelta sprites `Z` cada 1.35 s |
-| Jugar | zarpazo sincronizado que **impulsa el ovillo con física simple** (gravedad, rebote 0.44, fricción y retorno elástico a su sitio) |
+| Jugar | secuencia en bucle con anticipación, desplazamiento hacia el ovillo, pisada alternada con solver procedural tipo IK, mini-salto, zarpazos alternados, mirada que sigue el ovillo y golpe sincronizado con física simple (gravedad, rebote 0.44, fricción y retorno elástico a su sitio); cada impacto emite una nota y un destello |
 | Sobresalto | salto parabólico, lomo arqueado, **cola erizada** (`tailPuff` +0.85), orejas hacia atrás, pupilas dilatadas |
 
 ## Interacción
@@ -68,8 +69,8 @@ En vez de keyframes, hay un **sistema de poses con target + amortiguación expon
 - **Click sobre el gato** (raycast con `userData.tag` por pieza):
   - cabeza/collar → ronroneo + corazones + audio
   - lomo/cola → sobresalto y salto
-  - patas → modo jugar
-  - ovillo → lo bate
+  - patas → modo jugar y persecución del ovillo
+  - ovillo → lo bate y activa el desplazamiento del gato
 - **Audio 100 % sintetizado con WebAudio** (sin archivos): maullido = sierra + triángulo
   con `bandpass` barriendo 700 → 1750 → 620 Hz; ronroneo = ruido blanco con `lowpass`
   190 Hz modulado por un LFO de 26 Hz.
@@ -132,6 +133,6 @@ El vendor del repo es **r128** (2021). Para no romper compatibilidad:
 
 1. **Integrarlo al portafolio** reemplazando el easter egg ASCII `#cat3DStage`
    (`initCat3D()` en `src/script.js:3660`) por este gato real en mini-canvas.
-2. Exportar a GLB y cargar con `GLTFLoader` si se quiere un modelo más detallado.
-3. Añadir caminar/`lookAt` con IK en las patas.
-4. Piel con patrón generado por shader (rayas/Manchas procedurales en GLSL).
+2. Añadir juguetes alternativos, contador de combos y una pequeña meta de juego.
+3. Exportar a GLB y cargar con `GLTFLoader` si se quiere un modelo más detallado.
+4. Piel con patrón generado por shader (rayas/manchas procedurales en GLSL).

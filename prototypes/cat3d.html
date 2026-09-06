@@ -314,6 +314,10 @@
     startle: 0,        // temporizador de sobresalto
     meow: 0,           // temporizador de maullido
     petFlash: 0,
+    playPulse: 0,       // destello/impacto del último zarpazo
+    playHitCooldown: 0, // evita golpear el ovillo varias veces por frame
+    walking: false,
+    walkBlend: 0,
     earTwitch: 0,
     nextEarTwitch: 3.5,
     headTargetX: 0,
@@ -594,6 +598,12 @@
   var legFR = buildLeg(-0.44, 0.86, true);
   var legBL = buildLeg(0.6, -0.78, false);
   var legBR = buildLeg(-0.6, -0.78, false);
+  // Posiciones neutras de las caderas: el solver de pasos las usa como
+  // referencia para levantar y adelantar cada pata sin romper la pose.
+  var LEG_HOME_POS = {
+    FL: legFL.position.clone(), FR: legFR.position.clone(),
+    BL: legBL.position.clone(), BR: legBR.position.clone()
+  };
 
   // --- cola: cadena de 12 segmentos (animación ondular) ------------
   var TAIL_N = 12;
@@ -943,7 +953,12 @@
     state.prevPose = state.pose;
     state.pose = p;
     if (p === 'sleep') { say('z z z…', 1100); blip(320, 0.28, 'sine', 0.05); }
-    if (p === 'play') { blip(720, 0.1, 'triangle', 0.07); }
+    if (p === 'play') {
+      state.playHitCooldown = 0;
+      state.playPulse = 0;
+      say('¡a jugar!', 850);
+      blip(720, 0.1, 'triangle', 0.07);
+    }
     syncButtons();
   }
   function ripple() {
@@ -997,6 +1012,10 @@
     T.headPos = p.headPos.slice(); T.headRot = p.headRot.slice();
     T.legFL = p.legFL.slice(); T.legFR = p.legFR.slice();
     T.legBL = p.legBL.slice(); T.legBR = p.legBR.slice();
+    T.legFLPos = [LEG_HOME_POS.FL.x, LEG_HOME_POS.FL.y, LEG_HOME_POS.FL.z];
+    T.legFRPos = [LEG_HOME_POS.FR.x, LEG_HOME_POS.FR.y, LEG_HOME_POS.FR.z];
+    T.legBLPos = [LEG_HOME_POS.BL.x, LEG_HOME_POS.BL.y, LEG_HOME_POS.BL.z];
+    T.legBRPos = [LEG_HOME_POS.BR.x, LEG_HOME_POS.BR.y, LEG_HOME_POS.BR.z];
     T.tailBase = p.tailBase.slice(); T.tailCurl = p.tailCurl; T.tailWave = p.tailWave;
     T.tailSpeed = p.tailSpeed; T.tailPuff = p.tailPuff;
     T.eyeOpen = p.eyeOpen; T.pupil = p.pupil;
@@ -1014,6 +1033,20 @@
     v.x += (arr[0] - v.x) * k;
     v.y += (arr[1] - v.y) * k;
     v.z += (arr[2] - v.z) * k;
+  }
+
+  // Solver de pisada procedural: mueve la cadera durante el paso y calcula
+  // pequeños offsets de rotación para que la pata acompañe la dirección.
+  // No depende de IK externo y funciona con la jerarquía simple del prototipo.
+  function solveFootIK(posTarget, rotTarget, home, phase, stride, lift, dirX, dirZ, blend) {
+    var swing = Math.sin(phase) * stride * blend;
+    var liftAmount = Math.max(0, Math.sin(phase)) * lift * blend;
+    var legLength = 1.55;
+    posTarget[0] = home.x + dirX * swing;
+    posTarget[1] = home.y + liftAmount;
+    posTarget[2] = home.z + dirZ * swing;
+    rotTarget[2] += THREE.MathUtils.clamp((dirX * swing) / legLength, -0.34, 0.34);
+    rotTarget[0] += THREE.MathUtils.clamp((-dirZ * swing - liftAmount * 0.22) / legLength, -0.34, 0.34);
   }
 
   // ------------------------------------------------------------------
@@ -1061,8 +1094,14 @@
   var yarnImpulse = 0, yarnVel = new THREE.Vector3();
   function batYarn() {
     yarnImpulse = 1;
+    state.playPulse = 1;
+    state.playHitCooldown = 0.22;
     yarnVel.set(-0.9 - Math.random() * 0.7, 1.5, -0.5 + Math.random());
+    // Cada golpe deja una pequeña nota y un destello en el ovillo para que
+    // la acción se lea incluso cuando el gato está de perfil.
+    spawnFX('note', yarn.position.clone().add(new THREE.Vector3(0, 0.38, 0)), 1);
     blip(880, 0.07, 'triangle', 0.06);
+    ripple();
   }
 
   window.addEventListener('pointermove', onPointerMove, { passive: true });
@@ -1248,13 +1287,76 @@
     T.bodyScale[0] -= breathe * 0.45;
     T.bodyPos[1] += breathe * 0.28;
     if (state.pose === 'play') {
-      T.bodyPos[1] += Math.abs(Math.sin(elapsed * 5.4)) * 0.17;
-      T.rigRot[2] = Math.sin(elapsed * 5.4) * 0.05;
+      // Ciclo de juego: anticipación, zarpazo alternado y pequeño salto.
+      // Todo se suma al target y luego pasa por el mismo damping que el resto
+      // del rig, así que la animación conserva suavidad a cualquier FPS.
+      var playClock = elapsed * 5.4;
+      var playWave = Math.sin(playClock);
+      var rightSwat = Math.max(0, playWave);
+      var leftSwat = Math.max(0, -playWave);
+      var anticipation = Math.max(0, -playWave);
+      var pounce = Math.pow(Math.max(0, Math.sin(playClock - 0.72)), 2);
+
+      // El gato se acerca al ovillo, pero permanece dentro de la plataforma.
+      // El margen deja la distancia justa para que la pata llegue al juguete.
+      var chaseTargetX = THREE.MathUtils.clamp(yarn.position.x - 1.15, -1.35, 1.35);
+      var chaseTargetZ = THREE.MathUtils.clamp(yarn.position.z - 0.95, -0.85, 0.85);
+      var chaseDx = chaseTargetX - root.position.x;
+      var chaseDz = chaseTargetZ - root.position.z;
+      var chaseDistance = Math.sqrt(chaseDx * chaseDx + chaseDz * chaseDz);
+      var chaseInv = chaseDistance > 0.001 ? 1 / chaseDistance : 0;
+      var walkDirX = chaseDx * chaseInv;
+      var walkDirZ = chaseDz * chaseInv;
+      T.rootPos[0] = chaseTargetX;
+      T.rootPos[2] = chaseTargetZ;
+      state.walking = chaseDistance > 0.055;
+      state.walkBlend += ((state.walking ? 1 : 0) - state.walkBlend) * (1 - Math.exp(-9 * dt));
+
+      // La pisada alterna las cuatro patas: dos diagonales trabajan juntas,
+      // levantan la cadera y rotan en dirección al desplazamiento.
+      var walkPhase = elapsed * 8.2;
+      var walkBlend = state.walkBlend;
+      solveFootIK(T.legFLPos, T.legFL, LEG_HOME_POS.FL, walkPhase, 0.25, 0.16, walkDirX, walkDirZ, walkBlend);
+      solveFootIK(T.legBRPos, T.legBR, LEG_HOME_POS.BR, walkPhase, 0.25, 0.14, walkDirX, walkDirZ, walkBlend);
+      solveFootIK(T.legFRPos, T.legFR, LEG_HOME_POS.FR, walkPhase + Math.PI, 0.25, 0.16, walkDirX, walkDirZ, walkBlend);
+      solveFootIK(T.legBLPos, T.legBL, LEG_HOME_POS.BL, walkPhase + Math.PI, 0.25, 0.14, walkDirX, walkDirZ, walkBlend);
+
+      // El cuerpo se agacha antes del golpe y sale disparado hacia el ovillo.
+      T.bodyPos[1] += pounce * 0.16 + anticipation * 0.055;
+      T.bodyPos[2] += pounce * 0.16;
+      T.bodyRot[1] += Math.sin(playClock) * 0.06;
+      T.rigRot[0] += anticipation * 0.13 - pounce * 0.09;
+      T.rigRot[2] = Math.sin(playClock * 0.5) * 0.07;
+      T.rootPos[1] += pounce * 0.34;
+      T.rootPos[2] += pounce * 0.12;
+
+      // Las patas delanteras se turnan para golpear; las traseras
+      // compensan el peso durante el mini-salto.
+      T.legFR[0] += -0.95 * rightSwat;
+      T.legFR[1] += 0.42 * rightSwat;
+      T.legFR[2] += 0.18 * rightSwat;
+      T.legFL[0] += -0.88 * leftSwat;
+      T.legFL[1] += 0.36 * leftSwat;
+      T.legFL[2] -= 0.16 * leftSwat;
+      T.legBL[0] += 0.2 * pounce;
+      T.legBR[0] += 0.14 * pounce;
+      T.headRot[0] += 0.12 * (rightSwat + leftSwat) - pounce * 0.12;
+    } else {
+      state.walking = false;
+      state.walkBlend += (0 - state.walkBlend) * (1 - Math.exp(-9 * dt));
     }
 
     // --- seguimiento del puntero con la cabeza --------------------
     var hx = 0, hy = 0;
-    if (state.pointerActive && state.pose !== 'sleep') {
+    if (state.pose === 'play') {
+      // Mientras juega, la mirada sigue al ovillo en vez de quedarse fija en
+      // el cursor: la cabeza anticipa el siguiente zarpazo.
+      yarn.getWorldPosition(tmpV2);
+      head.getWorldPosition(tmpV);
+      var yarnDx = tmpV2.x - tmpV.x, yarnDy = tmpV2.y - tmpV.y;
+      hx = THREE.MathUtils.clamp(yarnDx * 0.17, -0.46, 0.46);
+      hy = THREE.MathUtils.clamp(yarnDy * 0.13, -0.28, 0.3);
+    } else if (state.pointerActive && state.pose !== 'sleep') {
       raycaster.setFromCamera(pointerNDC, camera);
       if (raycaster.ray.intersectPlane(trackPlane, trackPoint)) {
         head.getWorldPosition(tmpV);
@@ -1342,13 +1444,13 @@
       }
     }
 
-    // --- jugar: golpear el ovillo --------------------------------------
+    // --- jugar: sincronizar golpe con el ovillo ------------------------
     if (state.pose === 'play') {
       var swat = Math.sin(elapsed * 5.4);
-      T.legFR[0] += -0.9 * Math.max(0, swat);
-      T.legFR[1] += 0.35 * Math.max(0, swat);
-      T.headRot[0] += 0.16 * Math.max(0, swat);
-      if (swat > 0.985 && yarn.position.distanceTo(YARN_HOME) < 0.6) batYarn();
+      state.playHitCooldown = Math.max(0, state.playHitCooldown - dt);
+      if (swat > 0.985 && state.playHitCooldown <= 0 && yarn.position.distanceTo(YARN_HOME) < 0.6) {
+        batYarn();
+      }
     }
 
     // ================= aplicación del target =====================
@@ -1362,6 +1464,10 @@
     dampV3(bodyG.scale, T.bodyScale, L, dt);
     dampV3(head.position, T.headPos, L + 2, dt);
     dampV3(head.rotation, T.headRot, L + 2, dt);
+    dampV3(legFL.position, T.legFLPos, 12, dt);
+    dampV3(legFR.position, T.legFRPos, 12, dt);
+    dampV3(legBL.position, T.legBLPos, 12, dt);
+    dampV3(legBR.position, T.legBRPos, 12, dt);
     dampV3(legFL.rotation, T.legFL, L, dt);
     dampV3(legFR.rotation, T.legFR, L, dt);
     dampV3(legBL.rotation, T.legBL, L, dt);
@@ -1409,7 +1515,11 @@
     bell.rotation.z = Math.sin(elapsed * 2.2) * 0.16;
     bell.position.y = 2.9 + Math.sin(elapsed * 2.2) * 0.012;
 
-    // ovillo de lana (física simple)
+    // ovillo de lana (física simple + destello de impacto)
+    state.playPulse = Math.max(0, state.playPulse - dt * 4.8);
+    var yarnPulse = state.playPulse + (state.pose === 'play' ? Math.max(0, Math.sin(elapsed * 5.4)) * 0.08 : 0);
+    yarn.scale.set(1 + yarnPulse * 0.1, 1 + yarnPulse * 0.1, 1 + yarnPulse * 0.1);
+    mats.yarn.emissiveIntensity = 0.28 + yarnPulse * 0.82;
     yarnVel.y -= 5.2 * dt;
     yarn.position.addScaledVector(yarnVel, dt);
     if (yarn.position.y < 0.6) {
