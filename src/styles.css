@@ -4361,23 +4361,21 @@ footer p {
   gap: 6px !important;
 }
 
-/* --- Glyph Cat Easter — ASCII + glyphcss loader by cards --- */
+/* --- Procedural 3D Cat Easter — mini Three.js canvas by cards --- */
 #cat3DStage {
   position: fixed;
   bottom: 14px;
   right: 14px;
-  width: 148px;
-  height: auto;
-  min-height: 88px;
+  width: 190px;
+  height: 148px;
   z-index: 42;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(14px) scale(0.92);
+  transform: translateY(18px) scale(0.9);
   transform-origin: 85% 95%;
   transition: transform 0.48s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.34s ease;
   will-change: transform, opacity;
-  filter: drop-shadow(0 10px 28px rgba(0,0,0,0.55)) drop-shadow(0 0 14px rgba(var(--accent-rgb), 0.22));
-  /* glyph by-cards: JS will override bottom/right/left/top to anchor near a .case card */
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,0.58)) drop-shadow(0 0 16px rgba(var(--accent-rgb), 0.24));
 }
 
 #cat3DStage.cat-visible {
@@ -4387,59 +4385,111 @@ footer p {
 }
 
 #cat3DStage.cat-peeking {
-  animation: catGlyphPeek 3.8s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: cat3dMiniPeek 3.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes catGlyphPeek {
-  0% { opacity: 0; transform: translateY(16px) scale(0.88); }
-  10% { opacity: 1; transform: translateY(-4px) scale(1.03); }
+@keyframes cat3dMiniPeek {
+  0% { opacity: 0; transform: translateY(18px) scale(0.9) rotate(1deg); }
+  10% { opacity: 1; transform: translateY(-5px) scale(1.02) rotate(0); }
   16% { opacity: 1; transform: none; }
   84% { opacity: 1; transform: none; }
-  100% { opacity: 0; transform: translateY(12px) scale(0.92); }
+  100% { opacity: 0; transform: translateY(14px) scale(0.93) rotate(-1deg); }
 }
 
-/* glyphcss-inspired ASCII box */
-.cat-glyph-box {
-  background: linear-gradient(180deg, rgba(18, 24, 18, 0.98), rgba(10, 14, 11, 0.98));
-  border: 1px solid rgba(var(--accent-rgb), 0.38);
-  border-radius: 10px;
-  padding: 8px 10px 7px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+.cat-glyph-box.cat3d-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  padding: 0;
+  background:
+    linear-gradient(rgba(var(--accent-rgb), 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--accent-rgb), 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 50% 18%, rgba(var(--accent-rgb), 0.16), transparent 68%),
+    linear-gradient(180deg, rgba(18, 24, 18, 0.98), rgba(7, 11, 9, 0.98));
+  background-size: 22px 22px, 22px 22px, auto, auto;
+  border: 1px solid rgba(var(--accent-rgb), 0.42);
+  border-radius: 11px;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.56), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 24px rgba(var(--accent-rgb), 0.06);
   cursor: pointer;
   user-select: none;
+  isolation: isolate;
 }
 
-.cat-glyph {
+.cat-glyph-box.cat3d-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0 72%, rgba(var(--accent-rgb), 0.08) 73%, transparent 74%);
+  background-size: 100% 7px;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+
+#cat3DCanvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation;
+  outline: none;
+}
+
+.cat3d-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: none;
+  place-content: center;
   margin: 0;
-  font-family: ui-monospace, "DM Mono", "JetBrains Mono", monospace;
-  font-size: 11px;
-  line-height: 1.05;
-  letter-spacing: 0.01em;
+  padding: 12px;
   color: var(--accent);
-  white-space: pre;
+  font: 600 14px/1.12 ui-monospace, "DM Mono", monospace;
   text-align: center;
-  text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.55), 0 0 2px rgba(var(--accent-rgb), 0.9);
-  /* glyphcss effect: subtle scan */
-  position: relative;
+  text-shadow: 0 0 9px rgba(var(--accent-rgb), 0.7);
+  pointer-events: none;
+  white-space: pre;
+}
+
+.cat3d-fallback.is-active {
+  display: grid;
+  animation: catFallbackBounce 1.4s ease-in-out infinite;
+}
+
+.cat3d-fallback.fallback-happy {
+  color: #ff9ec1;
+  text-shadow: 0 0 10px rgba(255, 126, 179, 0.72);
+}
+
+@keyframes catFallbackBounce {
+  0%, 100% { transform: translateY(2px) rotate(-1deg); }
+  50% { transform: translateY(-4px) rotate(1deg); }
 }
 
 .cat-glyph-loader {
+  position: absolute;
+  left: 10px;
+  bottom: 7px;
+  z-index: 3;
   display: block;
-  margin-top: 4px;
+  margin: 0;
   font-family: ui-monospace, "DM Mono", monospace;
-  font-size: 8.5px;
-  letter-spacing: 0.22em;
-  text-align: center;
+  font-size: 8px;
+  letter-spacing: 0.16em;
   color: rgba(var(--accent-rgb), 0.9);
-  text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5);
-  opacity: 0.9;
-  animation: glyphDots 0.9s steps(4, end) infinite;
+  text-shadow: 0 0 7px rgba(var(--accent-rgb), 0.56);
+  opacity: 0.88;
+  pointer-events: none;
+  animation: cat3dStatus 1.25s steps(2, end) infinite;
 }
 
-@keyframes glyphDots {
-  0% { opacity: 0.45; letter-spacing: 0.18em; }
-  50% { opacity: 1; letter-spacing: 0.24em; }
-  100% { opacity: 0.45; letter-spacing: 0.18em; }
+@keyframes cat3dStatus {
+  0%, 100% { opacity: 0.52; }
+  50% { opacity: 1; }
 }
 
 .cat3d-tooltip {
@@ -4471,11 +4521,11 @@ footer p {
 
 @media (max-width: 600px) {
   #cat3DStage {
-    width: 132px;
+    width: 176px;
+    height: 138px;
     bottom: 10px;
     right: 10px;
   }
-  .cat-glyph { font-size: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4485,7 +4535,8 @@ footer p {
     animation: none !important;
   }
   #cat3DStage.cat-visible { transform: none !important; }
-  .cat-glyph-loader { animation: none; }
+  .cat-glyph-loader,
+  .cat3d-fallback.is-active { animation: none; }
 }
 
 /* P2 mobile hit targets (~44px) — nav + terminal chips */

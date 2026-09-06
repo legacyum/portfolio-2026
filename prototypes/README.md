@@ -1,8 +1,9 @@
 # Proto-lab · Gato 3D procedural · render ASCII
 
-> **Estado: prototipo experimental (`v0.3.0-prototype`)** — no forma parte del sitio publicado.
-> `prototypes/` no es leído por `tests/build-dist.js` ni por `tests/run-e2e-tests.js`,
-> así que este archivo no afecta el bundle `dist/` ni los 103 tests E2E.
+> **Estado: prototipo experimental (`v0.3.0-prototype`)** — el modelo completo vive aquí para pruebas.
+> El sitio publicado usa una versión mini optimizada en `src/cat3d-mini.js`, integrada como
+> easter egg cerca de las tarjetas; `prototypes/` no es leído por `tests/build-dist.js` ni por
+> `tests/run-e2e-tests.js`, así que este archivo no afecta el bundle `dist/`.
 
 ## Qué es
 
@@ -232,11 +233,11 @@ El vendor del repo es **r128** (2021). Para no romper compatibilidad:
 
 ## Siguientes pasos posibles
 
-1. **Integrarlo al portafolio** reemplazando el easter egg ASCII `#cat3DStage`
-   (`initCat3D()` en `src/script.js:3660`) por este gato real en mini-canvas.
+1. ~~Integrarlo al portafolio~~ ✅ — el sitio usa `src/cat3d-mini.js`, con botón manual y
+   fallback ASCII si WebGL no está disponible.
 2. Exportar a GLB y cargar con `GLTFLoader` si se quiere un modelo más detallado.
 3. ~~Añadir caminar/`lookAt` con IK en las patas.~~ ✅ v0.2 — pendiente: galope (4 tiempos con
    fase de suspensión), salto a la plataforma en vez de subir el bisel, y evitar el ovillo.
-4. Piel con patrón generado por shader (rayas/Manchas procedurales en GLSL).
+4. Piel con patrón generado por shader (rayas/manchas procedurales en GLSL).
 5. ~~Render ASCII~~ ✅ v0.3 — pendiente: temporal-AA de glifos (parpadeo en celdas al borde de
    dos niveles) y usar el atlas con MSDF para celdas grandes.

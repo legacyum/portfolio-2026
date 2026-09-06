@@ -4389,23 +4389,21 @@ footer p {
   gap: 6px !important;
 }
 
-/* --- Glyph Cat Easter — ASCII + glyphcss loader by cards --- */
+/* --- Procedural 3D Cat Easter — mini Three.js canvas by cards --- */
 #cat3DStage {
   position: fixed;
   bottom: 14px;
   right: 14px;
-  width: 148px;
-  height: auto;
-  min-height: 88px;
+  width: 190px;
+  height: 148px;
   z-index: 42;
   pointer-events: none;
   opacity: 0;
-  transform: translateY(14px) scale(0.92);
+  transform: translateY(18px) scale(0.9);
   transform-origin: 85% 95%;
   transition: transform 0.48s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.34s ease;
   will-change: transform, opacity;
-  filter: drop-shadow(0 10px 28px rgba(0,0,0,0.55)) drop-shadow(0 0 14px rgba(var(--accent-rgb), 0.22));
-  /* glyph by-cards: JS will override bottom/right/left/top to anchor near a .case card */
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,0.58)) drop-shadow(0 0 16px rgba(var(--accent-rgb), 0.24));
 }
 
 #cat3DStage.cat-visible {
@@ -4415,59 +4413,111 @@ footer p {
 }
 
 #cat3DStage.cat-peeking {
-  animation: catGlyphPeek 3.8s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: cat3dMiniPeek 3.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-@keyframes catGlyphPeek {
-  0% { opacity: 0; transform: translateY(16px) scale(0.88); }
-  10% { opacity: 1; transform: translateY(-4px) scale(1.03); }
+@keyframes cat3dMiniPeek {
+  0% { opacity: 0; transform: translateY(18px) scale(0.9) rotate(1deg); }
+  10% { opacity: 1; transform: translateY(-5px) scale(1.02) rotate(0); }
   16% { opacity: 1; transform: none; }
   84% { opacity: 1; transform: none; }
-  100% { opacity: 0; transform: translateY(12px) scale(0.92); }
+  100% { opacity: 0; transform: translateY(14px) scale(0.93) rotate(-1deg); }
 }
 
-/* glyphcss-inspired ASCII box */
-.cat-glyph-box {
-  background: linear-gradient(180deg, rgba(18, 24, 18, 0.98), rgba(10, 14, 11, 0.98));
-  border: 1px solid rgba(var(--accent-rgb), 0.38);
-  border-radius: 10px;
-  padding: 8px 10px 7px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06);
+.cat-glyph-box.cat3d-surface {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  padding: 0;
+  background:
+    linear-gradient(rgba(var(--accent-rgb), 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(var(--accent-rgb), 0.055) 1px, transparent 1px),
+    radial-gradient(circle at 50% 18%, rgba(var(--accent-rgb), 0.16), transparent 68%),
+    linear-gradient(180deg, rgba(18, 24, 18, 0.98), rgba(7, 11, 9, 0.98));
+  background-size: 22px 22px, 22px 22px, auto, auto;
+  border: 1px solid rgba(var(--accent-rgb), 0.42);
+  border-radius: 11px;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.56), inset 0 1px 0 rgba(255,255,255,0.08), inset 0 0 24px rgba(var(--accent-rgb), 0.06);
   cursor: pointer;
   user-select: none;
+  isolation: isolate;
 }
 
-.cat-glyph {
+.cat-glyph-box.cat3d-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(180deg, transparent 0 72%, rgba(var(--accent-rgb), 0.08) 73%, transparent 74%);
+  background-size: 100% 7px;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+
+#cat3DCanvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: manipulation;
+  outline: none;
+}
+
+.cat3d-fallback {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: none;
+  place-content: center;
   margin: 0;
-  font-family: ui-monospace, "DM Mono", "JetBrains Mono", monospace;
-  font-size: 11px;
-  line-height: 1.05;
-  letter-spacing: 0.01em;
+  padding: 12px;
   color: var(--accent);
-  white-space: pre;
+  font: 600 14px/1.12 ui-monospace, "DM Mono", monospace;
   text-align: center;
-  text-shadow: 0 0 8px rgba(var(--accent-rgb), 0.55), 0 0 2px rgba(var(--accent-rgb), 0.9);
-  /* glyphcss effect: subtle scan */
-  position: relative;
+  text-shadow: 0 0 9px rgba(var(--accent-rgb), 0.7);
+  pointer-events: none;
+  white-space: pre;
+}
+
+.cat3d-fallback.is-active {
+  display: grid;
+  animation: catFallbackBounce 1.4s ease-in-out infinite;
+}
+
+.cat3d-fallback.fallback-happy {
+  color: #ff9ec1;
+  text-shadow: 0 0 10px rgba(255, 126, 179, 0.72);
+}
+
+@keyframes catFallbackBounce {
+  0%, 100% { transform: translateY(2px) rotate(-1deg); }
+  50% { transform: translateY(-4px) rotate(1deg); }
 }
 
 .cat-glyph-loader {
+  position: absolute;
+  left: 10px;
+  bottom: 7px;
+  z-index: 3;
   display: block;
-  margin-top: 4px;
+  margin: 0;
   font-family: ui-monospace, "DM Mono", monospace;
-  font-size: 8.5px;
-  letter-spacing: 0.22em;
-  text-align: center;
+  font-size: 8px;
+  letter-spacing: 0.16em;
   color: rgba(var(--accent-rgb), 0.9);
-  text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5);
-  opacity: 0.9;
-  animation: glyphDots 0.9s steps(4, end) infinite;
+  text-shadow: 0 0 7px rgba(var(--accent-rgb), 0.56);
+  opacity: 0.88;
+  pointer-events: none;
+  animation: cat3dStatus 1.25s steps(2, end) infinite;
 }
 
-@keyframes glyphDots {
-  0% { opacity: 0.45; letter-spacing: 0.18em; }
-  50% { opacity: 1; letter-spacing: 0.24em; }
-  100% { opacity: 0.45; letter-spacing: 0.18em; }
+@keyframes cat3dStatus {
+  0%, 100% { opacity: 0.52; }
+  50% { opacity: 1; }
 }
 
 .cat3d-tooltip {
@@ -4499,11 +4549,11 @@ footer p {
 
 @media (max-width: 600px) {
   #cat3DStage {
-    width: 132px;
+    width: 176px;
+    height: 138px;
     bottom: 10px;
     right: 10px;
   }
-  .cat-glyph { font-size: 10px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -4513,7 +4563,8 @@ footer p {
     animation: none !important;
   }
   #cat3DStage.cat-visible { transform: none !important; }
-  .cat-glyph-loader { animation: none; }
+  .cat-glyph-loader,
+  .cat3d-fallback.is-active { animation: none; }
 }
 
 /* P2 mobile hit targets (~44px) — nav + terminal chips */
@@ -7540,6 +7591,461 @@ footer p {
 })(typeof window !== 'undefined' ? window : this);
 
   </script>
+  <script data-vendor="cat3d-mini">
+/*
+ * Cat 3D Mini — procedural Three.js easter egg for the main portfolio.
+ * Kept separate from script.js so the portfolio shell stays readable and the
+ * same renderer can be inlined by tests/build-dist.js.
+ */
+(function (global) {
+  'use strict';
+
+  var THREE = global.THREE;
+
+  function cssAccent() {
+    try {
+      var styles = global.getComputedStyle(global.document.body);
+      return (styles.getPropertyValue('--accent') || '').trim() || '#c9ff62';
+    } catch (e) {
+      return '#c9ff62';
+    }
+  }
+
+  function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  function mount(stage) {
+    if (!THREE || !stage || !global.document) return null;
+    var canvas = stage.querySelector('#cat3DCanvas');
+    if (!canvas || canvas.__cat3dMini) return canvas && canvas.__cat3dMini ? canvas.__cat3dMini : null;
+
+    try {
+      var reducedMotion = !!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches);
+      var renderer = new THREE.WebGLRenderer({ canvas: canvas, alpha: true, antialias: true, powerPreference: 'low-power' });
+      renderer.setPixelRatio(Math.min(global.devicePixelRatio || 1, 1.5));
+      renderer.setClearColor(0x000000, 0);
+      renderer.outputEncoding = THREE.sRGBEncoding;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.08;
+
+      var scene = new THREE.Scene();
+      var camera = new THREE.PerspectiveCamera(31, 1, 0.1, 50);
+      camera.position.set(0.1, 2.2, 6.6);
+      camera.lookAt(0, 1.65, 0);
+
+      var accent = new THREE.Color(cssAccent());
+      var fur = new THREE.MeshToonMaterial({ color: 0xd39152 });
+      var furDark = new THREE.MeshToonMaterial({ color: 0x7c431f });
+      var belly = new THREE.MeshToonMaterial({ color: 0xf4ddc0 });
+      var eye = new THREE.MeshStandardMaterial({ color: 0x9bea55, emissive: 0x9bea55, emissiveIntensity: 0.9, roughness: 0.18 });
+      var pupil = new THREE.MeshStandardMaterial({ color: 0x080b0d, roughness: 0.15 });
+      var glint = new THREE.MeshBasicMaterial({ color: 0xffffff });
+      var noseMat = new THREE.MeshToonMaterial({ color: 0xe4849b });
+      var earIn = new THREE.MeshToonMaterial({ color: 0xd98f9e });
+      var whisk = new THREE.MeshBasicMaterial({ color: 0xf3f6f2 });
+      var collarMat = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.65, metalness: 0.55, roughness: 0.3 });
+      var bellMat = new THREE.MeshStandardMaterial({ color: 0xffe9a8, metalness: 0.9, roughness: 0.2 });
+      var yarnMat = new THREE.MeshStandardMaterial({ color: accent, emissive: accent, emissiveIntensity: 0.45, roughness: 0.8 });
+      var floorMat = new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.08, side: THREE.DoubleSide, depthWrite: false });
+
+      var hemi = new THREE.HemisphereLight(0xd8f0ff, 0x111713, 1.05);
+      scene.add(hemi);
+      var key = new THREE.DirectionalLight(0xffffff, 1.45);
+      key.position.set(3, 7, 5);
+      scene.add(key);
+      var rim = new THREE.PointLight(accent, 1.1, 12, 2);
+      rim.position.set(-2, 2.5, -2.5);
+      scene.add(rim);
+
+      var floor = new THREE.Mesh(new THREE.CircleGeometry(2.35, 40), floorMat);
+      floor.rotation.x = -Math.PI / 2;
+      floor.position.y = 0.02;
+      scene.add(floor);
+      var ring = new THREE.Mesh(new THREE.TorusGeometry(1.65, 0.025, 6, 48), new THREE.MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.55 }));
+      ring.rotation.x = -Math.PI / 2;
+      ring.position.y = 0.04;
+      scene.add(ring);
+
+      var root = new THREE.Group();
+      root.position.y = 0.08;
+      scene.add(root);
+      var rig = new THREE.Group();
+      root.add(rig);
+
+      function mesh(geometry, material, parent) {
+        var item = new THREE.Mesh(geometry, material);
+        item.castShadow = false;
+        item.receiveShadow = false;
+        (parent || rig).add(item);
+        return item;
+      }
+
+      var body = new THREE.Group();
+      body.position.set(0, 1.48, 0);
+      rig.add(body);
+      var torso = mesh(new THREE.SphereGeometry(0.72, 16, 12), fur, body);
+      torso.scale.set(1, 1.08, 1.23);
+      var chest = mesh(new THREE.SphereGeometry(0.48, 14, 10), belly, body);
+      chest.position.set(0, -0.08, 0.62);
+      chest.scale.set(0.95, 1, 0.76);
+
+      function buildLeg(x, z, front) {
+        var leg = new THREE.Group();
+        leg.position.set(x, front ? 1.35 : 1.2, z);
+        leg.userData.home = leg.position.clone();
+        leg.userData.base = new THREE.Vector3(front ? -0.08 : 0, 0, front ? (x > 0 ? 0.05 : -0.05) : (x > 0 ? 0.18 : -0.18));
+        rig.add(leg);
+        var length = front ? 1.05 : 0.82;
+        var upper = mesh(new THREE.CylinderGeometry(0.12, 0.105, length, 8), fur, leg);
+        upper.position.y = -length / 2;
+        var paw = mesh(new THREE.SphereGeometry(0.16, 12, 9), furDark, leg);
+        paw.position.set(0, -length - 0.03, 0.06);
+        paw.scale.set(1.05, 0.7, 1.25);
+        return leg;
+      }
+
+      var legFL = buildLeg(0.34, 0.62, true);
+      var legFR = buildLeg(-0.34, 0.62, true);
+      var legBL = buildLeg(0.48, -0.62, false);
+      var legBR = buildLeg(-0.48, -0.62, false);
+      var legs = [legFL, legFR, legBL, legBR];
+
+      var tailRoot = new THREE.Group();
+      tailRoot.position.set(0, 1.65, -0.92);
+      rig.add(tailRoot);
+      var tailSegments = [];
+      var tailParent = tailRoot;
+      for (var ti = 0; ti < 8; ti++) {
+        var tailPart = new THREE.Group();
+        tailPart.position.z = ti === 0 ? 0 : -0.2;
+        tailParent.add(tailPart);
+        var tailSphere = mesh(new THREE.SphereGeometry(Math.max(0.14 - ti * 0.012, 0.06), 10, 8), ti > 5 ? furDark : fur, tailPart);
+        tailSphere.position.z = -0.1;
+        tailSphere.scale.z = 1.35;
+        tailSegments.push(tailPart);
+        tailParent = tailPart;
+      }
+
+      var neck = mesh(new THREE.CylinderGeometry(0.29, 0.36, 0.42, 12), fur, rig);
+      neck.position.set(0, 2.12, 0.64);
+      neck.rotation.x = 0.36;
+      var collar = mesh(new THREE.TorusGeometry(0.35, 0.045, 8, 24), collarMat, rig);
+      collar.position.set(0, 2.2, 0.72);
+      collar.rotation.x = Math.PI / 2 - 0.36;
+      var bell = mesh(new THREE.SphereGeometry(0.07, 10, 8), bellMat, rig);
+      bell.position.set(0, 2.05, 1.02);
+
+      var head = new THREE.Group();
+      head.position.set(0, 2.62, 0.78);
+      rig.add(head);
+      var skull = mesh(new THREE.SphereGeometry(0.68, 18, 14), fur, head);
+      skull.scale.set(1.05, 0.98, 1);
+      var cheekL = mesh(new THREE.SphereGeometry(0.27, 12, 9), fur, head);
+      cheekL.position.set(0.38, -0.17, 0.32);
+      var cheekR = mesh(new THREE.SphereGeometry(0.27, 12, 9), fur, head);
+      cheekR.position.set(-0.38, -0.17, 0.32);
+      var muzzle = mesh(new THREE.SphereGeometry(0.25, 12, 9), belly, head);
+      muzzle.position.set(0, -0.19, 0.55);
+      muzzle.scale.set(1.25, 0.78, 0.85);
+
+      function buildEar(side) {
+        var ear = new THREE.Group();
+        ear.position.set(0.35 * side, 0.48, -0.04);
+        ear.rotation.z = side * -0.25;
+        head.add(ear);
+        var outer = mesh(new THREE.ConeGeometry(0.24, 0.58, 4), fur, ear);
+        outer.position.y = 0.26;
+        outer.rotation.y = Math.PI / 4;
+        outer.scale.z = 0.6;
+        var inner = mesh(new THREE.ConeGeometry(0.14, 0.39, 4), earIn, ear);
+        inner.position.set(0, 0.23, 0.08);
+        inner.rotation.y = Math.PI / 4;
+        inner.scale.z = 0.45;
+        return ear;
+      }
+      var earL = buildEar(1);
+      var earR = buildEar(-1);
+
+      function buildEye(side) {
+        var group = new THREE.Group();
+        group.position.set(0.25 * side, 0.02, 0.55);
+        head.add(group);
+        var ball = mesh(new THREE.SphereGeometry(0.15, 12, 10), eye, group);
+        ball.scale.set(1, 1.08, 0.7);
+        var pup = mesh(new THREE.SphereGeometry(0.08, 10, 8), pupil, group);
+        pup.position.z = 0.09;
+        pup.scale.set(0.55, 1.2, 0.4);
+        var shine = mesh(new THREE.SphereGeometry(0.03, 8, 6), glint, group);
+        shine.position.set(0.035 * side, 0.05, 0.13);
+        return { group: group, ball: ball, pupil: pup };
+      }
+      var eyeL = buildEye(1);
+      var eyeR = buildEye(-1);
+      var nose = mesh(new THREE.SphereGeometry(0.06, 10, 8), noseMat, head);
+      nose.position.set(0, -0.14, 0.73);
+      nose.scale.set(1.2, 0.8, 0.7);
+      var mouth = mesh(new THREE.TorusGeometry(0.075, 0.014, 6, 14, Math.PI * 0.8), pupil, head);
+      mouth.position.set(0, -0.24, 0.7);
+      mouth.rotation.set(-0.25, 0, Math.PI);
+
+      function buildWhiskers(side) {
+        var group = new THREE.Group();
+        group.position.set(0.22 * side, -0.13, 0.62);
+        head.add(group);
+        for (var wi = 0; wi < 2; wi++) {
+          var line = mesh(new THREE.CylinderGeometry(0.004, 0.002, 0.45, 5), whisk, group);
+          line.position.set(side * 0.23, (wi - 0.5) * 0.06, -wi * 0.02);
+          line.rotation.set(0.05, side * (0.18 + wi * 0.1), Math.PI / 2);
+        }
+      }
+      buildWhiskers(1);
+      buildWhiskers(-1);
+
+      var yarn = new THREE.Group();
+      yarn.position.set(1.28, 0.34, 0.9);
+      scene.add(yarn);
+      mesh(new THREE.SphereGeometry(0.22, 14, 10), yarnMat, yarn);
+      for (var yi = 0; yi < 3; yi++) {
+        var yarnRing = mesh(new THREE.TorusGeometry(0.225, 0.01, 5, 20), yarnMat, yarn);
+        yarnRing.rotation.set(yi * 0.9, yi * 0.65, yi * 0.4);
+      }
+      var yarnHome = yarn.position.clone();
+      var yarnVelocity = new THREE.Vector3();
+      var tmpTarget = new THREE.Vector3();
+      var tmpHead = new THREE.Vector3();
+      var frameId = null;
+      var lastTime = 0;
+      var disposed = false;
+      var isVisible = false;
+      var isPaused = false;
+      var playing = true;
+      var time = 0;
+      var hitCooldown = 0.25;
+      var pulse = 0;
+      var walkBlend = 0;
+      var accentObserver = null;
+
+      function setAccent(value) {
+        accent.set(value || cssAccent());
+        collarMat.color.copy(accent);
+        collarMat.emissive.copy(accent);
+        yarnMat.color.copy(accent);
+        yarnMat.emissive.copy(accent);
+        floorMat.color.copy(accent);
+        ring.material.color.copy(accent);
+        rim.color.copy(accent);
+      }
+
+      function resize() {
+        if (disposed) return;
+        var width = canvas.clientWidth || stage.clientWidth || 184;
+        var height = canvas.clientHeight || stage.clientHeight || 140;
+        if (!width || !height) return;
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      }
+
+      function hitYarn() {
+        yarnVelocity.set(-0.7 - Math.random() * 0.35, 1.05, -0.2 + Math.random() * 0.4);
+        pulse = 1;
+        hitCooldown = 0.36;
+      }
+
+      function solveStep(leg, phase, stride, lift, dirX, dirZ, blend) {
+        var home = leg.userData.home;
+        var swing = Math.sin(phase) * stride * blend;
+        var liftAmount = Math.max(0, Math.sin(phase)) * lift * blend;
+        leg.position.x = home.x + dirX * swing;
+        leg.position.y = home.y + liftAmount;
+        leg.position.z = home.z + dirZ * swing;
+        leg.rotation.x = leg.userData.base.x + clamp((-dirZ * swing - liftAmount * 0.18) / 1.2, -0.25, 0.25);
+        leg.rotation.y = leg.userData.base.y;
+        leg.rotation.z = leg.userData.base.z + clamp((dirX * swing) / 1.2, -0.25, 0.25);
+      }
+
+      function update(dt) {
+        time += dt;
+        pulse = Math.max(0, pulse - dt * 4.4);
+        hitCooldown -= dt;
+
+        var phase = time * (playing ? 6.1 : 1.8);
+        var wave = Math.sin(phase);
+        var right = Math.max(0, wave);
+        var left = Math.max(0, -wave);
+        var pounce = playing ? Math.pow(Math.max(0, Math.sin(phase - 0.65)), 2) : 0;
+        var targetX = playing ? clamp(yarn.position.x - 0.7, -0.62, 0.7) : 0;
+        var targetZ = playing ? clamp(yarn.position.z - 0.62, -0.48, 0.54) : 0;
+        var dx = targetX - root.position.x;
+        var dz = targetZ - root.position.z;
+        var distance = Math.sqrt(dx * dx + dz * dz);
+        var inv = distance > 0.001 ? 1 / distance : 0;
+        var dirX = dx * inv;
+        var dirZ = dz * inv;
+        var moving = playing && distance > 0.035;
+        walkBlend += ((moving ? 1 : 0) - walkBlend) * (1 - Math.exp(-8 * dt));
+        root.position.x += (targetX - root.position.x) * (1 - Math.exp(-8 * dt));
+        root.position.z += (targetZ - root.position.z) * (1 - Math.exp(-8 * dt));
+        root.position.y += ((0.08 + pounce * 0.22) - root.position.y) * (1 - Math.exp(-12 * dt));
+
+        var breathe = Math.sin(time * 2) * (playing ? 0.025 : 0.035);
+        var bodyY = 1.48 + breathe + (playing ? pounce * 0.09 : 0);
+        body.position.y += (bodyY - body.position.y) * (1 - Math.exp(-10 * dt));
+        body.rotation.x += ((playing ? -0.12 + pounce * 0.08 : 0) - body.rotation.x) * (1 - Math.exp(-10 * dt));
+        body.rotation.z += (Math.sin(phase * 0.5) * 0.035 - body.rotation.z) * (1 - Math.exp(-10 * dt));
+        body.scale.y += (1 + breathe * 0.8 - body.scale.y) * (1 - Math.exp(-10 * dt));
+
+        solveStep(legFL, phase, 0.18, 0.1, dirX, dirZ, walkBlend);
+        solveStep(legBR, phase, 0.2, 0.09, dirX, dirZ, walkBlend);
+        solveStep(legFR, phase + Math.PI, 0.18, 0.1, dirX, dirZ, walkBlend);
+        solveStep(legBL, phase + Math.PI, 0.2, 0.09, dirX, dirZ, walkBlend);
+        legFR.rotation.x -= right * 0.58;
+        legFR.rotation.z += right * 0.18;
+        legFL.rotation.x -= left * 0.52;
+        legFL.rotation.z -= left * 0.16;
+
+        yarn.getWorldPosition(tmpTarget);
+        head.getWorldPosition(tmpHead);
+        var lookX = clamp((tmpTarget.x - tmpHead.x) * 0.16, -0.42, 0.42);
+        var lookY = clamp((tmpTarget.y - tmpHead.y) * 0.13, -0.25, 0.25);
+        head.rotation.y += (lookX - head.rotation.y) * (1 - Math.exp(-7 * dt));
+        head.rotation.x += (-lookY - head.rotation.x) * (1 - Math.exp(-7 * dt));
+
+        tailSegments.forEach(function (segment, index) {
+          var tailPhase = time * (playing ? 5.2 : 1.35) - index * 0.42;
+          segment.rotation.y += (Math.sin(tailPhase) * (playing ? 0.26 : 0.1) - segment.rotation.y) * (1 - Math.exp(-10 * dt));
+          segment.rotation.x += (0.12 + Math.cos(tailPhase) * (playing ? 0.15 : 0.06) - segment.rotation.x) * (1 - Math.exp(-10 * dt));
+        });
+        earL.rotation.x = Math.sin(time * 1.8) * 0.035;
+        earR.rotation.x = Math.sin(time * 1.8 + 0.5) * 0.035;
+        bell.rotation.z = Math.sin(time * 3.2) * 0.15;
+        ring.material.opacity = 0.38 + Math.sin(time * 2.2) * 0.12 + pulse * 0.24;
+        yarn.scale.setScalar(1 + pulse * 0.1);
+        yarnMat.emissiveIntensity = 0.45 + pulse * 0.8;
+        eye.emissiveIntensity = 0.8 + Math.sin(time * 2.3) * 0.14 + pulse * 0.3;
+        [eyeL, eyeR].forEach(function (eyePart) {
+          eyePart.pupil.scale.x += (0.58 - eyePart.pupil.scale.x) * (1 - Math.exp(-14 * dt));
+          eyePart.pupil.scale.y += (0.95 - eyePart.pupil.scale.y) * (1 - Math.exp(-14 * dt));
+        });
+
+        yarnVelocity.y -= 3.6 * dt;
+        yarn.position.addScaledVector(yarnVelocity, dt);
+        if (yarn.position.y < yarnHome.y) {
+          yarn.position.y = yarnHome.y;
+          if (yarnVelocity.y < -0.25) yarnVelocity.y = -yarnVelocity.y * 0.38;
+          else yarnVelocity.y = 0;
+          yarnVelocity.x *= Math.max(0, 1 - 2.8 * dt);
+          yarnVelocity.z *= Math.max(0, 1 - 2.8 * dt);
+        }
+        var returnVector = yarnHome.clone().sub(yarn.position);
+        returnVector.y = 0;
+        if (returnVector.length() > 0.01) {
+          yarn.position.addScaledVector(returnVector.normalize(), Math.min(returnVector.length(), 0.8) * dt * (playing ? 0.8 : 1.6));
+        }
+        yarn.rotation.x += dt * (0.8 + yarnVelocity.length() * 2);
+        yarn.rotation.z += dt * (0.6 + yarnVelocity.length() * 1.5);
+        if (playing && wave > 0.97 && hitCooldown <= 0 && yarn.position.distanceTo(yarnHome) < 0.48) hitYarn();
+      }
+
+      function renderFrame(now) {
+        if (disposed || !isVisible || isPaused) {
+          frameId = null;
+          return;
+        }
+        var dt = lastTime ? Math.min((now - lastTime) / 1000, 0.05) : 0.016;
+        lastTime = now;
+        if (reducedMotion) dt *= 0.25;
+        update(dt);
+        renderer.render(scene, camera);
+        frameId = global.requestAnimationFrame(renderFrame);
+      }
+
+      function start() {
+        if (disposed || !isVisible || isPaused || frameId !== null) return;
+        resize();
+        lastTime = 0;
+        frameId = global.requestAnimationFrame(renderFrame);
+      }
+
+      function show() {
+        if (disposed) return;
+        isVisible = true;
+        isPaused = false;
+        setAccent(cssAccent());
+        resize();
+        start();
+      }
+
+      function hide() {
+        isVisible = false;
+        playing = false;
+        if (frameId !== null) {
+          global.cancelAnimationFrame(frameId);
+          frameId = null;
+        }
+      }
+
+      function play() {
+        if (disposed) return;
+        playing = true;
+        if (yarn.position.distanceTo(yarnHome) > 0.6) yarn.position.lerp(yarnHome, 0.35);
+        show();
+      }
+
+      function pause() {
+        isPaused = true;
+        if (frameId !== null) {
+          global.cancelAnimationFrame(frameId);
+          frameId = null;
+        }
+      }
+
+      function resume() {
+        if (!disposed && isVisible) {
+          isPaused = false;
+          start();
+        }
+      }
+
+      function destroy() {
+        disposed = true;
+        hide();
+        global.removeEventListener('resize', resize);
+        if (accentObserver) accentObserver.disconnect();
+        renderer.dispose();
+      }
+
+      global.addEventListener('resize', resize, { passive: true });
+      if (global.MutationObserver) {
+        accentObserver = new global.MutationObserver(function () { setAccent(cssAccent()); });
+        accentObserver.observe(global.document.body, { attributes: true, attributeFilter: ['data-theme'] });
+      }
+      canvas.__cat3dMini = {
+        show: show,
+        hide: hide,
+        play: play,
+        pause: pause,
+        resume: resume,
+        resize: resize,
+        destroy: destroy,
+        scene: scene,
+        root: root,
+        state: function () { return { visible: isVisible, playing: playing, walking: walkBlend > 0.05 }; }
+      };
+      resize();
+      renderer.render(scene, camera);
+      return canvas.__cat3dMini;
+    } catch (error) {
+      try { if (global.console && global.console.warn) global.console.warn('Cat 3D mini disabled:', error); } catch (e) {}
+      return null;
+    }
+  }
+
+  global.Cat3DMini = { mount: mount };
+})(window);
+
+  </script>
   <script>
 /* ==========================================================================
    Alessandro Altamirano — Portfolio Interactive Script
@@ -7556,6 +8062,7 @@ const T = {
     recruiterNav: 'vista reclutador',
     credentialsNav: 'formación & herramientas',
     contactNav: 'contacto',
+    catNav: 'gatito 3D',
     recruiterMode: 'modo reclutador',
     hero: 'Convierto procesos<br><em class="accent">en sistemas más claros.</em>',
     lead: 'Ingeniero Industrial en formación con experiencia en análisis de datos, automatización, operaciones, Supply Chain y planeamiento.',
@@ -7680,6 +8187,7 @@ const T = {
     recruiterNav: 'recruiter view',
     credentialsNav: 'education & tools',
     contactNav: 'contact',
+    catNav: '3D cat',
     recruiterMode: 'recruiter mode',
     hero: 'I turn processes<br><em class="accent">into clearer systems.</em>',
     lead: 'Industrial Engineering student with experience in data analytics, automation, operations, Supply Chain, and planning.',
@@ -11195,39 +11703,28 @@ function initScrollReveal() {
 }
 
 // ==========================================================================
-// Cat 3D Easter Peek — Three.js Low-Poly Procedural (no external model)
-// Fixed mini-canvas bottom-corner, random peek every 22-45s, 3.8s visible.
-// Uses window.THREE (vendor/three.min.js) when available; otherwise no-op.
-// Theme-aware collar color via --accent. Completely independent RAF.
+// Cat 3D Easter Peek — procedural Three.js mini-canvas.
+// The renderer lives in cat3d-mini.js; this wrapper keeps the original Easter
+// egg behavior: the cat peeks near cards, plays briefly, and can be clicked.
 // ==========================================================================
 function initCat3D() {
   try {
     const stage = document.getElementById('cat3DStage');
-    const glyph = document.getElementById('catGlyph');
     const box = stage ? stage.querySelector('.cat-glyph-box') : null;
-    if (!stage || !glyph || !box) return;
-    const prefersReduced = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const fallback = stage ? stage.querySelector('#cat3DFallback') : null;
+    const mini = stage && window.Cat3DMini ? window.Cat3DMini.mount(stage) : null;
+    if (!stage || !box || (!mini && !fallback)) return;
+
     let timeoutId = null;
     let isVisible = false;
-    const frames = [
-      " /\\_/\\ \n( o.o )\n > ^ <",
-      " /\\_/\\ \n( -.- )\n > ^ <",
-      " /\\_/\\ \n( o.o )\n > - <",
-      " /\\_/\\ \n( o.o )\n > ^ <"
-    ];
-    let frameIdx = 0;
-    let frameTimer = null;
-    function cycleFrames() {
-      frameIdx = (frameIdx + 1) % frames.length;
-      glyph.textContent = frames[frameIdx];
-    }
+
     function getCardTargets() {
       return Array.from(document.querySelectorAll('.case, .credential-card, .education'));
     }
+
     function positionNearRandomCard() {
       const cards = getCardTargets();
       if (!cards.length) return;
-      // pick a card that is at least partially in viewport
       const inView = cards.filter(c => {
         const r = c.getBoundingClientRect();
         return r.top < window.innerHeight * 0.92 && r.bottom > 80;
@@ -11235,22 +11732,19 @@ function initCat3D() {
       const pool = inView.length ? inView : cards;
       const card = pool[Math.floor(Math.random() * pool.length)];
       const rect = card.getBoundingClientRect();
+      const stageRect = stage.getBoundingClientRect();
+      const stageW = stageRect.width || 190;
+      const stageH = stageRect.height || 148;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
-      const stageW = 148;
-      const stageH = 92;
-      // anchor to top-right corner of card, peeking over its edge (glyphcss loader style)
-      let left = rect.right - 28;
-      let top = rect.top - 18;
-      // keep inside viewport
-      if (left + stageW > vw - 8) left = Math.max(8, rect.left + rect.width * 0.42);
+      let left = rect.right - 40;
+      let top = rect.top - 22;
+      if (left + stageW > vw - 8) left = Math.max(8, rect.left + rect.width * 0.35);
       if (left < 8) left = 8;
-      // if top would be off-screen, place at bottom edge of card
       if (top < 8 || top + stageH > vh - 8) {
         top = rect.top - stageH + 14;
         if (top < 8) top = Math.min(vh - stageH - 10, rect.bottom + 6);
       }
-      // add slight random jitter so it feels alive
       left += (Math.random() - 0.5) * 12;
       top += (Math.random() - 0.5) * 10;
       stage.style.left = Math.round(left) + 'px';
@@ -11258,6 +11752,12 @@ function initCat3D() {
       stage.style.top = Math.round(top) + 'px';
       stage.style.bottom = 'auto';
     }
+
+    function scheduleNext() {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(showCat, 14000 + Math.random() * 22000);
+    }
+
     function showCat() {
       if (isVisible) return;
       positionNearRandomCard();
@@ -11267,36 +11767,32 @@ function initCat3D() {
       void stage.offsetWidth;
       stage.classList.add('cat-peeking');
       stage.setAttribute('aria-hidden', 'false');
-      glyph.textContent = frames[0];
-      if (!prefersReduced) {
-        frameTimer = setInterval(cycleFrames, 420);
-      }
+      if (mini) mini.play();
+      else fallback.classList.add('is-active');
       try {
         const r = stage.getBoundingClientRect();
         if (typeof window.__triggerRipple === 'function') {
           window.__triggerRipple(r.left + r.width * 0.5, r.top + r.height * 0.5, 0.68);
         }
       } catch (e) {}
-      setTimeout(hideCat, 3400);
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(hideCat, 3400);
     }
+
     function hideCat() {
       if (!isVisible) return;
       isVisible = false;
       stage.classList.remove('cat-visible', 'cat-peeking');
       stage.setAttribute('aria-hidden', 'true');
-      if (frameTimer) { clearInterval(frameTimer); frameTimer = null; }
-      glyph.textContent = frames[0];
+      if (mini) mini.hide();
+      if (fallback) fallback.classList.remove('is-active', 'fallback-happy');
       scheduleNext();
     }
-    function scheduleNext() {
-      clearTimeout(timeoutId);
-      const next = 14000 + Math.random() * 22000; // 14-36s
-      timeoutId = setTimeout(showCat, next);
-    }
+
     box.addEventListener('click', () => {
       if (!isVisible) return;
-      glyph.textContent = " /\\_/\\ \n( \u2665.\u2665 )\n > ^ <";
-      setTimeout(() => { glyph.textContent = frames[0]; }, 720);
+      if (mini) mini.play();
+      if (fallback) fallback.classList.add('fallback-happy');
       try {
         const r = stage.getBoundingClientRect();
         if (typeof window.__triggerRipple === 'function') {
@@ -11304,25 +11800,34 @@ function initCat3D() {
         }
       } catch (e) {}
       clearTimeout(timeoutId);
-      setTimeout(hideCat, 820);
+      timeoutId = setTimeout(hideCat, 2200);
     });
+
     box.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); box.click(); }
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        box.click();
+      }
     });
+
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         clearTimeout(timeoutId);
-        if (frameTimer) { clearInterval(frameTimer); frameTimer = null; }
+        if (mini) mini.pause();
+      } else if (isVisible) {
+        if (mini) mini.resume();
       } else {
-        if (isVisible && !frameTimer && !prefersReduced) frameTimer = setInterval(cycleFrames, 420);
-        else if (!isVisible) scheduleNext();
+        scheduleNext();
       }
     });
-    // first appearance 9-14s
+
+    const summonBtn = document.getElementById('summonCatBtn');
+    if (summonBtn) summonBtn.addEventListener('click', showCat);
+
     timeoutId = setTimeout(showCat, 9000 + Math.random() * 5000);
     window.__summonCat = showCat;
     window.__hideCat = hideCat;
-    // also peek when a card reveals (scroll reveal)
+
     if (typeof IntersectionObserver !== 'undefined') {
       const obs = new IntersectionObserver((entries) => {
         entries.forEach(en => {
@@ -11782,6 +12287,8 @@ function initCat3D() {
       <footer>
         <p data-t="footer">Diseñado con intención, datos y café.</p>
         <div class="footer-links">
+          <button class="footer-btn link-btn" id="summonCatBtn" type="button" data-t="catNav">gatito 3D</button>
+          <span class="muted">·</span>
           <button class="footer-btn link-btn" id="openTermsBtn" type="button" data-t="termsNav">términos & privacidad</button>
           <span class="muted">·</span>
           <p>© <span id="year"></span> Alessandro Altamirano</p>
@@ -11789,15 +12296,16 @@ function initCat3D() {
       </footer>
     </section>
   </main>
-  <!-- Glyph Cat Easter — glyphcss loader by cards -->
-  <div id="cat3DStage" aria-hidden="true" role="status" aria-label="Gatito glyphcss sorpresa por los cards">
-    <div class="cat-glyph-box" role="button" tabindex="0" aria-label="Gatito glyphcss, haz clic para acariciar">
-      <pre id="catGlyph" class="cat-glyph glyph-output" aria-hidden="true"> /\_/\ 
+  <!-- Gato 3D Easter — procedural Three.js mini-canvas -->
+  <div id="cat3DStage" aria-hidden="true" role="status" aria-label="Gatito 3D interactivo sorpresa">
+    <div class="cat-glyph-box cat3d-surface" role="button" tabindex="0" aria-label="Gatito 3D, haz clic para jugar">
+      <canvas id="cat3DCanvas" role="img" aria-label="Gatito 3D procedural jugando con un ovillo"></canvas>
+      <pre id="cat3DFallback" class="cat3d-fallback" aria-hidden="true"> /\_/\
 ( o.o )
- > ^ &lt;</pre>
-      <span class="cat-glyph-loader glyph-output" aria-hidden="true">· · ·</span>
+ &gt; ^ &lt;</pre>
+      <span class="cat-glyph-loader" aria-hidden="true">PLAY // 3D</span>
     </div>
-    <div class="cat3d-tooltip" aria-hidden="true">glyphcat · ¡miau! · click</div>
+    <div class="cat3d-tooltip" aria-hidden="true">CAT_3D · ¡miau! · click para jugar</div>
   </div>
   <dialog id="cvModal" class="cv-modal" aria-labelledby="cvModalTitle">
     <div class="cv-modal-box">
