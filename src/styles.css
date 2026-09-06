@@ -4364,10 +4364,10 @@ footer p {
 /* --- Procedural 3D Cat Easter — mini Three.js canvas by cards --- */
 #cat3DStage {
   position: fixed;
-  bottom: 14px;
-  right: 14px;
-  width: 190px;
-  height: 148px;
+  bottom: 16px;
+  right: 16px;
+  width: 252px;
+  height: 196px;
   z-index: 42;
   pointer-events: none;
   opacity: 0;
@@ -4375,13 +4375,54 @@ footer p {
   transform-origin: 85% 95%;
   transition: transform 0.48s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.34s ease;
   will-change: transform, opacity;
-  filter: drop-shadow(0 12px 28px rgba(0,0,0,0.58)) drop-shadow(0 0 16px rgba(var(--accent-rgb), 0.24));
+  filter: drop-shadow(0 14px 34px rgba(0,0,0,0.62)) drop-shadow(0 0 20px rgba(var(--accent-rgb), 0.28));
 }
 
 #cat3DStage.cat-visible {
   opacity: 1;
   transform: none;
   pointer-events: auto;
+}
+
+#cat3DStage.cat-roaming {
+  filter: none;
+  transition: opacity 0.3s ease;
+  will-change: left, top;
+}
+
+#cat3DStage.cat-roaming .cat-glyph-box.cat3d-surface {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+}
+
+#cat3DStage.cat-roaming .cat-glyph-box.cat3d-surface::after {
+  display: none !important;
+}
+
+#cat3DStage.cat-roaming .cat3d-top-bar {
+  background: rgba(6, 10, 8, 0.92);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  border-radius: 6px;
+  padding: 3px 6px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: opacity 0.24s ease, transform 0.24s ease;
+}
+
+#cat3DStage.cat-roaming:hover .cat3d-top-bar,
+#cat3DStage.cat-roaming:focus-within .cat3d-top-bar {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+#cat3DStage.cat-roaming .cat-glyph-loader,
+#cat3DStage.cat-roaming .cat3d-tooltip {
+  display: none !important;
 }
 
 #cat3DStage.cat-peeking {
@@ -4394,6 +4435,70 @@ footer p {
   16% { opacity: 1; transform: none; }
   84% { opacity: 1; transform: none; }
   100% { opacity: 0; transform: translateY(14px) scale(0.93) rotate(-1deg); }
+}
+
+/* --- ASCII Floating Particles (Hearts, Sparks, Zzz) --- */
+.cat-ascii-particle {
+  position: fixed;
+  pointer-events: none;
+  z-index: 10000;
+  font-family: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  font-weight: 800;
+  user-select: none;
+  line-height: 1;
+  will-change: transform, opacity;
+}
+
+.cat-ascii-heart {
+  color: #ff6b9d;
+  text-shadow: 0 0 8px rgba(255, 107, 157, 0.7), 0 0 16px rgba(255, 107, 157, 0.4);
+  font-size: 1.15rem;
+  animation: floatCatHeart 1.5s cubic-bezier(0.2, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes floatCatHeart {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.6) rotate(0deg);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(var(--dx, 0px), -18px) scale(1.25) rotate(var(--rot, 0deg));
+  }
+  80% {
+    opacity: 0.9;
+    transform: translate(calc(var(--dx, 0px) * 1.5), -48px) scale(1.0) rotate(var(--rot, 0deg));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--dx, 0px) * 2), -75px) scale(0.7) rotate(var(--rot, 0deg));
+  }
+}
+
+.cat-ascii-sleep {
+  color: var(--accent, #68d391);
+  text-shadow: 0 0 6px rgba(var(--accent-rgb, 104, 211, 145), 0.6);
+  font-size: 1.05rem;
+  animation: floatCatSleep 2.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes floatCatSleep {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) scale(0.5);
+  }
+  25% {
+    opacity: 0.95;
+    transform: translate(var(--dx, 12px), -16px) scale(1.15);
+  }
+  75% {
+    opacity: 0.75;
+    transform: translate(calc(var(--dx, 12px) * 1.8), -44px) scale(1.0);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(var(--dx, 12px) * 2.5), -68px) scale(0.8);
+  }
 }
 
 .cat-glyph-box.cat3d-surface {
@@ -4426,6 +4531,91 @@ footer p {
   background-size: 100% 7px;
   mix-blend-mode: screen;
   opacity: 0.55;
+}
+
+.cat-speech-bubble {
+  position: absolute;
+  top: 36px;
+  left: 50%;
+  transform: translateX(-50%) translateY(4px) scale(0.88);
+  background: rgba(10, 14, 12, 0.94);
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  padding: 3px 8px;
+  font-family: "DM Mono", monospace;
+  font-size: 8.5px;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.2, 1.4, 0.4, 1);
+  z-index: 12;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 10px rgba(var(--accent-rgb), 0.3);
+}
+
+.cat-speech-bubble.is-active {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.cat3d-btn.is-active-btn {
+  background: var(--accent) !important;
+  color: #06090c !important;
+  border-color: var(--accent) !important;
+  font-weight: 700 !important;
+}
+
+.cat3d-top-bar {
+  position: absolute;
+  top: 7px;
+  left: 9px;
+  right: 9px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  pointer-events: auto;
+}
+
+.cat3d-top-title {
+  font-family: "DM Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  text-shadow: 0 0 6px rgba(var(--accent-rgb), 0.5);
+  pointer-events: none;
+}
+
+.cat3d-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cat3d-btn {
+  background: rgba(10, 14, 12, 0.88);
+  border: 1px solid rgba(var(--accent-rgb), 0.38);
+  border-radius: 4px;
+  color: var(--text);
+  font-family: "DM Mono", monospace;
+  font-size: 8px;
+  letter-spacing: 0.06em;
+  padding: 2px 6px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  line-height: 1.2;
+}
+
+.cat3d-btn:hover {
+  background: rgba(var(--accent-rgb), 0.22);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.cat3d-btn:active {
+  transform: translateY(1px);
 }
 
 #cat3DCanvas {
@@ -4521,10 +4711,10 @@ footer p {
 
 @media (max-width: 600px) {
   #cat3DStage {
-    width: 176px;
-    height: 138px;
-    bottom: 10px;
-    right: 10px;
+    width: 208px;
+    height: 162px;
+    bottom: 12px;
+    right: 12px;
   }
 }
 

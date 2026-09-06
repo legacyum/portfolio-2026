@@ -490,11 +490,21 @@
   <!-- Gato 3D Easter — procedural Three.js mini-canvas -->
   <div id="cat3DStage" aria-hidden="true" role="status" aria-label="Gatito 3D interactivo sorpresa">
     <div class="cat-glyph-box cat3d-surface" role="button" tabindex="0" aria-label="Gatito 3D, haz clic para jugar">
+      <div class="cat3d-top-bar">
+        <span class="cat3d-top-title" id="catStageTitle">CAT_3D // PROTO</span>
+        <div class="cat3d-actions">
+          <button type="button" class="cat3d-btn" id="catWalkBtn" title="Hacer que camine libremente por la página">PASEAR 🐾</button>
+          <button type="button" class="cat3d-btn" id="catModeBtn" title="Alternar render 3D / ASCII">ASCII</button>
+          <button type="button" class="cat3d-btn" id="catExpandBtn" title="Abrir laboratorio 3D en pantalla completa">⛶</button>
+          <button type="button" class="cat3d-btn" id="catCloseStageBtn" title="Cerrar">✕</button>
+        </div>
+      </div>
       <canvas id="cat3DCanvas" role="img" aria-label="Gatito 3D procedural jugando con un ovillo"></canvas>
       <pre id="cat3DFallback" class="cat3d-fallback" aria-hidden="true"> /\_/\
 ( o.o )
  &gt; ^ &lt;</pre>
-      <span class="cat-glyph-loader" aria-hidden="true">PLAY // 3D</span>
+      <span class="cat-glyph-loader" id="catGlyphStatus" aria-hidden="true">PLAY // 3D</span>
+      <div id="catSpeechBubble" class="cat-speech-bubble" aria-hidden="true">¡miau!</div>
     </div>
     <div class="cat3d-tooltip" aria-hidden="true">CAT_3D · ¡miau! · click para jugar</div>
   </div>
@@ -610,6 +620,21 @@
           </div>
           <div class="cosmos-planet-rail" id="cosmosPlanetRail"></div>
         </div>
+      </div>
+    </div>
+  </dialog>
+  <dialog id="catModal" class="cosmos-modal" aria-labelledby="catModalTitle">
+    <div class="cosmos-modal-box">
+      <div class="cosmos-modal-header">
+        <div class="circles"><i></i><i></i><i></i></div>
+        <p id="catModalTitle">alessandro@portfolio:~/lab/cat3d_procedural_ascii.exe</p>
+        <div class="cosmos-header-meta">
+          <span class="cosmos-live-badge">// THREE.JS R128 · PROTO-LAB</span>
+          <button class="cosmos-close-btn" id="closeCatBtn" type="button" aria-label="Cerrar modal">✕</button>
+        </div>
+      </div>
+      <div class="cosmos-modal-body" style="background:#05070a;position:relative;overflow:hidden;min-height:500px;height:calc(100vh - 120px);">
+        <iframe id="catModalIframe" src="" data-src="prototypes/cat3d.html" title="Laboratorio interactivo Gato 3D" style="width:100%;height:100%;border:none;display:block;"></iframe>
       </div>
     </div>
   </dialog>

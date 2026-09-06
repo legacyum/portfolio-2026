@@ -731,6 +731,26 @@ function runCommand(raw) {
     addOutput(cmd, '<p class="output-title">// ' + (lang === 'es' ? 'COSMIC ATLAS 3D · SISTEMA SOLAR' : 'COSMIC ATLAS 3D · SOLAR SYSTEM') + '</p><p><span class="green">' + (lang === 'es' ? '✓ Desplegando simulador astronómico WebGL interactivo...' : '✓ Launching interactive WebGL astronomy simulator...') + '</span></p>');
     return;
   }
+  if (cmd === 'cat walk' || cmd === 'cat roam' || cmd === 'gato caminar' || cmd === 'gato pasear') {
+    if (typeof window.__startCatRoam === 'function') {
+      window.__startCatRoam();
+    } else if (typeof window.__summonCat === 'function') {
+      window.__summonCat();
+    }
+    addOutput(cmd, '<p class="output-title">// ' + (lang === 'es' ? 'GATO 3D · MODO PASEO LIBRE' : '3D CAT · FREE ROAMING MODE') + '</p><p><span class="green">' + (lang === 'es' ? '🐾 ¡El gato 3D ha salido a caminar por la pantalla!' : '🐾 3D Cat is now freely roaming the screen!') + '</span></p>');
+    return;
+  }
+  if (cmd === 'cat home' || cmd === 'cat base' || cmd === 'gato casa' || cmd === 'gato base') {
+    if (typeof window.__stopCatRoam === 'function') window.__stopCatRoam();
+    addOutput(cmd, '<p class="output-title">// ' + (lang === 'es' ? 'GATO 3D · RETORNO A BASE' : '3D CAT · RETURN TO BASE') + '</p><p><span class="green">' + (lang === 'es' ? '🏠 El gato 3D ha regresado a su pedestal neón.' : '🏠 3D Cat returned to its neon dais.') + '</span></p>');
+    return;
+  }
+  if (cmd === 'gato' || cmd === 'cat' || cmd === 'gatito' || cmd === 'kitty' || cmd === 'cat3d') {
+    openCatModal();
+    if (typeof window.__summonCat === 'function') window.__summonCat();
+    addOutput(cmd, '<p class="output-title">// ' + (lang === 'es' ? 'GATO 3D PROCEDURAL · PROTO-LAB' : 'PROCEDURAL 3D CAT · PROTO-LAB') + '</p><p><span class="green">' + (lang === 'es' ? '✓ Desplegando laboratorio interactivo del Gato 3D...' : '✓ Launching interactive 3D Cat proto-lab...') + '</span></p>');
+    return;
+  }
   if (cmd === 'htop' || cmd === 'top') {
     addOutput(cmd, getHtopOutput());
     return;
@@ -3658,6 +3678,37 @@ function initScrollReveal() {
 // The renderer lives in cat3d-mini.js; this wrapper keeps the original Easter
 // egg behavior: the cat peeks near cards, plays briefly, and can be clicked.
 // ==========================================================================
+function openCatModal() {
+  const modal = document.getElementById('catModal');
+  const iframe = document.getElementById('catModalIframe');
+  if (!modal) return;
+  if (iframe && iframe.dataset.src && (!iframe.src || iframe.src === 'about:blank' || iframe.src.endsWith('/'))) {
+    iframe.src = iframe.dataset.src;
+  }
+  if (typeof modal.showModal === 'function') {
+    modal.showModal();
+  } else {
+    modal.setAttribute('open', '');
+  }
+  modal.classList.add('show');
+  try {
+    if (typeof window.__triggerRipple === 'function') {
+      window.__triggerRipple(window.innerWidth / 2, window.innerHeight / 2, 0.85);
+    }
+  } catch (e) {}
+}
+
+function closeCatModal() {
+  const modal = document.getElementById('catModal');
+  if (!modal) return;
+  if (typeof modal.close === 'function') {
+    modal.close();
+  } else {
+    modal.removeAttribute('open');
+  }
+  modal.classList.remove('show');
+}
+
 function initCat3D() {
   try {
     const stage = document.getElementById('cat3DStage');
@@ -3668,6 +3719,64 @@ function initCat3D() {
 
     let timeoutId = null;
     let isVisible = false;
+    let isRoaming = false;
+    let roamFrameId = null;
+    let roamState = 'idle'; // 'idle' | 'walking'
+    let idleWaitTimer = 0;
+
+    // Viewport position & movement kinematics
+    let currentX = 0;
+    let currentY = 0;
+    let targetX = 0;
+    let targetY = 0;
+    const walkSpeedPx = 135; // Pixels per second
+    let lastRoamTime = 0;
+
+    const walkBtn = stage.querySelector('#catWalkBtn');
+    const modeBtn = stage.querySelector('#catModeBtn');
+    const expandBtn = stage.querySelector('#catExpandBtn');
+    const closeStageBtn = stage.querySelector('#catCloseStageBtn');
+    const speechBubble = stage.querySelector('#catSpeechBubble');
+    const glyphStatus = stage.querySelector('#catGlyphStatus');
+
+    let bubbleTimeout = null;
+    function say(text, duration = 2400) {
+      if (!speechBubble) return;
+      speechBubble.textContent = text;
+      speechBubble.classList.add('is-active');
+      clearTimeout(bubbleTimeout);
+      bubbleTimeout = setTimeout(() => {
+        speechBubble.classList.remove('is-active');
+      }, duration);
+    }
+
+    // Mode Toggle (3D / ASCII / Hybrid)
+    let catMode = '3d';
+    if (modeBtn) {
+      modeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        catMode = catMode === '3d' ? 'ascii' : catMode === 'ascii' ? 'hybrid' : '3d';
+        if (mini && typeof mini.setMode === 'function') mini.setMode(catMode);
+        modeBtn.textContent = catMode.toUpperCase();
+      });
+    }
+
+    // Expand Button to open full 3D interactive laboratory modal
+    if (expandBtn) {
+      expandBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        openCatModal();
+      });
+    }
+
+    const closeCatBtn = document.getElementById('closeCatBtn');
+    if (closeCatBtn) closeCatBtn.addEventListener('click', closeCatModal);
+    const catModal = document.getElementById('catModal');
+    if (catModal) {
+      catModal.addEventListener('click', (e) => {
+        if (e.target === catModal) closeCatModal();
+      });
+    }
 
     function getCardTargets() {
       return Array.from(document.querySelectorAll('.case, .credential-card, .education'));
@@ -3684,8 +3793,8 @@ function initCat3D() {
       const card = pool[Math.floor(Math.random() * pool.length)];
       const rect = card.getBoundingClientRect();
       const stageRect = stage.getBoundingClientRect();
-      const stageW = stageRect.width || 190;
-      const stageH = stageRect.height || 148;
+      const stageW = stageRect.width || 252;
+      const stageH = stageRect.height || 196;
       const vw = window.innerWidth;
       const vh = window.innerHeight;
       let left = rect.right - 40;
@@ -3698,28 +3807,479 @@ function initCat3D() {
       }
       left += (Math.random() - 0.5) * 12;
       top += (Math.random() - 0.5) * 10;
-      stage.style.left = Math.round(left) + 'px';
+      currentX = Math.round(left);
+      currentY = Math.round(top);
+      stage.style.left = currentX + 'px';
       stage.style.right = 'auto';
-      stage.style.top = Math.round(top) + 'px';
+      stage.style.top = currentY + 'px';
       stage.style.bottom = 'auto';
     }
 
-    function scheduleNext() {
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(showCat, 14000 + Math.random() * 22000);
+    let currentCardSurface = null;
+    let isClimbing = false;
+    let mouseX = -9999;
+    let mouseY = -9999;
+    let lastMouseMoveTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+    let isCatSleeping = false;
+    let isCatPetting = false;
+    let petTimer = 0;
+    let zzzTimer = 0;
+
+    function wakeUpCat() {
+      if (!isCatSleeping) return;
+      isCatSleeping = false;
+      if (mini) {
+        mini.setPose('sit');
+        mini.setHeading(0);
+      }
+      if (glyphStatus) glyphStatus.textContent = 'AWAKE // ASCII';
+      say('¡Desperté! 🐾');
+      idleWaitTimer = 0.8;
     }
 
-    function showCat() {
+    if (typeof window !== 'undefined' && window.addEventListener) {
+      window.addEventListener('pointermove', (e) => {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+        lastMouseMoveTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        if (isCatSleeping) {
+          wakeUpCat();
+        }
+      }, { passive: true });
+
+      window.addEventListener('scroll', () => {
+        lastMouseMoveTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+        if (isCatSleeping) {
+          wakeUpCat();
+        }
+      }, { passive: true });
+    }
+
+    function spawnAsciiParticles(type, count, sourceX, sourceY) {
+      if (typeof document === 'undefined' || !document.createElement || !document.body) return;
+      const glyphs = type === 'heart' ? ['♥', '♥', '★', '⋆', '✦', 'purr~'] : ['z', 'Z', 'z', 'Zzz'];
+      const cls = type === 'heart' ? 'cat-ascii-heart' : 'cat-ascii-sleep';
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement('span');
+        el.className = `cat-ascii-particle ${cls}`;
+        el.textContent = glyphs[Math.floor(Math.random() * glyphs.length)];
+        const ox = (Math.random() - 0.5) * 60;
+        const oy = (Math.random() - 0.5) * 20;
+        const dx = (Math.random() - 0.5) * 50 + (type === 'sleep' ? 24 : 0);
+        const rot = (Math.random() - 0.5) * 35;
+        el.style.left = Math.round(sourceX + ox) + 'px';
+        el.style.top = Math.round(sourceY + oy) + 'px';
+        el.style.setProperty('--dx', Math.round(dx) + 'px');
+        el.style.setProperty('--rot', Math.round(rot) + 'deg');
+        document.body.appendChild(el);
+        setTimeout(() => {
+          if (el.parentNode) el.parentNode.removeChild(el);
+        }, type === 'heart' ? 1600 : 2300);
+      }
+    }
+
+    function petCat(e) {
+      if (e && e.stopPropagation) e.stopPropagation();
+      isCatSleeping = false;
+      isCatPetting = true;
+      petTimer = 2.4;
+      if (mini) {
+        mini.setPose('pet');
+        if (typeof mini.playPurr === 'function') {
+          mini.playPurr(2.2);
+        }
+        if (typeof mini.playMeow === 'function' && Math.random() < 0.45) {
+          setTimeout(() => { if (mini) mini.playMeow(); }, 350);
+        }
+      }
+      if (glyphStatus) glyphStatus.textContent = 'PURR // ♥';
+      const rect = stage.getBoundingClientRect();
+      const px = rect.left + rect.width * 0.5;
+      const py = rect.top + 30;
+      spawnAsciiParticles('heart', 6, px, py);
+
+      const sweetPhrases = [
+        '¡Prrr! Nivel de cariño: 100% ♥',
+        '¡Purr purr! Gracias por las caricias 🐾',
+        '¡Miau! Modo ronroneo activado ♥',
+        'Ronroneando de felicidad ~⋆',
+        '¡Acariciaste al gato de Alessandro!'
+      ];
+      say(sweetPhrases[Math.floor(Math.random() * sweetPhrases.length)]);
+    }
+
+    function getVisibleCards() {
+      const cards = Array.from(document.querySelectorAll('.case, .credential-card, .education, #terminalWindow'));
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      return cards.filter(c => {
+        const r = c.getBoundingClientRect();
+        return r.top >= -40 && r.top < vh - 100 && r.bottom > 100 && r.width >= 120;
+      });
+    }
+
+    function pickNextWaypoint() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const visibleCards = getVisibleCards();
+
+      // 68% de probabilidad de trepar/posarse sobre el borde de una tarjeta visible
+      if (visibleCards.length && Math.random() < 0.68) {
+        let pool = visibleCards;
+        if (currentCardSurface && visibleCards.length > 1) {
+          pool = visibleCards.filter(c => c !== currentCardSurface);
+          if (!pool.length) pool = visibleCards;
+        }
+        const card = pool[Math.floor(Math.random() * pool.length)];
+        currentCardSurface = card;
+        const rect = card.getBoundingClientRect();
+
+        // Techo / borde superior de la tarjeta donde posar las patas
+        const shelfY = Math.max(30, rect.top - 128);
+        const minShelfX = Math.max(16, rect.left);
+        const maxShelfX = Math.min(vw - 260, rect.right - 220);
+        
+        targetX = Math.max(minShelfX, Math.min(maxShelfX, minShelfX + Math.random() * Math.max(10, maxShelfX - minShelfX)));
+        targetY = shelfY;
+        isClimbing = true;
+        roamState = 'walking';
+        if (mini) mini.setPose('walk');
+        if (glyphStatus) glyphStatus.textContent = 'CLIMB // ASCII';
+      } else {
+        // Paseo a nivel del suelo del viewport
+        currentCardSurface = null;
+        isClimbing = false;
+        const minX = 24;
+        const maxX = Math.max(minX + 80, vw - 276);
+        targetX = minX + Math.random() * (maxX - minX);
+        const groundBase = vh - 215;
+        targetY = Math.max(40, groundBase + (Math.random() - 0.5) * 60);
+        roamState = 'walking';
+        if (mini) mini.setPose('walk');
+        if (glyphStatus) glyphStatus.textContent = 'ROAM // ASCII';
+      }
+    }
+
+    function roamLoop(now) {
+      if (!isRoaming || !isVisible) {
+        roamFrameId = null;
+        return;
+      }
+      const dt = lastRoamTime ? Math.min((now - lastRoamTime) / 1000, 0.05) : 0.016;
+      lastRoamTime = now;
+
+      // 1. Manejo de estado de caricias activo
+      if (isCatPetting) {
+        petTimer -= dt;
+        if (mini) mini.setPose('pet');
+        if (petTimer <= 0) {
+          isCatPetting = false;
+          if (mini) mini.setPose('sit');
+        }
+        roamFrameId = requestAnimationFrame(roamLoop);
+        return;
+      }
+
+      // 2. Siesta inteligente tras 6 segundos sin movimiento de mouse ni scroll
+      const idleMs = now - lastMouseMoveTime;
+      if (idleMs > 6000 && !isCatSleeping) {
+        isCatSleeping = true;
+        currentCardSurface = null;
+        if (mini) {
+          mini.setPose('sleep');
+          mini.setHeading(0);
+        }
+        if (glyphStatus) glyphStatus.textContent = 'SLEEP // Zzz';
+        say('Zzz... siesta gatuna 🐾');
+        zzzTimer = 0.4;
+      }
+
+      if (isCatSleeping) {
+        zzzTimer -= dt;
+        if (zzzTimer <= 0) {
+          zzzTimer = 1.6 + Math.random() * 0.8;
+          spawnAsciiParticles('sleep', 1, currentX + 110, currentY + 45);
+        }
+        roamFrameId = requestAnimationFrame(roamLoop);
+        return;
+      }
+
+      // 3. Modo reactivo con el cursor (< 260px)
+      const catCenterX = currentX + 110;
+      const catCenterY = currentY + 80;
+      let isFollowingMouse = false;
+
+      if (mouseX > 0 && mouseY > 0) {
+        const distToMouse = Math.hypot(mouseX - catCenterX, mouseY - catCenterY);
+        if (distToMouse < 260) {
+          isFollowingMouse = true;
+          // Comprobar si el cursor está sobre un elemento interactivo para no estorbar
+          let isInteractive = false;
+          if (typeof document !== 'undefined' && typeof document.elementFromPoint === 'function') {
+            try {
+              const elUnder = document.elementFromPoint(mouseX, mouseY);
+              if (elUnder && elUnder.closest && elUnder.closest('button, a, input, textarea, select, .interactive, .terminal-tab, .portfolio-filter-btn, .theme-btn')) {
+                isInteractive = true;
+              }
+            } catch (e) {}
+          }
+
+          if (isInteractive) {
+            // Guardar distancia respetuosa (~60px) para dejar al usuario hacer click libremente
+            const headingAngle = mouseX >= catCenterX ? 0.7 : -0.7;
+            if (mini) {
+              mini.setHeading(headingAngle);
+              mini.setPose('sit');
+            }
+            if (glyphStatus) glyphStatus.textContent = 'WATCH // CURSOR';
+          } else {
+            // Seguir al cursor por la página o tarjetas
+            targetX = Math.max(16, Math.min(window.innerWidth - 250, mouseX - 110));
+            targetY = Math.max(16, Math.min(window.innerHeight - 190, mouseY - 70));
+            roamState = 'walking';
+            if (glyphStatus) glyphStatus.textContent = 'FOLLOW // MOUSE';
+          }
+        }
+      }
+
+      if (roamState === 'walking') {
+        const dx = targetX - currentX;
+        const dy = targetY - currentY;
+        const dist = Math.hypot(dx, dy);
+
+        if (dist > 8) {
+          const step = Math.min(dist, walkSpeedPx * dt);
+          const nx = dx / dist;
+          const ny = dy / dist;
+          currentX += nx * step;
+          currentY += ny * step;
+
+          // Si está escalando o cambiando de altura, añade un arco parabólico de salto
+          let arcOffset = 0;
+          if (Math.abs(dy) > 35) {
+            const progress = 1 - Math.min(1, dist / 180);
+            arcOffset = -Math.sin(progress * Math.PI) * 32;
+          }
+
+          stage.style.left = Math.round(currentX) + 'px';
+          stage.style.top = Math.round(currentY + arcOffset) + 'px';
+          stage.style.right = 'auto';
+          stage.style.bottom = 'auto';
+
+          // Orientación 3D del gato según dirección de avance
+          if (mini) {
+            const targetHeading = nx >= 0 ? 0.72 : -0.72;
+            mini.setHeading(targetHeading);
+            mini.setPose('walk');
+          }
+        } else {
+          // Llegada al destino / cornisa
+          currentX = targetX;
+          currentY = targetY;
+          roamState = 'idle';
+          idleWaitTimer = 2.8 + Math.random() * 3.8;
+          if (mini) {
+            mini.setPose('sit');
+            mini.setHeading(0);
+          }
+          if (glyphStatus) glyphStatus.textContent = isClimbing ? 'CARD // TOP' : 'REST // ASCII';
+          
+          if (!isFollowingMouse) {
+            if (isClimbing) {
+              const climbPhrases = [
+                '¡Trepé a la tarjeta! 🐾',
+                'Excelente vista desde aquí 🔭',
+                'Supervisando el portafolio...',
+                'Un gato en la cornisa 🐈‍⬛',
+                'Observando los proyectos~'
+              ];
+              say(climbPhrases[Math.floor(Math.random() * climbPhrases.length)]);
+              if (mini && Math.random() < 0.6) mini.playMeow();
+            } else if (Math.random() < 0.32) {
+              const phrases = ['¡Miau!', 'Paseando en modo ASCII...', 'Explorando código 🐾', 'Purr~', '¡Lindo portafolio!'];
+              say(phrases[Math.floor(Math.random() * phrases.length)]);
+              if (mini) mini.playMeow();
+            }
+          }
+        }
+      } else {
+        // Idle descansando en la cornisa o suelo
+        if (!isFollowingMouse) {
+          idleWaitTimer -= dt;
+          if (idleWaitTimer <= 0) {
+            pickNextWaypoint();
+          }
+        }
+      }
+
+      roamFrameId = requestAnimationFrame(roamLoop);
+    }
+
+    function startRoaming() {
+      if (isRoaming) return;
+      isRoaming = true;
+      clearTimeout(timeoutId); // El paseo activo anula el auto-cierre
+      stage.classList.add('cat-roaming', 'cat-visible');
+      stage.classList.remove('cat-peeking');
+      stage.setAttribute('aria-hidden', 'false');
+      isVisible = true;
+
+      const rect = stage.getBoundingClientRect();
+      currentX = rect.left;
+      currentY = rect.top;
+      stage.style.left = Math.round(currentX) + 'px';
+      stage.style.top = Math.round(currentY) + 'px';
+      stage.style.right = 'auto';
+      stage.style.bottom = 'auto';
+
+      if (walkBtn) {
+        walkBtn.textContent = 'BASE 🏠';
+        walkBtn.classList.add('is-active-btn');
+        walkBtn.title = 'Regresar a la base en la esquina';
+      }
+
+      // Activar modo ASCII transparente y atigrado al pasear
+      catMode = 'ascii';
+      isCatSleeping = false;
+      isCatPetting = false;
+      lastMouseMoveTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+      if (modeBtn) modeBtn.textContent = '3D';
+      if (mini) {
+        mini.setMode('ascii');
+        mini.setRoaming(true);
+        mini.setPose('walk');
+        mini.play();
+      }
+
+      say('¡A explorar tarjetas! 🐾');
+      pickNextWaypoint();
+      lastRoamTime = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
+      if (!roamFrameId) roamFrameId = requestAnimationFrame(roamLoop);
+    }
+
+    function stopRoaming(andDock = true) {
+      if (!isRoaming) return;
+      if (andDock) {
+        say('Volviendo a casa...');
+        currentCardSurface = null;
+        isClimbing = false;
+        targetX = Math.max(24, window.innerWidth - 274);
+        targetY = Math.max(24, window.innerHeight - 218);
+        roamState = 'walking';
+        if (mini) mini.setPose('walk');
+
+        const checkArrival = setInterval(() => {
+          if (Math.hypot(targetX - currentX, targetY - currentY) <= 14 || !isRoaming) {
+            clearInterval(checkArrival);
+            isRoaming = false;
+            if (roamFrameId) {
+              cancelAnimationFrame(roamFrameId);
+              roamFrameId = null;
+            }
+            stage.classList.remove('cat-roaming');
+            stage.style.left = 'auto';
+            stage.style.right = '22px';
+            stage.style.top = 'auto';
+            stage.style.bottom = '22px';
+
+            if (walkBtn) {
+              walkBtn.textContent = 'PASEAR 🐾';
+              walkBtn.classList.remove('is-active-btn');
+              walkBtn.title = 'Hacer que camine libremente por la página';
+            }
+            if (mini) {
+              mini.setRoaming(false);
+              mini.setHeading(0);
+              mini.setPose('play');
+            }
+            if (glyphStatus) glyphStatus.textContent = 'PLAY // 3D';
+            say('¡En casa!');
+            timeoutId = setTimeout(hideCat, 12000);
+          }
+        }, 120);
+      } else {
+        isRoaming = false;
+        if (roamFrameId) {
+          cancelAnimationFrame(roamFrameId);
+          roamFrameId = null;
+        }
+        stage.classList.remove('cat-roaming');
+        if (walkBtn) {
+          walkBtn.textContent = 'PASEAR 🐾';
+          walkBtn.classList.remove('is-active-btn');
+        }
+        if (mini) {
+          mini.setRoaming(false);
+          mini.setPose('play');
+        }
+      }
+    }
+
+    if (walkBtn) {
+      walkBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isRoaming) {
+          stopRoaming(true);
+        } else {
+          startRoaming();
+        }
+      });
+    }
+
+    // Close button on stage
+    if (closeStageBtn) {
+      closeStageBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        hideCat();
+      });
+    }
+
+    // Keep stage alive while user hovers over it
+    stage.addEventListener('mouseenter', () => {
+      if (!isRoaming) clearTimeout(timeoutId);
+    });
+    stage.addEventListener('mouseleave', () => {
+      if (isVisible && !isRoaming) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(hideCat, 6000);
+      }
+    });
+
+    stage.addEventListener('click', (e) => {
+      if (e.target && (e.target.closest('.cat3d-top-bar') || e.target.closest('button'))) return;
+      petCat(e);
+    });
+
+    function scheduleNext() {
+      clearTimeout(timeoutId);
+      timeoutId = setTimeout(showCat, 18000 + Math.random() * 24000);
+    }
+
+    function showCat(isManual) {
       if (isVisible) return;
-      positionNearRandomCard();
+      if (isManual) {
+        currentX = window.innerWidth - 274;
+        currentY = window.innerHeight - 218;
+        stage.style.left = 'auto';
+        stage.style.right = '22px';
+        stage.style.top = 'auto';
+        stage.style.bottom = '22px';
+      } else {
+        positionNearRandomCard();
+      }
       isVisible = true;
       stage.classList.add('cat-visible');
       stage.classList.remove('cat-peeking');
       void stage.offsetWidth;
       stage.classList.add('cat-peeking');
       stage.setAttribute('aria-hidden', 'false');
-      if (mini) mini.play();
-      else fallback.classList.add('is-active');
+      if (mini) {
+        mini.setRoaming(false);
+        mini.setPose('play');
+        mini.play();
+      } else if (fallback) {
+        fallback.classList.add('is-active');
+      }
       try {
         const r = stage.getBoundingClientRect();
         if (typeof window.__triggerRipple === 'function') {
@@ -3727,13 +4287,14 @@ function initCat3D() {
         }
       } catch (e) {}
       clearTimeout(timeoutId);
-      timeoutId = setTimeout(hideCat, 3400);
+      timeoutId = setTimeout(hideCat, isManual ? 18000 : 5500);
     }
 
     function hideCat() {
       if (!isVisible) return;
+      if (isRoaming) stopRoaming(false);
       isVisible = false;
-      stage.classList.remove('cat-visible', 'cat-peeking');
+      stage.classList.remove('cat-visible', 'cat-peeking', 'cat-roaming');
       stage.setAttribute('aria-hidden', 'true');
       if (mini) mini.hide();
       if (fallback) fallback.classList.remove('is-active', 'fallback-happy');
@@ -3742,7 +4303,14 @@ function initCat3D() {
 
     box.addEventListener('click', () => {
       if (!isVisible) return;
-      if (mini) mini.play();
+      if (mini) {
+        mini.playMeow();
+        if (!isRoaming) {
+          mini.play();
+        } else {
+          say('¡Miau! ❤️');
+        }
+      }
       if (fallback) fallback.classList.add('fallback-happy');
       try {
         const r = stage.getBoundingClientRect();
@@ -3750,14 +4318,56 @@ function initCat3D() {
           window.__triggerRipple(r.left + r.width * 0.5, r.top + r.height * 0.5, 1.0);
         }
       } catch (e) {}
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(hideCat, 2200);
+      if (!isRoaming) {
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout(hideCat, 5000);
+      }
     });
 
     box.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         box.click();
+      }
+    });
+
+    // Drag & Drop interaction for repositioning the cat
+    let isDraggingCat = false;
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
+
+    stage.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.cat3d-btn')) return;
+      isDraggingCat = true;
+      const rect = stage.getBoundingClientRect();
+      dragOffsetX = e.clientX - rect.left;
+      dragOffsetY = e.clientY - rect.top;
+      currentX = rect.left;
+      currentY = rect.top;
+      stage.style.cursor = 'grabbing';
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDraggingCat) return;
+      currentX = e.clientX - dragOffsetX;
+      currentY = e.clientY - dragOffsetY;
+      targetX = currentX;
+      targetY = currentY;
+      stage.style.left = Math.round(currentX) + 'px';
+      stage.style.top = Math.round(currentY) + 'px';
+      stage.style.right = 'auto';
+      stage.style.bottom = 'auto';
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (!isDraggingCat) return;
+      isDraggingCat = false;
+      stage.style.cursor = '';
+      if (mini) mini.playMeow();
+      if (isRoaming) {
+        roamState = 'idle';
+        idleWaitTimer = 1.8;
+        if (mini) mini.setPose('sit');
       }
     });
 
@@ -3773,11 +4383,14 @@ function initCat3D() {
     });
 
     const summonBtn = document.getElementById('summonCatBtn');
-    if (summonBtn) summonBtn.addEventListener('click', showCat);
+    if (summonBtn) summonBtn.addEventListener('click', () => showCat(true));
 
     timeoutId = setTimeout(showCat, 9000 + Math.random() * 5000);
-    window.__summonCat = showCat;
+    window.__summonCat = () => showCat(true);
     window.__hideCat = hideCat;
+    window.__startCatRoam = startRoaming;
+    window.__stopCatRoam = () => stopRoaming(true);
+    window.__isCatRoaming = () => isRoaming;
 
     if (typeof IntersectionObserver !== 'undefined') {
       const obs = new IntersectionObserver((entries) => {
