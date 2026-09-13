@@ -17,12 +17,12 @@
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta name="robots" content="index, follow" />
   <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.vercel-insights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' https://vitals.vercel-insights.com; frame-src 'self' blob:; object-src 'self' blob:; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'self'; upgrade-insecure-requests" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.vercel-insights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob: data: https://vitals.vercel-insights.com; frame-src 'self' blob:; object-src 'self' blob:; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'self';" />
   <link rel="canonical" href="https://portfolio-alessandro-2026.vercel.app/" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Share+Tech+Mono&family=Space+Grotesk:wght@400;500;600;700&family=VT323&display=swap" rel="stylesheet" />
   <title>Alessandro Altamirano | Datos &amp; Operaciones</title>
   <script type="application/ld+json">{"@context":"https://schema.org","@type":"Person","name":"Alessandro Edward Altamirano Salazar","jobTitle":"Industrial Engineering Student | Data & Operations","url":"https://www.linkedin.com/in/alessandroaltamirano","address":{"@type":"PostalAddress","addressLocality":"Lima","addressCountry":"PE"},"email":"mailto:alessandro.altamirano23@gmail.com","sameAs":["https://www.linkedin.com/in/alessandroaltamirano","https://github.com/legacyum"],"alumniOf":{"@type":"EducationalOrganization","name":"Universidad Continental"},"worksFor":{"@type":"Organization","name":"PRIMAX Ecuador"},"knowsAbout":["Power BI","Python","SQL","Excel Avanzado","SAP ERP","Bizagi","Inteligencia Artificial","Power Automate","Industrial Engineering","Data Analysis","Supply Chain","BPMN"]}</script>
   <link rel="stylesheet" href="styles.css" />
@@ -31,6 +31,7 @@
   <script src="vendor/OrbitControls.js" defer></script>
   <script src="vendor/cosmos-engine.js" defer></script>
   <script src="vendor/asciify-vanilla.js" defer></script>
+  <script src="vendor/crt-engine.js" defer></script>
   <script src="cat3d-mini.js" defer></script>
   <script src="script.js" defer></script>
   <!-- Vercel Web Analytics -->
@@ -43,10 +44,7 @@
   </script>
   <script defer src="/_vercel/speed-insights/script.js"></script>
 </head>
-<body>
-  <!-- =========================================================================
-       ReactBits Depth-Text 3D Preloader Stage
-       ========================================================================= -->
+<body class="crt-active">
   <div id="preloader" class="preloader" aria-label="Pantalla de carga inicial">
     <div class="preloader-ambient-grid" aria-hidden="true"></div>
     <div class="preloader-content">
@@ -94,6 +92,10 @@
     </div>
     <div class="cyber-vignette"></div>
   </div>
+  <!-- ThreeUI CrtBackground WebGL Zion Terminal Layer (Variant: terminal) -->
+  <div id="threeuiCrtBackground" class="threeui-background crt crt-terminal" aria-hidden="true">
+    <canvas id="threeuiCrtCanvas"></canvas>
+  </div>
   <canvas id="cyber-canvas" aria-hidden="true"></canvas>
   <div class="asciify-layer" id="asciify-layer" aria-hidden="true">
     <div class="asciify-content" id="asciify-content">
@@ -102,7 +104,77 @@
     <canvas id="asciify-canvas"></canvas>
   </div>
   <div class="noise" aria-hidden="true"></div>
-  <main class="shell" id="content" tabindex="-1">
+  <!-- ThreeUI CRT Fullscreen Optical Lens System -->
+  <div id="crtScreenOverlay" class="crt-screen-overlay" aria-hidden="true">
+    <div class="crt-scanlines"></div>
+    <div class="crt-grille"></div>
+    <div class="crt-vignette-bezel"></div>
+    <div class="crt-glass-reflection"></div>
+    <div class="crt-refresh-bar"></div>
+    <div id="crtBootFlash" class="crt-boot-flash" aria-hidden="true"></div>
+  </div>
+
+  <div class="crt-workstation-environment" id="crtWorkstation">
+    <div class="crt-monitor-casing" id="crtMonitorCasing">
+      <!-- Casing Top: ventilation vents & RobCo industrial badge -->
+      <div class="crt-bezel-top" aria-hidden="true">
+        <div class="crt-screw screw-tl"></div>
+        <div class="crt-vent-cluster">
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+        </div>
+        <div class="crt-chassis-badge">
+          <span class="crt-badge-glow"></span>
+          <span class="crt-badge-text">MODEL AA-2026 // ROBCO CRT-OS v4.2</span>
+        </div>
+        <div class="crt-vent-cluster">
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+          <div class="crt-vent-slot"></div>
+        </div>
+        <div class="crt-screw screw-tr"></div>
+      </div>
+
+      <!-- CRT Cathode Tube Screen -->
+      <div class="crt-tube-housing">
+        <div class="crt-glass-screen" id="crtGlassScreen">
+          <!-- Glass screen overlays: scanlines, grille, glass reflection, cathode vignette -->
+          <div class="crt-screen-overlays" aria-hidden="true">
+            <div class="crt-scanlines"></div>
+            <div class="crt-grille"></div>
+            <div class="crt-vignette-bezel"></div>
+            <div class="crt-glass-reflection"></div>
+            <div class="crt-refresh-bar"></div>
+            <div id="crtCathodeCollapse" class="crt-cathode-collapse" aria-hidden="true"></div>
+          </div>
+          
+          <!-- Gato 3D RobCo Companion — procedural Three.js mini-canvas en pantalla CRT -->
+          <div id="cat3DStage" aria-hidden="true" role="region" aria-label="Gatito 3D RobCo Companion">
+            <div class="cat-glyph-box cat3d-surface" role="button" tabindex="0" aria-label="Gatito 3D interactivo, clic para acariciar, doble clic para jugar">
+              <canvas id="cat3DCanvas" role="img" aria-label="Gatito 3D procedural RobCo"></canvas>
+              <pre id="cat3DFallback" class="cat3d-fallback" aria-hidden="true"> /\_/\
+( o.o )
+ &gt; ^ &lt;</pre>
+              <div id="catSpeechBubble" class="cat-speech-bubble" aria-hidden="true">¡miau!</div>
+              <div id="catSleepBubble" class="cat-sleep-bubble" aria-hidden="true">Zzz...</div>
+              <div id="catHeartContainer" class="cat-heart-container" aria-hidden="true"></div>
+            </div>
+          </div>
+
+          <!-- Scrollable Viewport holding the entire full portfolio -->
+          <div class="crt-screen-viewport" id="crtScreenViewport">
+            <main class="shell" id="content" tabindex="-1">
     <aside class="rail" aria-label="Perfil">
       <a class="brand" href="#top" id="brandLink" aria-label="Alessandro Altamirano - Ir al inicio">
         <div class="brand-mark-wrap">
@@ -134,7 +206,7 @@
       <div class="links"><div class="link-item"><a href="mailto:alessandro.altamirano23@gmail.com">email ↗</a><button class="copy-btn" data-copy="alessandro.altamirano23@gmail.com" type="button" aria-label="Copiar correo"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div><a href="https://www.linkedin.com/in/alessandroaltamirano" target="_blank" rel="noopener noreferrer">linkedin ↗</a><a href="https://github.com/legacyum" target="_blank" rel="noopener noreferrer">github ↗</a><a class="link-btn" id="openCvBtn" href="CV_Alessandro_Altamirano_Salazar_2026.pdf" target="_blank" rel="noopener noreferrer">ver_cv.pdf ↗</a></div>
     </aside>
     <section class="page" id="top">
-      <header class="top"><p><span class="dot"></span> LIMA, PERÚ <span>/</span> UTC−5</p><div class="utilities"><button class="utility" id="language" type="button" aria-label="Change language">EN</button><button class="utility" id="view" type="button" aria-pressed="false" data-t="recruiterMode">modo reclutador</button><button class="theme" id="theme" type="button">tema: verde</button><time id="clock"></time></div></header>
+      <header class="top"><p><span class="dot"></span> LIMA, PERÚ <span>/</span> UTC−5</p><div class="utilities"><button class="utility" id="language" type="button" aria-label="Change language">EN</button><button class="utility" id="view" type="button" aria-pressed="false" data-t="recruiterMode">modo reclutador</button><button class="theme" id="theme" type="button">tema: verde</button><span class="crt-status-static" aria-label="Monitor CRT desactivado"><span class="crt-tag">CRT:</span> <span>OFF</span></span><time id="clock"></time></div></header>
       <section class="hero">
         <div class="hero-grid">
           <div class="hero-intro">
@@ -486,47 +558,102 @@
         </div>
       </footer>
     </section>
-  </main>
-  <!-- Gato 3D Easter — procedural Three.js mini-canvas -->
-  <div id="cat3DStage" aria-hidden="true" role="status" aria-label="Gatito 3D interactivo sorpresa">
-    <div class="cat-glyph-box cat3d-surface" role="button" tabindex="0" aria-label="Gatito 3D, haz clic para jugar">
-      <div class="cat3d-top-bar">
-        <span class="cat3d-top-title" id="catStageTitle">CAT_3D // PROTO</span>
-        <div class="cat3d-actions">
-          <button type="button" class="cat3d-btn" id="catWalkBtn" title="Hacer que camine libremente por la página">PASEAR 🐾</button>
-          <button type="button" class="cat3d-btn" id="catModeBtn" title="Alternar render 3D / ASCII">ASCII</button>
-          <button type="button" class="cat3d-btn" id="catExpandBtn" title="Abrir laboratorio 3D en pantalla completa">⛶</button>
-          <button type="button" class="cat3d-btn" id="catCloseStageBtn" title="Cerrar">✕</button>
+            </main>
+          </div>
         </div>
       </div>
-      <canvas id="cat3DCanvas" role="img" aria-label="Gatito 3D procedural jugando con un ovillo"></canvas>
-      <pre id="cat3DFallback" class="cat3d-fallback" aria-hidden="true"> /\_/\
-( o.o )
- &gt; ^ &lt;</pre>
-      <span class="cat-glyph-loader" id="catGlyphStatus" aria-hidden="true">PLAY // 3D</span>
-      <div id="catSpeechBubble" class="cat-speech-bubble" aria-hidden="true">¡miau!</div>
+
+      <!-- Lower Hardware Controls Bezel -->
+      <div class="crt-hardware-dock" id="crtHardwareDock" aria-label="Controles físicos del monitor CRT">
+        <div class="crt-screw screw-bl"></div>
+        <div class="crt-controls-group">
+          <!-- Power switch + LED -->
+          <div class="crt-control-item">
+            <button type="button" class="crt-hw-btn crt-power-toggle" id="crtPowerBtn" aria-label="Interruptor de encendido del monitor">
+              <span class="crt-hw-icon">⏻</span>
+              <span class="crt-hw-label">POWER</span>
+            </button>
+            <div class="crt-power-led" id="crtPowerLed" title="Estado de alimentación"></div>
+          </div>
+
+          <!-- Phosphor color switch -->
+          <div class="crt-control-item">
+            <button type="button" class="crt-hw-btn" id="crtPhosphorBtn" aria-label="Cambiar fósforo catódico">
+              <span class="crt-hw-tag">FÓSFORO:</span>
+              <span class="crt-hw-val" id="crtPhosphorVal">VERDE P1</span>
+            </button>
+          </div>
+
+          <!-- Screen mode toggle (Desktop Monitor vs Fullscreen Tube) -->
+          <div class="crt-control-item">
+            <button type="button" class="crt-hw-btn" id="crtFullscreenBtn" aria-label="Alternar pantalla completa">
+              <span class="crt-hw-icon" id="crtFullscreenIcon">⛶</span>
+              <span class="crt-hw-label" id="crtFullscreenLabel">PANTALLA COMPLETA</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Decorative vintage analog rotary dials -->
+        <div class="crt-rotary-group" aria-hidden="true">
+          <div class="crt-rotary-dial" title="Control de brillo catódico">
+            <div class="crt-rotary-knob"><i></i></div>
+            <span>BRILLO</span>
+          </div>
+          <div class="crt-rotary-dial" title="Control de contraste">
+            <div class="crt-rotary-knob"><i></i></div>
+            <span>CONTRASTE</span>
+          </div>
+        </div>
+
+        <div class="crt-screw screw-br"></div>
+      </div>
     </div>
-    <div class="cat3d-tooltip" aria-hidden="true">CAT_3D · ¡miau! · click para jugar</div>
   </div>
   <dialog id="cvModal" class="cv-modal" aria-labelledby="cvModalTitle">
     <div class="cv-modal-box">
       <div class="cv-modal-header">
         <div class="circles"><i></i><i></i><i></i></div>
-        <p id="cvModalTitle">alessandro@portfolio:~/CV_Alessandro_Altamirano_2026.pdf</p>
+        <div class="cv-view-tabs" role="tablist" aria-label="Selector de formato de CV">
+          <button type="button" class="cv-tab-btn active" id="cvTabPaper" role="tab" aria-selected="true" aria-controls="cvPaperView">
+            <span class="tab-badge">3D</span> ThreeDPaper
+          </button>
+          <button type="button" class="cv-tab-btn" id="cvTabPdf" role="tab" aria-selected="false" aria-controls="cvPdfView">
+            <span>PDF</span>
+          </button>
+        </div>
+        <p id="cvModalTitle">alessandro@portfolio:~/cert_3d_nocturne.glsl</p>
         <div class="cv-modal-actions">
           <a class="button ghost cv-dl-btn" href="CV_Alessandro_Altamirano_Salazar_2026.pdf" download target="_blank" rel="noopener noreferrer"><span data-t="downloadCv">descargar</span> ↗</a>
           <button class="cv-close-btn" id="closeCvBtn" type="button" aria-label="Cerrar modal">✕</button>
         </div>
       </div>
       <div class="cv-modal-body">
-        <iframe src="CV_Alessandro_Altamirano_Salazar_2026.pdf" title="Currículum Vitae - Alessandro Altamirano">
-          <p style="padding: 24px; text-align: center; color: var(--muted, #888);">
-            Tu navegador no admite la visualización directa de documentos PDF.<br><br>
-            <a class="button ghost" href="CV_Alessandro_Altamirano_Salazar_2026.pdf" download target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 10px;">
-              Descargar o abrir CV en nueva pestaña ↗
-            </a>
-          </p>
-        </iframe>
+        <div id="cvPdfView" class="cv-view-panel" role="tabpanel" aria-labelledby="cvTabPdf" style="display: none;">
+          <iframe id="cvPdfIframe" src="CV_Alessandro_Altamirano_Salazar_2026.pdf" title="Currículum Vitae - Alessandro Altamirano">
+            <p style="padding: 24px; text-align: center; color: var(--muted, #888);">
+              Tu navegador no admite la visualización directa de documentos PDF.<br><br>
+              <a class="button ghost" href="CV_Alessandro_Altamirano_Salazar_2026.pdf" download target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 10px;">
+                Descargar o abrir CV en nueva pestaña ↗
+              </a>
+            </p>
+          </iframe>
+        </div>
+        <div id="cvPaperView" class="cv-view-panel active shader-frame" role="tabpanel" aria-labelledby="cvTabPaper">
+          <div
+            class="threeui-background three-d-paper"
+            role="group"
+            aria-label="Interactive translucent 3D paper certificate"
+            data-state="ready"
+          >
+            <iframe
+              id="threeDPaperFrame"
+              title="3D Paper"
+              src="shaders/3d-paper/sources/3d-paper.html"
+              sandbox="allow-scripts"
+              loading="eager"
+            ></iframe>
+          </div>
+        </div>
       </div>
     </div>
   </dialog>

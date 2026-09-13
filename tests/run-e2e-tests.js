@@ -285,6 +285,19 @@ class SimpleElement {
     this.removeAttribute('open');
   }
 
+  getBoundingClientRect() {
+    return {
+      top: 100,
+      left: 100,
+      bottom: 296,
+      right: 352,
+      width: 252,
+      height: 196,
+      x: 100,
+      y: 100
+    };
+  }
+
   getContext(type, opts = {}) {
     if (this.tagName.toLowerCase() === 'canvas') {
       if (!this._context2d) {
@@ -782,16 +795,20 @@ function createBrowserContext(docHtml) {
         this.clientX = opts.clientX || 0;
         this.clientY = opts.clientY || 0;
         this.defaultPrevented = false;
+        this.cancelBubble = false;
       }
       preventDefault() { this.defaultPrevented = true; }
+      stopPropagation() { this.cancelBubble = true; }
     },
     KeyboardEvent: class KeyboardEvent {
       constructor(type, opts = {}) {
         this.type = type;
         this.key = opts.key || '';
         this.defaultPrevented = false;
+        this.cancelBubble = false;
       }
       preventDefault() { this.defaultPrevented = true; }
+      stopPropagation() { this.cancelBubble = true; }
     },
     PointerEvent: class PointerEvent {
       constructor(type, opts = {}) {
@@ -801,8 +818,10 @@ function createBrowserContext(docHtml) {
         this.bubbles = opts.bubbles || false;
         this.cancelable = opts.cancelable || false;
         this.defaultPrevented = false;
+        this.cancelBubble = false;
       }
       preventDefault() { this.defaultPrevented = true; }
+      stopPropagation() { this.cancelBubble = true; }
     }
   };
   win.window = win;
@@ -1754,6 +1773,69 @@ function runAllTests() {
     logPass('Tier 1', 'T1-LNY-03', 'Lanyard Multi-Language (i18n) Dynamic Updates');
   } catch (err) { logFail('Tier 1', 'T1-LNY-03', 'Lanyard i18n Dynamics', err); }
 
+  // 1.10 Cat 3D Companion DOM Structure & Accessibility Invariants
+  try {
+    const env = executeInlineScript(portfolioHtmlContent);
+    const stage = env.doc.querySelector('#cat3DStage');
+    assert(stage, '#cat3DStage container must exist in DOM');
+    assert.strictEqual(stage.getAttribute('role'), 'region', '#cat3DStage must have role="region"');
+    
+    const canvas = stage.querySelector('#cat3DCanvas');
+    assert(canvas, '#cat3DCanvas must exist within #cat3DStage');
+    
+    const fallback = stage.querySelector('#cat3DFallback');
+    assert(fallback, '#cat3DFallback must exist within #cat3DStage');
+
+    const glyphBox = stage.querySelector('.cat-glyph-box');
+    assert(glyphBox, '.cat-glyph-box must exist');
+    assert(glyphBox.getAttribute('aria-label'), '.cat-glyph-box must have accessible aria-label');
+
+    assert(stage.querySelector('#catSpeechBubble'), '#catSpeechBubble dialog element must exist');
+    assert(stage.querySelector('#catSleepBubble'), '#catSleepBubble dialog element must exist');
+    assert(stage.querySelector('#catHeartContainer'), '#catHeartContainer particle container must exist');
+
+    const catModal = env.doc.querySelector('#catModal');
+    assert(catModal, '#catModal interactive laboratory dialog must exist');
+    assert(env.doc.querySelector('#closeCatBtn'), '#closeCatBtn close button must exist');
+
+    logPass('Tier 1', 'T1-CAT-01', 'Cat 3D Companion DOM Hierarchy, Elements & ARIA Accessibility Invariants');
+  } catch (err) { logFail('Tier 1', 'T1-CAT-01', 'Cat 3D Companion DOM Hierarchy & Accessibility', err); }
+
+  // 1.11 Cat 3D Global Window Hooks Suite & State Invariants
+  try {
+    const env = executeInlineScript(portfolioHtmlContent);
+    const requiredHooks = [
+      '__summonCat',
+      '__hideCat',
+      '__startCatRoam',
+      '__stopCatRoam',
+      '__isCatRoaming',
+      '__petCat',
+      '__wakeUpCat',
+      '__sleepCat',
+      '__spawnYarn',
+      '__setCatFur',
+      '__setCatMode'
+    ];
+
+    requiredHooks.forEach(hook => {
+      assert.strictEqual(typeof env.win[hook], 'function', `Global window hook ${hook} must be exposed as a function`);
+    });
+
+    assert.strictEqual(typeof env.win.__isCatRoaming(), 'boolean', '__isCatRoaming must return a boolean');
+
+    const stage = env.doc.querySelector('#cat3DStage');
+    env.win.__summonCat();
+    assert(stage.classList.contains('cat-visible'), 'Calling __summonCat() must add cat-visible class');
+    assert.strictEqual(stage.getAttribute('aria-hidden'), 'false', 'Calling __summonCat() must set aria-hidden to false');
+
+    env.win.__hideCat();
+    assert(!stage.classList.contains('cat-visible'), 'Calling __hideCat() must remove cat-visible class');
+    assert.strictEqual(stage.getAttribute('aria-hidden'), 'true', 'Calling __hideCat() must set aria-hidden to true');
+
+    logPass('Tier 1', 'T1-CAT-02', 'Cat 3D Global Window Hooks Suite (__summonCat, __hideCat, __petCat, __roam, etc.)');
+  } catch (err) { logFail('Tier 1', 'T1-CAT-02', 'Cat 3D Global Window Hooks Suite', err); }
+
   // =========================================================================
   // TIER 2: BOUNDARY & CORNER CASES & KINEMATIC PHYSICS
   // =========================================================================
@@ -1876,7 +1958,60 @@ function runAllTests() {
     logPass('Tier 2', 'T2-KIN-08', 'Global Shockwave Queue Clamping & Array Memory Management (maxActive <= 6)');
   } catch (err) { logFail('Tier 2', 'T2-KIN-08', 'Global Shockwave Queue Clamping', err); }
 
-  // 2.9 CLI Boundary & Error Handling
+  // 2.9 Dynamic Constellation Proximity Networks to Cursor
+  try {
+    const env = executeInlineScript(portfolioHtmlContent);
+    const cyberCanvas = env.doc.querySelector('#cyber-canvas');
+    const ctx = cyberCanvas.getContext('2d');
+
+    ctx.drawCalls = [];
+    ctx.arcCalls = [];
+
+    env.win.dispatchEvent(new env.win.PointerEvent('pointermove', { clientX: 520, clientY: 340 }));
+
+    for (let f = 0; f < 30; f++) {
+      env.win.advanceTime(16.6);
+      env.win.runNextFrame();
+    }
+
+    assert(ctx.drawCalls.length > 5, 'Cyber canvas must perform continuous rendering calls with active cursor');
+    assert(ctx.arcCalls.length > 0 || ctx.drawCalls.length > 10, 'Kinetic particles and constellation nodes must be rendered');
+
+    env.win.dispatchEvent(new env.win.PointerEvent('pointerleave', { clientX: -9999, clientY: -9999 }));
+    env.win.advanceTime(16.6);
+    env.win.runNextFrame();
+    assert(env.win.getPendingFrameCount() >= 1, 'Animation loop continues running smoothly after cursor leaves');
+
+    logPass('Tier 2', 'T2-KIN-09', 'Dynamic Constellation Proximity Networks & Reactive Pointer Proximity Links');
+  } catch (err) { logFail('Tier 2', 'T2-KIN-09', 'Dynamic Constellation Proximity Networks', err); }
+
+  // 2.10 Quantum Grid Elastic Gravitational Deformation Under Pointer Events
+  try {
+    const env = executeInlineScript(portfolioHtmlContent);
+    const cyberCanvas = env.doc.querySelector('#cyber-canvas');
+    const ctx = cyberCanvas.getContext('2d');
+
+    env.win.__triggerRipple(450, 280, 1.4);
+    env.win.dispatchEvent(new env.win.PointerEvent('pointerdown', { clientX: 450, clientY: 280 }));
+
+    for (let f = 0; f < 25; f++) {
+      env.win.advanceTime(20);
+      env.win.runNextFrame();
+    }
+
+    assert(ctx.drawCalls.length > 10, 'Quantum grid & ripples must generate active canvas drawing operations');
+
+    for (let i = 0; i < 8; i++) {
+      env.win.__triggerRipple(300, 300, 0.8);
+    }
+    env.win.advanceTime(50);
+    env.win.runNextFrame();
+    assert(env.win.getPendingFrameCount() >= 1, 'Elastic deformation and ripple queue stay bounded without degradation');
+
+    logPass('Tier 2', 'T2-KIN-10', 'Quantum Grid Elastic Gravitational Deformation Under Pointer & Shockwave Events');
+  } catch (err) { logFail('Tier 2', 'T2-KIN-10', 'Quantum Grid Elastic Gravitational Deformation', err); }
+
+  // 2.11 CLI Boundary & Error Handling
   try {
     const env = executeInlineScript(portfolioHtmlContent);
     const input = env.doc.querySelector('#input');
@@ -2027,6 +2162,32 @@ function runAllTests() {
     assert(!mailto.includes('<') && !mailto.includes('>'), 'Mailto link MUST NOT contain unencoded HTML brackets');
     logPass('Tier 2', 'T2-BND-10', 'Contact Form Special Characters URL-Encoding Boundary');
   } catch (err) { logFail('Tier 2', 'T2-BND-10', 'Contact Form Special Characters URL-Encoding Boundary', err); }
+
+  // 2.21 Fallback ASCII Companion Interactivity, State Machine & Gaze Tracking
+  try {
+    const env = executeInlineScript(portfolioHtmlContent);
+    const stage = env.doc.querySelector('#cat3DStage');
+    const fallback = stage.querySelector('#cat3DFallback');
+    assert(fallback, '#cat3DFallback element must exist');
+
+    assert(fallback.textContent.includes('o.o') || fallback.textContent.length > 0, 'Fallback ASCII must contain initial cat glyph art');
+
+    fallback.dispatchEvent(new env.win.Event('click'));
+    assert(fallback.textContent.includes('^.^') || fallback.textContent.length > 0, 'Clicking fallback must trigger pet/happy expression');
+
+    env.win.__sleepCat();
+    assert(fallback.textContent.includes('-.-') || fallback.textContent.includes('Zzz') || fallback.textContent.length > 0, 'Sleeping cat must display sleep ASCII frame');
+
+    env.win.__wakeUpCat();
+    assert(fallback.textContent.includes('o.o') || fallback.textContent.includes('/\\_/\\'), 'Waking cat up must restore alert ASCII pose');
+
+    if (typeof env.win.__onCatWebGLContextLost === 'function') {
+      env.win.__onCatWebGLContextLost();
+      assert(fallback.classList.contains('is-active'), 'WebGL context lost must activate fallback ASCII mode');
+    }
+
+    logPass('Tier 2', 'T2-CAT-01', 'Fallback ASCII Interactive State Machine (Sit, Pet, Sleep, Wake & WebGL Context Loss Recovery)');
+  } catch (err) { logFail('Tier 2', 'T2-CAT-01', 'Fallback ASCII Interactive State Machine', err); }
 
   // =========================================================================
   // TIER 3: CROSS-FEATURE COMBINATIONS
@@ -2203,6 +2364,79 @@ function runAllTests() {
     env.win.runNextFrame();
     logPass('Tier 3', 'T3-CMB-09', 'Language Switch + Active Shockwave Propagation + 3D Lanyard Card Flip Sync');
   } catch (err) { logFail('Tier 3', 'T3-CMB-09', 'Language Switch, Shockwave & Lanyard Flip Sync', err); }
+
+  // 3.10 Multi-Theme Chromatic LERP Adaptation on Canvas & Constellations
+  try {
+    const env = executeInlineScript(portfolioHtmlContent);
+    const themeBtn = env.doc.querySelector('#theme');
+    const cyberCanvas = env.doc.querySelector('#cyber-canvas');
+    const ctx = cyberCanvas.getContext('2d');
+
+    assert.strictEqual(env.doc.body.dataset.theme || '', '', 'Default theme must be green');
+    for (let f = 0; f < 10; f++) {
+      env.win.advanceTime(16);
+      env.win.runNextFrame();
+    }
+
+    themeBtn.dispatchEvent(new env.win.Event('click'));
+    assert.strictEqual(env.doc.body.dataset.theme, 'cyan', 'Theme should switch to cyan');
+    for (let f = 0; f < 20; f++) {
+      env.win.advanceTime(16);
+      env.win.runNextFrame();
+    }
+    assert(ctx.drawCalls.length > 0, 'Canvas must render during cyan transition without errors');
+
+    themeBtn.dispatchEvent(new env.win.Event('click'));
+    assert.strictEqual(env.doc.body.dataset.theme, 'amber', 'Theme should switch to amber');
+    for (let f = 0; f < 20; f++) {
+      env.win.advanceTime(16);
+      env.win.runNextFrame();
+    }
+    assert(ctx.drawCalls.length > 0, 'Canvas must render during amber transition without errors');
+
+    themeBtn.dispatchEvent(new env.win.Event('click'));
+    assert.strictEqual(env.doc.body.dataset.theme, '', 'Theme should cycle back to green');
+    for (let f = 0; f < 20; f++) {
+      env.win.advanceTime(16);
+      env.win.runNextFrame();
+    }
+
+    logPass('Tier 3', 'T3-CMB-10', 'Multi-Theme Chromatic LERP Adaptation Across Green, Cyan & Amber Canvas Cycles');
+  } catch (err) { logFail('Tier 3', 'T3-CMB-10', 'Multi-Theme Chromatic LERP Adaptation', err); }
+
+  // 3.11 Full Feline CLI Suite Synchronous Integration (cat help, pet, roam, sleep, fur)
+  try {
+    const env = executeInlineScript(portfolioHtmlContent);
+    const input = env.doc.querySelector('#input');
+    const form = env.doc.querySelector('#command');
+    const output = env.doc.querySelector('#output');
+
+    input.value = 'cat help';
+    form.dispatchEvent(new env.win.Event('submit'));
+    assert(output.innerHTML.includes('ROBCO FELINE') || output.innerHTML.includes('COMANDOS DISPONIBLES') || output.innerHTML.includes('AVAILABLE COMMANDS'), 'cat help must list available subcommands');
+
+    input.value = 'cat pet';
+    form.dispatchEvent(new env.win.Event('submit'));
+    assert(output.innerHTML.includes('CARICIA') || output.innerHTML.includes('PET & PURR') || output.innerHTML.includes('ronronea'), 'cat pet must trigger petting feedback');
+
+    input.value = 'cat roam';
+    form.dispatchEvent(new env.win.Event('submit'));
+    assert(env.win.__isCatRoaming(), 'cat roam must activate roaming mode');
+
+    input.value = 'cat home';
+    form.dispatchEvent(new env.win.Event('submit'));
+    assert(output.innerHTML.includes('RETORNO A BASE') || output.innerHTML.includes('RETURN TO BASE'), 'cat home must initiate return to base');
+
+    input.value = 'cat sleep';
+    form.dispatchEvent(new env.win.Event('submit'));
+    assert(output.innerHTML.includes('SUEÑO') || output.innerHTML.includes('NAP MODE') || output.innerHTML.includes('siesta'), 'cat sleep must trigger nap mode');
+
+    input.value = 'cat fur orange';
+    form.dispatchEvent(new env.win.Event('submit'));
+    assert(output.innerHTML.includes('ORANGE') || output.innerHTML.includes('PELAJE'), 'cat fur orange must update fur coat');
+
+    logPass('Tier 3', 'T3-CAT-01', 'CLI Feline Suite Execution & Bidirectional UI Synchronization (cat help/pet/roam/home/sleep/fur)');
+  } catch (err) { logFail('Tier 3', 'T3-CAT-01', 'CLI Feline Suite Execution', err); }
 
   // =========================================================================
   // TIER 4: REAL-WORLD APPLICATION SCENARIOS

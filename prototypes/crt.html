@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Alessandro Altamirano — Terminal CRT Monitor // Data & Ops</title>
+  <meta name="description" content="Portafolio interactivo de Alessandro Altamirano Salazar presentado en un monitor físico retro CRT estilo Fallout con tubo de cristal curvado, controles mecánicos de hardware y contenido 100% clickeable." />
+  <link rel="icon" href="../src/favicon.svg" type="image/svg+xml" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    /* =========================================================================
+       CSS Variables: Dynamic Phosphor Color Palettes
+       ========================================================================= */
+    :root {
+      /* Green Phosphor P1 (Default / Matrix / RobCo) */
+      --p-text: #8df0b4;
+      --p-bright: #afffd0;
+      --p-glow: rgba(28, 236, 132, 0.85);
+      --p-border: rgba(28, 236, 132, 0.4);
+      --p-border-hover: #1cec84;
+      --p-bg: #03100a;
+      --p-tube-bg: #020804;
+      --p-tag-text: #ffba5e;
+      --p-tag-border: rgba(255, 186, 94, 0.4);
+      --p-accent: #1cec84;
+    }
+
+    [data-phosphor="amber"] {
+      /* Amber Phosphor P3 (Fallout New Vegas / Pip-Boy) */
+      --p-text: #ffce7a;
+      --p-bright: #ffe6b0;
+      --p-glow: rgba(255, 160, 48, 0.85);
+      --p-border: rgba(255, 170, 60, 0.45);
+      --p-border-hover: #ffaa3c;
+      --p-bg: #140a02;
+      --p-tube-bg: #0d0601;
+      --p-tag-text: #7beeff;
+      --p-tag-border: rgba(123, 238, 255, 0.4);
+      --p-accent: #ff9e28;
+    }
+
+    [data-phosphor="cyan"] {
+      /* Cyan Phosphor P4 (Cyber / Mainframe) */
+      --p-text: #7beeff;
+      --p-bright: #d4f8ff;
+      --p-glow: rgba(0, 230, 255, 0.85);
+      --p-border: rgba(0, 230, 255, 0.4);
+      --p-border-hover: #00e6ff;
+      --p-bg: #030f16;
+      --p-tube-bg: #02090e;
+      --p-tag-text: #ffba5e;
+      --p-tag-border: rgba(255, 186, 94, 0.4);
+      --p-accent: #00f0ff;
+    }
+
+    /* =========================================================================
+       Base Reset & Desk Environment
+       ========================================================================= */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #020503;
+      font-family: "Share Tech Mono", "DM Mono", ui-monospace, monospace;
+      color: var(--p-text);
+      user-select: text;
+      -webkit-user-select: text;
+    }
+
+    /* Outer Vintage Desk Room Setup */
+    .crt-desk-environment {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 50% 45%, #0a110d 0%, #030604 70%, #010201 100%);
+      padding: 14px;
+      overflow: hidden;
+    }
+
+    /* Ambient Desk Wall Vignette */
+    .crt-desk-environment::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 40%, rgba(0,0,0,0.85) 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* =========================================================================
+       Physical Vintage CRT Monitor Casing (Fallout / 1980s Retro Computer)
+       ========================================================================= */
+    .crt-monitor-casing {
+      position: relative;
+      z-index: 10;
+      width: min(1360px, 98vw);
+      height: min(940px, 96vh);
+      background: linear-gradient(175deg, #272e29 0%, #1a201c 35%, #131714 80%, #0d100e 100%);
+      border-radius: 26px;
+      padding: 18px 24px 16px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.96),
+                  inset 0 2px 4px rgba(255, 255, 255, 0.16),
+                  inset 0 -5px 10px rgba(0, 0, 0, 0.85),
+                  0 0 0 1px #090c0a;
+      border: 3px solid #333d36;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.3s ease;
+    }
+
+    /* Fullscreen Mode Expansion */
+    body.is-fullscreen-view .crt-monitor-casing {
+      width: 100vw;
+      height: 100vh;
+      border-radius: 0;
+      border: none;
+      padding: 10px 14px 10px;
+    }
+
+    /* Casing Header: Vent Grille & Identification Badge */
+    .crt-casing-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 8px;
+    }
+
+    .crt-vent-grille {
+      display: flex;
+      gap: 6px;
+    }
+
+    .crt-vent-slot {
+      width: 32px;
+      height: 6px;
+      background: #080b09;
+      border-radius: 3px;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.9), 0 1px 1px rgba(255,255,255,0.06);
+    }
+
+    .crt-metal-badge {
+      background: linear-gradient(135deg, #445148 0%, #252d27 100%);
+      border: 1px solid #5a6b60;
+      border-radius: 4px;
+      padding: 4px 14px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: #cbe0d3;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.25);
+      text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .crt-metal-screws {
+      display: flex;
+      gap: 8px;
+    }
+
+    .crt-screw {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #1d241f;
+      box-shadow: inset 0 1px 1px rgba(0,0,0,0.9), 0 1px 1px rgba(255,255,255,0.1);
+      position: relative;
+    }
+
+    .crt-screw::after {
+      content: "";
+      position: absolute;
+      top: 3px;
+      left: 1px;
+      width: 6px;
+      height: 1.5px;
+      background: #3c4640;
+    }
+
+    /* =========================================================================
+       The CRT Bezel & Curved Glass Screen Tube
+       ========================================================================= */
+    .crt-bezel-frame {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      background: #060907;
+      border-radius: 20px;
+      padding: 12px;
+      box-shadow: inset 0 10px 30px rgba(0,0,0,0.96),
+                  inset 0 2px 8px rgba(0,0,0,0.95),
+                  0 1px 2px rgba(255,255,255,0.1);
+      border: 2px solid #141b16;
+      display: flex;
+    }
+
+    .crt-glass-screen {
+      position: relative;
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--p-tube-bg);
+      box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.95),
+                  inset 0 0 25px rgba(0, 0, 0, 0.9);
+      display: flex;
+    }
+
+    /* ThreeUI CRT Background Canvas Layer */
+    .threeui-background {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+      opacity: 0.9;
+    }
+
+    .threeui-background canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Glass Optical Layers: Tube Curvature, Scanlines & Screen Glare */
+    .crt-screen-optics {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 6;
+      overflow: hidden;
+    }
+
+    /* CRT Phosphor Scanlines */
+    .crt-screen-optics::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.42) 50%),
+                  linear-gradient(90deg, rgba(255, 0, 0, 0.025), rgba(0, 255, 0, 0.015), rgba(0, 0, 255, 0.025));
+      background-size: 100% 3px, 4px 100%;
+      opacity: 0.7;
+    }
+
+    /* Tube Corner Vignette & Diagonal Screen Reflection */
+    .crt-screen-optics::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, transparent 35%, transparent 100%);
+      box-shadow: inset 0 0 85px rgba(0, 0, 0, 0.95),
+                  inset 0 0 35px rgba(0, 0, 0, 0.85);
+    }
+
+    /* Tube Power Collapse Animation */
+    .crt-glass-screen.is-power-off {
+      filter: brightness(0);
+      transition: filter 0.3s ease;
+    }
+
+    .crt-glass-screen.is-power-off * {
+      pointer-events: none !important;
+    }
+
+    /* =========================================================================
+       Interactive HTML Portafolio Inside the CRT Screen (100% Clickable & Scrollable)
+       ========================================================================= */
+    .crt-screen-viewport {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 32px 36px 48px;
+      scroll-behavior: smooth;
+    }
+
+    /* Phosphor CRT Scrollbar */
+    .crt-screen-viewport::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .crt-screen-viewport::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.65);
+      border-left: 1px solid var(--p-border);
+    }
+
+    .crt-screen-viewport::-webkit-scrollbar-thumb {
+      background: var(--p-accent);
+      border-radius: 4px;
+      box-shadow: 0 0 10px var(--p-glow);
+    }
+
+    .crt-screen-viewport::-webkit-scrollbar-thumb:hover {
+      background: var(--p-bright);
+      box-shadow: 0 0 16px var(--p-glow);
+    }
+
+    /* Content Layout */
+    .crt-container {
+      max-width: 1020px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Typography */
+    .crt-glow {
+      color: var(--p-text);
+      text-shadow: 0 0 8px var(--p-glow);
+    }
+
+    .crt-bright {
+      color: var(--p-bright);
+      text-shadow: 0 0 10px var(--p-glow);
+    }
+
+    .crt-amber {
+      color: var(--p-tag-text);
+      text-shadow: 0 0 8px rgba(255, 186, 94, 0.7);
+    }
+
+    .crt-dim {
+      opacity: 0.75;
+    }
+
+    /* Top Sticky Screen Nav Header */
+    .crt-screen-nav-bar {
+      position: sticky;
+      top: -32px;
+      z-index: 50;
+      background: rgba(3, 16, 10, 0.95);
+      border: 1px solid var(--p-border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,0,0,0.5);
+      backdrop-filter: blur(10px);
+      flex-wrap: wrap;
+    }
+
+    .crt-nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--p-bright);
+    }
+
+    .crt-nav-pip {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--p-accent);
+      box-shadow: 0 0 8px var(--p-accent);
+      animation: pulse 1.6s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .crt-nav-links {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    /* Action Buttons (100% Clickable) */
+    .crt-btn {
+      background: rgba(3, 18, 10, 0.88);
+      border: 1px solid var(--p-border);
+      color: var(--p-text);
+      font-family: inherit;
+      font-size: 0.74rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 6px 12px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    .crt-btn:hover {
+      background: var(--p-accent);
+      color: #020704;
+      border-color: var(--p-accent);
+      box-shadow: 0 0 16px var(--p-glow);
+      transform: translateY(-1px);
+    }
+
+    .crt-btn:active {
+      transform: translateY(1px);
+    }
+
+    .crt-btn.primary {
+      background: rgba(28, 236, 132, 0.2);
+      border-color: var(--p-border-hover);
+      color: var(--p-bright);
+    }
+
+    /* Section Cards */
+    .crt-box {
+      background: rgba(3, 16, 10, 0.88);
+      border: 1px solid var(--p-border);
+      border-radius: 8px;
+      padding: 22px;
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), inset 0 0 15px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(6px);
+      transition: border-color 0.2s ease;
+    }
+
+    .crt-box:hover {
+      border-color: var(--p-border-hover);
+    }
+
+    .crt-box-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px dashed var(--p-border);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .crt-box-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--p-bright);
+    }
+
+    .crt-box-tag {
+      font-size: 0.7rem;
+      color: var(--p-tag-text);
+      border: 1px solid var(--p-tag-border);
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    /* Hero Banner */
+    .crt-hero-box {
+      text-align: center;
+      padding: 26px 16px;
+      background: rgba(2, 14, 8, 0.92);
+      border: 1px solid var(--p-border);
+      border-radius: 10px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+    }
+
+    .crt-ascii {
+      font-family: monospace;
+      font-size: 0.72rem;
+      line-height: 1.15;
+      color: var(--p-accent);
+      text-shadow: 0 0 10px var(--p-glow);
+      white-space: pre;
+      overflow-x: auto;
+      margin-bottom: 16px;
+      user-select: none;
+    }
+
+    .crt-hero-h1 {
+      font-size: 1.55rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: var(--p-bright);
+      text-shadow: 0 0 12px var(--p-glow);
+      margin-bottom: 6px;
+    }
+
+    .crt-hero-sub {
+      font-size: 0.88rem;
+      color: var(--p-tag-text);
+      margin-bottom: 12px;
+    }
+
+    /* Metrics Grid */
+    .crt-metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 14px;
+    }
+
+    .crt-metric-item {
+      background: rgba(1, 10, 5, 0.85);
+      border: 1px solid var(--p-border);
+      border-radius: 6px;
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .crt-metric-item:hover {
+      border-color: var(--p-border-hover);
+      background: rgba(28, 236, 132, 0.1);
+      transform: translateY(-2px);
+      box-shadow: 0 0 16px var(--p-glow);
+    }
+
+    .crt-metric-num {
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--p-bright);
+      text-shadow: 0 0 10px var(--p-glow);
+      margin-bottom: 4px;
+    }
+
+    .crt-metric-desc {
+      font-size: 0.76rem;
+      line-height: 1.35;
+    }
+
+    /* STAR Projects Grid */
+    .crt-cases-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 16px;
+    }
+
+    .crt-case-item {
+      background: rgba(1, 10, 5, 0.9);
+      border: 1px solid var(--p-border);
+      border-radius: 8px;
+      padding: 18px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+    }
+
+    .crt-case-item:hover {
+      border-color: var(--p-border-hover);
+      box-shadow: 0 0 20px var(--p-glow);
+      transform: translateY(-2px);
+      background: rgba(28, 236, 132, 0.08);
+    }
+
+    .crt-case-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--p-bright);
+    }
+
+    .crt-tag-pill {
+      font-size: 0.68rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: rgba(28, 236, 132, 0.12);
+      border: 1px solid var(--p-border);
+      color: var(--p-text);
+    }
+
+    /* Terminal CLI Window */
+    .crt-cli-window {
+      background: #010603;
+      border: 1px solid var(--p-accent);
+      border-radius: 8px;
+      padding: 16px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    }
+
+    .crt-cli-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .crt-cli-log {
+      min-height: 120px;
+      max-height: 220px;
+      overflow-y: auto;
+      font-size: 0.78rem;
+      line-height: 1.45;
+      margin-bottom: 12px;
+      white-space: pre-wrap;
+    }
+
+    .crt-cli-prompt {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      padding-top: 10px;
+    }
+
+    .crt-cli-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--p-text);
+      font-family: inherit;
+      font-size: 0.82rem;
+      caret-color: var(--p-accent);
+    }
+
+    /* =========================================================================
+       Physical Controls Bar on Monitor Casing Bottom (Mechanical Buttons)
+       ========================================================================= */
+    .crt-casing-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 2px 10px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .crt-mech-controls {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .crt-power-group {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #111613;
+      border: 1px solid #29332c;
+      padding: 4px 10px;
+      border-radius: 6px;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.8);
+    }
+
+    .crt-power-led {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #1cec84;
+      box-shadow: 0 0 10px #1cec84;
+      transition: all 0.3s ease;
+    }
+
+    .crt-power-led.is-off {
+      background: #4a1515;
+      box-shadow: 0 0 4px #ff3333;
+    }
+
+    .crt-mech-btn {
+      background: linear-gradient(180deg, #303b33 0%, #1c241f 100%);
+      border: 1px solid #445248;
+      border-bottom: 3px solid #0d120f;
+      color: #bed4c5;
+      font-family: inherit;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 6px 14px;
+      border-radius: 5px;
+      cursor: pointer;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.6);
+      transition: all 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      text-decoration: none;
+    }
+
+    .crt-mech-btn:hover {
+      background: linear-gradient(180deg, #3b493f 0%, #242e28 100%);
+      color: #ffffff;
+      border-color: #5c6e61;
+    }
+
+    .crt-mech-btn:active {
+      transform: translateY(2px);
+      border-bottom-width: 1px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .crt-casing-brand-tag {
+      font-size: 0.68rem;
+      color: #637568;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+    }
+
+    /* =========================================================================
+       Modals for STAR Cases & CV (Inside Glass Screen)
+       ========================================================================= */
+    .crt-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      z-index: 100;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .crt-modal-backdrop.is-open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .crt-modal-box {
+      width: min(800px, 94%);
+      max-height: 84%;
+      background: var(--p-bg);
+      border: 2px solid var(--p-accent);
+      border-radius: 10px;
+      box-shadow: 0 0 40px var(--p-glow), inset 0 0 20px rgba(0,0,0,0.6);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform: scale(0.96);
+      transition: transform 0.25s ease;
+    }
+
+    .crt-modal-backdrop.is-open .crt-modal-box {
+      transform: scale(1);
+    }
+
+    .crt-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      background: rgba(0, 0, 0, 0.5);
+      border-bottom: 1px solid var(--p-border);
+    }
+
+    .crt-modal-body {
+      padding: 18px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .crt-star-tabs {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--p-border);
+      padding-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .crt-tab-btn {
+      background: transparent;
+      border: 1px solid var(--p-border);
+      color: var(--p-text);
+      font-family: inherit;
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .crt-tab-btn.active {
+      background: var(--p-accent);
+      color: #020704;
+      font-weight: 700;
+      border-color: var(--p-accent);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: absolute;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(10px);
+      background: rgba(3, 16, 10, 0.96);
+      border: 1px solid var(--p-accent);
+      color: var(--p-bright);
+      padding: 8px 18px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.25s ease;
+      z-index: 200;
+      box-shadow: 0 0 25px var(--p-glow);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Retro Desk Room Environment -->
+  <div class="crt-desk-environment" id="deskEnv">
+
+    <!-- Physical Vintage CRT Monitor Casing -->
+    <div class="crt-monitor-casing" id="monitorCasing">
+
+      <!-- Monitor Top Casing: Ventilation Slots & Metal Specification Badge -->
+      <div class="crt-casing-header">
+        <div class="crt-vent-grille">
+          <span class="crt-vent-slot"></span>
+          <span class="crt-vent-slot"></span>
+          <span class="crt-vent-slot"></span>
+          <span class="crt-vent-slot"></span>
+          <span class="crt-vent-slot"></span>
+        </div>
+
+        <div class="crt-metal-badge">
+          <span class="crt-metal-screws"><i class="crt-screw"></i></span>
+          <span>MODEL AA-2026 // DATA &amp; OPS CRT TERMINAL</span>
+          <span class="crt-metal-screws"><i class="crt-screw"></i></span>
+        </div>
+
+        <div class="crt-vent-grille">
+          <span class="crt-vent-slot"></span>
+          <span class="crt-vent-slot"></span>
+          <span class="crt-vent-slot"></span>
+          <span class="crt-vent-slot"></span>
+          <span class="crt-vent-slot"></span>
+        </div>
+      </div>
+
+      <!-- Monitor Plastic Bezel Frame -->
+      <div class="crt-bezel-frame">
+
+        <!-- Curved Cathode Ray Glass Screen Tube -->
+        <div class="crt-glass-screen" id="glassScreen">
+
+          <!-- ThreeUI CRT WebGL Active Phosphor Raster -->
+          <div id="crtBackground" class="threeui-background crt crt-terminal">
+            <canvas id="crtCanvas"></canvas>
+          </div>
+
+          <!-- Glass Optics: Scanlines, Curvature Vignette & Reflection -->
+          <div class="crt-screen-optics" aria-hidden="true"></div>
+
+          <!-- 100% Clickable & Scrollable Portfolio Content Viewport -->
+          <main class="crt-screen-viewport" id="screenViewport">
+            <div class="crt-container">
+
+              <!-- Sticky Screen Navigation Bar -->
+              <header class="crt-screen-nav-bar">
+                <div class="crt-nav-brand">
+                  <span class="crt-nav-pip" aria-hidden="true"></span>
+                  <span>ALTAMIRANO.SYS // 2026</span>
+                </div>
+
+                <nav class="crt-nav-links" aria-label="Navegación de secciones">
+                  <button type="button" class="crt-btn" data-target="sec-bio">[ 1. BIO ]</button>
+                  <button type="button" class="crt-btn" data-target="sec-metrics">[ 2. MÉTRICAS ]</button>
+                  <button type="button" class="crt-btn" data-target="sec-cases">[ 3. CASOS STAR ]</button>
+                  <button type="button" class="crt-btn" data-target="sec-exp">[ 4. EXPERIENCIA ]</button>
+                  <button type="button" class="crt-btn" data-target="sec-skills">[ 5. SKILLS ]</button>
+                  <button type="button" class="crt-btn" data-target="sec-contact">[ 6. CONTACTO ]</button>
+                </nav>
+              </header>
+
+              <!-- Hero Section -->
+              <section class="crt-hero-box" id="sec-hero">
+                <pre class="crt-ascii">
+ ██████╗  ██████╗ ██████╗ ████████╗███████╗ ██████╗ ██╗     ██╗ ██████╗ 
+ ██╔══██╗██╔═══██╗██╔══██╗╚══██╔══╝██╔════╝██╔═══██╗██║     ██║██╔═══██╗
+ ██████╔╝██║   ██║██████╔╝   ██║   █████╗  ██║   ██║██║     ██║██║   ██║
+ ██╔═══╝ ██║   ██║██╔══██╗   ██║   ██╔══╝  ██║   ██║██║     ██║██║   ██║
+ ██║     ╚██████╔╝██║  ██║   ██║   ██║     ╚██████╔╝███████╗██║╚██████╔╝
+ ╚═╝      ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═╝      ╚═════╝ ╚══════╝╚═╝ ╚═════╝ </pre>
+                <h1 class="crt-hero-h1">ALESSANDRO ALTAMIRANO SALAZAR</h1>
+                <p class="crt-hero-sub">Ingeniería Industrial · Inteligencia de Negocios · Automatización · Supply Chain</p>
+                <p class="crt-dim" style="max-width: 680px; margin: 0 auto; font-size: 0.82rem; line-height: 1.5;">
+                  Diseño de arquitecturas analíticas corporativas, pipelines ETL/ELT automatizados, modelos dimensionales en Power BI PBIR y modelos predictivos para maximizar el ROI operativo.
+                </p>
+
+                <div style="display:flex; justify-content:center; gap:10px; margin-top:16px; flex-wrap:wrap;">
+                  <button type="button" class="crt-btn primary" id="btnOpenCvModal">[ 📄 VER CV COMPLETO (PDF) ]</button>
+                  <button type="button" class="crt-btn" data-target="sec-cases">[ 🚀 EXPLORAR CASOS STAR ]</button>
+                  <button type="button" class="crt-btn" data-target="sec-contact">[ ✉ CONTACTAR ]</button>
+                </div>
+              </section>
+
+              <!-- Section 01: Bio & Enfoque -->
+              <section class="crt-box" id="sec-bio">
+                <div class="crt-box-header">
+                  <h2 class="crt-box-title">01. RESUMEN PROFESIONAL &amp; ENFOQUE</h2>
+                  <span class="crt-box-tag">DISPONIBILIDAD INMEDIATA</span>
+                </div>
+                <p class="crt-glow" style="margin-bottom:12px; font-size:0.86rem; line-height:1.5;">
+                  Ingeniero Industrial en formación con especialización en Business Intelligence y automatización de datos. Enfoque holístico que combina optimización de procesos operativos (Supply Chain, inventarios, mermas) con arquitectura técnica de datos.
+                </p>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(260px, 1fr)); gap:12px; margin-top:14px;">
+                  <div class="crt-metric-item" data-target="sec-cases">
+                    <div class="crt-amber" style="font-weight:700; font-size:0.84rem; margin-bottom:4px;">► BUSINESS INTELLIGENCE</div>
+                    <p class="crt-dim" style="font-size:0.76rem;">Modelos dimensionales estrella Kimball, medidas DAX vectorizadas, cuadros de mando ejecutivos en Power BI PBIR con latencia de carga inferior a 1s.</p>
+                  </div>
+                  <div class="crt-metric-item" data-target="sec-cases">
+                    <div class="crt-amber" style="font-weight:700; font-size:0.84rem; margin-bottom:4px;">► PIPELINES &amp; CLOUD DWH</div>
+                    <p class="crt-dim" style="font-size:0.76rem;">Extracción y transformación de datos con Python (Pandas, PySpark), SQL avanzado, Google BigQuery, Snowflake y pipelines orquestados con dbt Core.</p>
+                  </div>
+                  <div class="crt-metric-item" data-target="sec-cases">
+                    <div class="crt-amber" style="font-weight:700; font-size:0.84rem; margin-bottom:4px;">► OPERACIONES &amp; SUPPLY CHAIN</div>
+                    <p class="crt-dim" style="font-size:0.76rem;">Planeamiento y control de la producción (MRP), digitalización de flujos de trabajo con SAP ERP y modelado de procesos en Bizagi BPMN.</p>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Section 02: Métricas Clave de Impacto -->
+              <section class="crt-box" id="sec-metrics">
+                <div class="crt-box-header">
+                  <h2 class="crt-box-title">02. MÉTRICAS CLAVE DE IMPACTO CUANTIFICABLE</h2>
+                  <span class="crt-box-tag">RESULTADOS AUDITADOS</span>
+                </div>
+                <div class="crt-metrics-grid">
+                  <div class="crt-metric-item">
+                    <div class="crt-metric-num">+35%</div>
+                    <div class="crt-metric-desc">Eficiencia operativa alcanzada mediante la automatización de reportería ejecutiva y comercial.</div>
+                  </div>
+                  <div class="crt-metric-item">
+                    <div class="crt-metric-num">-70%</div>
+                    <div class="crt-metric-desc">Reducción de horas-hombre en conciliaciones diarias y validaciones documentales manuales.</div>
+                  </div>
+                  <div class="crt-metric-item">
+                    <div class="crt-metric-num">99.8%</div>
+                    <div class="crt-metric-desc">Disponibilidad (SLA) y confiabilidad en pipelines de datos y modelos analíticos en producción.</div>
+                  </div>
+                  <div class="crt-metric-item">
+                    <div class="crt-metric-num">+$120K</div>
+                    <div class="crt-metric-desc">Ahorro anual directo en costos de infraestructura cloud, prevención de mermas y licencias.</div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Section 03: Casos de Estudio STAR (100% Clickeables con Modal) -->
+              <section class="crt-box" id="sec-cases">
+                <div class="crt-box-header">
+                  <h2 class="crt-box-title">03. CASOS DE ESTUDIO STAR (HAZ CLIC EN CUALQUIERA)</h2>
+                  <span class="crt-box-tag">METODOLOGÍA S-T-A-R</span>
+                </div>
+                <p class="crt-dim" style="margin-bottom:14px; font-size:0.78rem;">
+                  Haz clic en cualquier tarjeta de proyecto para abrir el desglose completo de <strong>Situación, Tarea, Acción y Resultado</strong>.
+                </p>
+
+                <div class="crt-cases-grid">
+                  <!-- Case 1: PRIMAX -->
+                  <article class="crt-case-item" data-case="primax">
+                    <div>
+                      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <h3 class="crt-case-title">PRIMAX PERÚ // ANALÍTICA COMERCIAL &amp; GESTIÓN DOCUMENTAL</h3>
+                        <span class="crt-box-tag">RETAIL</span>
+                      </div>
+                      <p class="crt-dim" style="font-size:0.78rem; line-height:1.45;">
+                        Automatización integral de telemetría y ventas en más de 200 estaciones. Reducción de desfase de 3 días a T-0 en tiempo real y $45K ahorrados en merma.
+                      </p>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                      <span class="crt-tag-pill">Power BI</span>
+                      <span class="crt-tag-pill">BigQuery</span>
+                      <span class="crt-tag-pill">Python</span>
+                      <span class="crt-tag-pill">SAP ERP</span>
+                    </div>
+                    <button type="button" class="crt-btn primary" style="width:100%; justify-content:center;">[ VER DETALLES DEL CASO ↗ ]</button>
+                  </article>
+
+                  <!-- Case 2: ETL Lakehouse -->
+                  <article class="crt-case-item" data-case="etl">
+                    <div>
+                      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <h3 class="crt-case-title">PIPELINES MEDALLION LAKEHOUSE &amp; DATA WAREHOUSE</h3>
+                        <span class="crt-box-tag">INGENIERÍA</span>
+                      </div>
+                      <p class="crt-dim" style="font-size:0.78rem; line-height:1.45;">
+                        Arquitectura escalable Bronze/Silver/Gold procesando 48,000+ documentos diarios con dbt Core, Snowflake y validaciones automáticas con 100% de linaje de datos.
+                      </p>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                      <span class="crt-tag-pill">Snowflake</span>
+                      <span class="crt-tag-pill">dbt Core</span>
+                      <span class="crt-tag-pill">Python</span>
+                      <span class="crt-tag-pill">Airflow</span>
+                    </div>
+                    <button type="button" class="crt-btn primary" style="width:100%; justify-content:center;">[ VER DETALLES DEL CASO ↗ ]</button>
+                  </article>
+
+                  <!-- Case 3: Machine Learning -->
+                  <article class="crt-case-item" data-case="ml">
+                    <div>
+                      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <h3 class="crt-case-title">SCORING PREDICTIVO DE RETENCIÓN &amp; CHURN (ML)</h3>
+                        <span class="crt-box-tag">MACHINE LEARNING</span>
+                      </div>
+                      <p class="crt-dim" style="font-size:0.78rem; line-height:1.45;">
+                        Modelo predictivo de fuga de clientes B2B con XGBoost y Scikit-Learn. Precisión AUC-ROC 0.89 y aumento del 22% en la retención durante el primer trimestre.
+                      </p>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                      <span class="crt-tag-pill">Python</span>
+                      <span class="crt-tag-pill">Scikit-Learn</span>
+                      <span class="crt-tag-pill">XGBoost</span>
+                      <span class="crt-tag-pill">SQL</span>
+                    </div>
+                    <button type="button" class="crt-btn primary" style="width:100%; justify-content:center;">[ VER DETALLES DEL CASO ↗ ]</button>
+                  </article>
+
+                  <!-- Case 4: VASMAD -->
+                  <article class="crt-case-item" data-case="vasmad">
+                    <div>
+                      <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                        <h3 class="crt-case-title">DASHBOARD DIRECTIVO VASMAD EN POWER BI</h3>
+                        <span class="crt-box-tag">BI DIRECTIVO</span>
+                      </div>
+                      <p class="crt-dim" style="font-size:0.78rem; line-height:1.45;">
+                        Suite ejecutiva de indicadores financieros con renderizado ultrarrápido (&lt; 0.8s), medidas DAX optimizadas y adopción del 100% por el comité de gerencia.
+                      </p>
+                    </div>
+                    <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                      <span class="crt-tag-pill">Power BI PBIR</span>
+                      <span class="crt-tag-pill">DAX Avanzado</span>
+                      <span class="crt-tag-pill">Tabular Editor</span>
+                    </div>
+                    <button type="button" class="crt-btn primary" style="width:100%; justify-content:center;">[ VER DETALLES DEL CASO ↗ ]</button>
+                  </article>
+                </div>
+              </section>
+
+              <!-- Section 04: Experiencia Laboral -->
+              <section class="crt-box" id="sec-exp">
+                <div class="crt-box-header">
+                  <h2 class="crt-box-title">04. TRAYECTORIA PROFESIONAL</h2>
+                  <span class="crt-box-tag">EXPERIENCIA</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:14px;">
+                  <div class="crt-metric-item" style="cursor:default;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap;">
+                      <h3 class="crt-bright" style="font-size:0.92rem;">LEAD DATA &amp; BI SPECIALIST</h3>
+                      <span class="crt-amber" style="font-size:0.74rem;">2023 — Presente</span>
+                    </div>
+                    <p class="crt-dim" style="font-size:0.76rem; line-height:1.45;">
+                      • Liderazgo técnico en modelado dimensional corporativo y reducción del 40% en costos de procesamiento cloud.<br>
+                      • Implementación de dashboards PBIR directivos y gobierno centralizado de datos.
+                    </p>
+                  </div>
+
+                  <div class="crt-metric-item" style="cursor:default;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap;">
+                      <h3 class="crt-bright" style="font-size:0.92rem;">SENIOR BI &amp; DATA AUTOMATION ANALYST</h3>
+                      <span class="crt-amber" style="font-size:0.74rem;">2021 — 2023</span>
+                    </div>
+                    <p class="crt-dim" style="font-size:0.76rem; line-height:1.45;">
+                      • Creación y optimización de flujos ETL/ELT con Python y SQL, ahorrando 18 horas semanales de reportería manual.<br>
+                      • Despliegue de modelos de machine learning para predicción de demanda e inventarios.
+                    </p>
+                  </div>
+
+                  <div class="crt-metric-item" style="cursor:default;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; flex-wrap:wrap;">
+                      <h3 class="crt-bright" style="font-size:0.92rem;">CONSULTOR DE INTELIGENCIA COMERCIAL &amp; BI</h3>
+                      <span class="crt-amber" style="font-size:0.74rem;">2019 — 2021</span>
+                    </div>
+                    <p class="crt-dim" style="font-size:0.76rem; line-height:1.45;">
+                      • Consultoría analítica para clientes del sector retail y logística, implementando tableros de control en Power BI.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Section 05: Certificaciones & Skills -->
+              <section class="crt-box" id="sec-skills">
+                <div class="crt-box-header">
+                  <h2 class="crt-box-title">05. CERTIFICACIONES &amp; STACK TÉCNICO</h2>
+                  <span class="crt-box-tag">SKILLS</span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:10px;">
+                  <div class="crt-metric-item" style="cursor:default;">
+                    <div class="crt-bright" style="font-size:0.82rem; font-weight:700;">[✔] Microsoft Certified: Power BI PL-300</div>
+                    <div class="crt-dim" style="font-size:0.72rem; margin-top:2px;">Data Analyst Associate · DAX &amp; PBIR</div>
+                  </div>
+                  <div class="crt-metric-item" style="cursor:default;">
+                    <div class="crt-bright" style="font-size:0.82rem; font-weight:700;">[✔] Google Cloud: Data Engineering</div>
+                    <div class="crt-dim" style="font-size:0.72rem; margin-top:2px;">BigQuery &amp; Cloud Pipelines</div>
+                  </div>
+                  <div class="crt-metric-item" style="cursor:default;">
+                    <div class="crt-bright" style="font-size:0.82rem; font-weight:700;">[✔] Python for Data Science &amp; ML</div>
+                    <div class="crt-dim" style="font-size:0.72rem; margin-top:2px;">Pandas, Scikit-Learn, XGBoost, Streamlit</div>
+                  </div>
+                  <div class="crt-metric-item" style="cursor:default;">
+                    <div class="crt-bright" style="font-size:0.82rem; font-weight:700;">[✔] Kimball Dimensional Modeling</div>
+                    <div class="crt-dim" style="font-size:0.72rem; margin-top:2px;">Data Warehouse, Fact &amp; Dimension Tables</div>
+                  </div>
+                  <div class="crt-metric-item" style="cursor:default;">
+                    <div class="crt-bright" style="font-size:0.82rem; font-weight:700;">[✔] dbt Fundamentals &amp; Snowflake</div>
+                    <div class="crt-dim" style="font-size:0.72rem; margin-top:2px;">Transformación, Testing &amp; Data Lineage</div>
+                  </div>
+                  <div class="crt-metric-item" style="cursor:default;">
+                    <div class="crt-bright" style="font-size:0.82rem; font-weight:700;">[✔] SAP ERP &amp; Supply Chain Operations</div>
+                    <div class="crt-dim" style="font-size:0.72rem; margin-top:2px;">MRP, Control de Inventarios &amp; Bizagi BPMN</div>
+                  </div>
+                </div>
+              </section>
+
+              <!-- Section 06: Terminal CLI Interactiva -->
+              <section class="crt-box" id="sec-cli">
+                <div class="crt-box-header">
+                  <h2 class="crt-box-title">06. TERMINAL CLI INTERACTIVA</h2>
+                  <span class="crt-box-tag">ZSH CONSOLE</span>
+                </div>
+                <div class="crt-cli-window">
+                  <div class="crt-cli-chips">
+                    <span class="crt-dim" style="font-size:0.72rem; align-self:center;">COMANDOS RÁPIDOS:</span>
+                    <button type="button" class="crt-btn" data-cmd="bio">bio</button>
+                    <button type="button" class="crt-btn" data-cmd="cases">cases</button>
+                    <button type="button" class="crt-btn" data-cmd="skills">skills</button>
+                    <button type="button" class="crt-btn" data-cmd="stats">stats</button>
+                    <button type="button" class="crt-btn" data-cmd="download-cv">download-cv</button>
+                    <button type="button" class="crt-btn" data-cmd="contact">contact</button>
+                    <button type="button" class="crt-btn" data-cmd="clear">clear</button>
+                  </div>
+                  <div class="crt-cli-log" id="cliLog">alessandro@crt:~ $ ready
+Consola interactiva lista. Escribe un comando o haz clic en los accesos rápidos.</div>
+                  <form class="crt-cli-prompt" id="cliForm">
+                    <label for="cliInput" class="crt-amber" style="font-weight:700; font-size:0.8rem;">alessandro@crt:~ $</label>
+                    <input type="text" class="crt-cli-input" id="cliInput" placeholder="Escribe 'help', 'bio', 'cases', 'skills'..." autocomplete="off" />
+                    <button type="submit" class="crt-btn" style="padding:4px 8px;">[ ↵ ]</button>
+                  </form>
+                </div>
+              </section>
+
+              <!-- Section 07: Contacto Directo -->
+              <section class="crt-box" id="sec-contact">
+                <div class="crt-box-header">
+                  <h2 class="crt-box-title">07. CANALES DE CONTACTO &amp; DESCARGAS</h2>
+                  <span class="crt-box-tag">CONECTEMOS</span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px; margin-bottom:16px;">
+                  <button type="button" class="crt-btn primary" id="btnOpenCvContact" style="justify-content:center; padding:10px;">
+                    <span>📄 VER CV COMPLETO (PDF)</span>
+                  </button>
+                  <a href="https://www.linkedin.com/in/alessandroaltamirano" target="_blank" rel="noreferrer" class="crt-btn" style="justify-content:center; padding:10px;">
+                    <span>💼 LINKEDIN ↗</span>
+                  </a>
+                  <a href="https://github.com/legacyum" target="_blank" rel="noreferrer" class="crt-btn" style="justify-content:center; padding:10px;">
+                    <span>💻 GITHUB ↗</span>
+                  </a>
+                  <a href="mailto:alessandro.altamirano23@gmail.com" class="crt-btn" style="justify-content:center; padding:10px;">
+                    <span>✉ ENVIAR EMAIL ↗</span>
+                  </a>
+                </div>
+
+                <form id="contactForm" style="background:rgba(0,0,0,0.5); padding:16px; border:1px dashed var(--p-border); border-radius:6px; display:grid; gap:10px;">
+                  <div class="crt-amber" style="font-size:0.78rem; font-weight:700;">FORMULARIO DIRECTO // MENSAJE A ALESSANDRO:</div>
+                  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:10px;">
+                    <input type="text" id="formName" placeholder="Tu Nombre / Empresa" required style="background:rgba(0,0,0,0.8); border:1px solid var(--p-border); color:var(--p-text); padding:8px 10px; font-family:inherit; font-size:0.78rem; border-radius:4px; outline:none;" />
+                    <input type="email" id="formEmail" placeholder="Tu Correo Electrónico" required style="background:rgba(0,0,0,0.8); border:1px solid var(--p-border); color:var(--p-text); padding:8px 10px; font-family:inherit; font-size:0.78rem; border-radius:4px; outline:none;" />
+                  </div>
+                  <textarea id="formMsg" rows="2" placeholder="Mensaje o detalles de la oportunidad..." required style="background:rgba(0,0,0,0.8); border:1px solid var(--p-border); color:var(--p-text); padding:8px 10px; font-family:inherit; font-size:0.78rem; border-radius:4px; outline:none; resize:vertical;"></textarea>
+                  <button type="submit" class="crt-btn primary" style="justify-self:start;">[ ✉ ENVIAR MENSAJE ]</button>
+                </form>
+              </section>
+
+              <!-- Screen Footer -->
+              <footer style="text-align:center; padding:20px; font-size:0.72rem; opacity:0.6; border-top:1px dashed var(--p-border);">
+                <div>ALESSANDRO ALTAMIRANO SALAZAR · 2026 // CRT FALLOUT MONITOR EDITION</div>
+                <div>POWERED BY THREEUI CRT SHADER ENGINE + VANILLA JS</div>
+              </footer>
+
+            </div>
+          </main>
+
+          <!-- STAR Case Modal (Inside Screen) -->
+          <div class="crt-modal-backdrop" id="caseModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="caseModalTitle">
+            <div class="crt-modal-box">
+              <div class="crt-modal-header">
+                <h3 class="crt-modal-title crt-bright" id="caseModalTitle">CASO DE ESTUDIO // DETALLE STAR</h3>
+                <button type="button" class="crt-btn" id="btnCloseCaseModal">[ ✕ CERRAR ]</button>
+              </div>
+              <div class="crt-modal-body">
+                <div class="crt-star-tabs">
+                  <button type="button" class="crt-tab-btn active" data-tab="all">VISTA COMPLETA</button>
+                  <button type="button" class="crt-tab-btn" data-tab="s">S - SITUACIÓN</button>
+                  <button type="button" class="crt-tab-btn" data-tab="t">T - TAREA</button>
+                  <button type="button" class="crt-tab-btn" data-tab="a">A - ACCIÓN</button>
+                  <button type="button" class="crt-tab-btn" data-tab="r">R - RESULTADO</button>
+                </div>
+                <div id="caseModalBodyContent"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CV Preview Modal (Inside Screen) -->
+          <div class="crt-modal-backdrop" id="cvModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="cvModalTitle">
+            <div class="crt-modal-box" style="width:min(860px, 95%); height:85%;">
+              <div class="crt-modal-header">
+                <h3 class="crt-modal-title crt-bright" id="cvModalTitle">CURRÍCULUM VITAE // ALESSANDRO ALTAMIRANO</h3>
+                <div style="display:flex; gap:6px;">
+                  <a href="../src/CV_Alessandro_Altamirano_Salazar_2026.pdf" download="CV_Alessandro_Altamirano_2026.pdf" class="crt-btn primary">[ ⬇ DESCARGAR PDF ]</a>
+                  <button type="button" class="crt-btn" id="btnCloseCvModal">[ ✕ CERRAR ]</button>
+                </div>
+              </div>
+              <div class="crt-modal-body" style="padding:0; height:calc(100% - 55px);">
+                <iframe src="../src/CV_Alessandro_Altamirano_Salazar_2026.pdf" style="width:100%; height:100%; border:none; background:#040e08;" title="Currículum Vitae"></iframe>
+              </div>
+            </div>
+          </div>
+
+          <!-- Toast Feedback Element -->
+          <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+        </div>
+      </div>
+
+      <!-- Monitor Casing Bottom: Mechanical Hardware Controls -->
+      <div class="crt-casing-bottom">
+        <div class="crt-mech-controls">
+          <!-- Power Switch with Physical LED Indicator -->
+          <div class="crt-power-group">
+            <span class="crt-power-led" id="powerLed" title="Estado de energía del monitor"></span>
+            <button type="button" class="crt-mech-btn" id="btnPowerSwitch" title="Encender / Apagar Tubo Catódico">
+              <span>⏻ POWER</span>
+            </button>
+          </div>
+
+          <!-- Phosphor Color Selector Switch (Verde / Ámbar / Cyan) -->
+          <button type="button" class="crt-mech-btn" id="btnPhosphorCycle" title="Cambiar color del fósforo de la pantalla">
+            <span>FÓSFORO: <strong id="phosphorLabel" style="color:#afffd0;">VERDE P1</strong></span>
+          </button>
+
+          <!-- Fullscreen Hardware Toggle -->
+          <button type="button" class="crt-mech-btn" id="btnFullscreenHw" title="Maximizar monitor (Tecla F)">
+            <span>⛶ PANTALLA COMPLETA</span>
+          </button>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span class="crt-casing-brand-tag">VAULT-TEC // ROBCO CRT-1987</span>
+          <a href="/" class="crt-mech-btn" title="Volver al portafolio estándar">
+            <span>← WEB ESTÁNDAR</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Load ThreeUI CRT WebGL Shader Engine -->
+  <script src="../src/vendor/crt-engine.js"></script>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const host = document.getElementById("crtBackground");
+      const canvas = document.getElementById("crtCanvas");
+      const glassScreen = document.getElementById("glassScreen");
+      const powerLed = document.getElementById("powerLed");
+      const btnPowerSwitch = document.getElementById("btnPowerSwitch");
+      const btnPhosphorCycle = document.getElementById("btnPhosphorCycle");
+      const phosphorLabel = document.getElementById("phosphorLabel");
+      const btnFullscreenHw = document.getElementById("btnFullscreenHw");
+      const toast = document.getElementById("toast");
+      const viewport = document.getElementById("screenViewport");
+
+      let crtRendererInstance = null;
+      let isPoweredOn = true;
+      const phosphorModes = [
+        { id: "green", label: "VERDE P1", hue: 0, color: "#afffd0" },
+        { id: "amber", label: "ÁMBAR P3", hue: 45, color: "#ffe6b0" },
+        { id: "cyan", label: "CYAN P4", hue: 180, color: "#d4f8ff" }
+      ];
+      let currentPhosphorIdx = 0;
+
+      // Mount ThreeUI CRT WebGL Background Pass
+      if (typeof mountThreeUiCrt === "function") {
+        crtRendererInstance = mountThreeUiCrt(host, canvas, {
+          variant: "terminal",
+          showLog: false, // Pure WebGL scanlines & aperture grille raster behind HTML
+          speed: 1.00,
+          motion: 1.00,
+          hue: 0,
+          saturation: 1.00,
+          brightness: 1.05,
+          opacity: 0.92
+        });
+      }
+
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 1900);
+      }
+
+      // =========================================================================
+      // Hardware Mechanical Controls on Monitor Casing
+      // =========================================================================
+
+      // Power Switch Logic
+      btnPowerSwitch.addEventListener("click", () => {
+        isPoweredOn = !isPoweredOn;
+        glassScreen.classList.toggle("is-power-off", !isPoweredOn);
+        powerLed.classList.toggle("is-off", !isPoweredOn);
+        if (isPoweredOn) {
+          showToast("Tubo catódico encendido. Sistema operativo online.");
+          if (crtRendererInstance && crtRendererInstance.resume) crtRendererInstance.resume();
+        } else {
+          showToast("Tubo catódico apagado.");
+          if (crtRendererInstance && crtRendererInstance.pause) crtRendererInstance.pause();
+        }
+      });
+
+      // Phosphor Color Cycle Logic (Verde -> Ámbar -> Cyan -> Verde)
+      btnPhosphorCycle.addEventListener("click", () => {
+        currentPhosphorIdx = (currentPhosphorIdx + 1) % phosphorModes.length;
+        const mode = phosphorModes[currentPhosphorIdx];
+        document.documentElement.setAttribute("data-phosphor", mode.id);
+        phosphorLabel.textContent = mode.label;
+        phosphorLabel.style.color = mode.color;
+        if (crtRendererInstance) {
+          crtRendererInstance.update({ hue: mode.hue });
+        }
+        showToast(`Fósforo cambiado a: ${mode.label}`);
+      });
+
+      // Fullscreen Toggle
+      function toggleFullscreen() {
+        document.body.classList.toggle("is-fullscreen-view");
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      }
+
+      btnFullscreenHw.addEventListener("click", toggleFullscreen);
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key.toLowerCase() === "f" && e.target.tagName !== "INPUT" && e.target.tagName !== "TEXTAREA") {
+          toggleFullscreen();
+        } else if (e.key === "Escape") {
+          closeCaseModal();
+          closeCvModal();
+        }
+      });
+
+      // =========================================================================
+      // Smooth In-Screen Section Navigation
+      // =========================================================================
+      document.querySelectorAll("[data-target]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const id = btn.getAttribute("data-target");
+          const target = document.getElementById(id);
+          if (target) {
+            target.scrollIntoView({ behavior: "smooth", block: "start" });
+            showToast(`Navegando a: ${target.querySelector("h2, h1")?.textContent?.trim() || id}`);
+          }
+        });
+      });
+
+      // =========================================================================
+      // STAR Cases Data & Modal Logic
+      // =========================================================================
+      const STAR_CASES = {
+        primax: {
+          title: "PRIMAX PERÚ — ANALÍTICA COMERCIAL & TELEMETRÍA EN TIEMPO REAL",
+          s: "La red de más de 200 estaciones de servicio dependía de consolidaciones manuales en hojas de cálculo con 3 días de desfase (T-3), lo que impedía responder a quiebres de stock o variaciones de margen en tiempo real.",
+          t: "Diseñar e implementar una arquitectura centralizada que conectara los sistemas transaccionales POS y SAP con un modelo analítico en tiempo real (T-0).",
+          a: "Desarrollé pipelines en Google BigQuery con vistas materializadas optimizadas, integradas a modelos semánticos en Power BI mediante la especificación PBIR y medidas DAX vectorizadas. Implementé alertas tempranas automáticas de reabastecimiento.",
+          r: "Reducción del desfase a 0 horas (actualización horaria continua), reducción del 65% en horas de conciliación y ahorro certificado de $45,000 USD anuales en reducción de mermas y sobrecostos logísticos."
+        },
+        etl: {
+          title: "PIPELINES MEDALLION LAKEHOUSE & DATA WAREHOUSE",
+          s: "Múltiples sistemas de la compañía (ERP SAP, CRM, APIs externas, logs de telemetría) operaban en silos desconectados, con datos duplicados, falta de auditoría y reportes discrepantes entre áreas.",
+          t: "Arquitectar una solución moderna de Lakehouse bajo el patrón Medallion (Bronze/Silver/Gold) con linaje total de datos, calidad auditable y gobierno corporativo.",
+          a: "Implementé ingestas automáticas batch/streaming hacia Snowflake orquestadas con dbt Core. Definí pruebas de integridad referencial, pruebas estadísticas con Great Expectations y modelos dimensionales en estrella.",
+          r: "48,000+ documentos y transacciones procesadas diariamente, disponibilidad del 99.8% (SLA) y linaje de datos auditable al 100%, convirtiéndose en la fuente única de la verdad de la organización."
+        },
+        ml: {
+          title: "SCORING PREDICTIVO DE RETENCIÓN & CHURN (ML)",
+          s: "Pérdida recurrente de clientes de cuentas corporativas B2B sin previo aviso, detectada solo cuando la facturación mensual ya había caído a cero.",
+          t: "Construir un modelo predictivo de propensión a la fuga (churn prediction) que alertara al equipo comercial 30 días antes del desenganche del cliente.",
+          a: "Diseñé un pipeline en Python con Scikit-Learn y XGBoost entrenado con histórico transaccional, frecuencia de compra, volumen y reclamos. El scoring semanal se exportaba directamente a Power BI con semáforos de riesgo y sugerencias de retención.",
+          r: "Precisión predictiva con métrica AUC-ROC de 0.89 y aumento del 22% en la retención efectiva de clientes B2B durante el primer trimestre de puesta en producción."
+        },
+        vasmad: {
+          title: "DASHBOARD DIRECTIVO VASMAD EN POWER BI PBIR",
+          s: "El directorio ejecutivo requería consultar el estado de pérdidas y ganancias, flujo de caja y ventas consolidadas en dispositivos móviles y reuniones semanales, pero los reportes previos tardaban más de 20 segundos en cargar.",
+          t: "Crear una suite directiva de alta densidad con tiempo de respuesta inferior a 1.2 segundos y diseño responsive optimizado para tabletas y navegadores.",
+          a: "Re-diseñé el modelo semántico en Tabular Editor, reemplacé columnas calculadas por medidas DAX eficientes y maqueté la interfaz con diseño minimalista de alto contraste y renderizado PBIR.",
+          r: "Tiempo de carga reducido a 0.8 segundos (96% más rápido), adopción del 100% en el comité directivo y toma de decisiones estratégicas en minutos en lugar de días."
+        }
+      };
+
+      const caseModalBackdrop = document.getElementById("caseModalBackdrop");
+      const caseModalTitle = document.getElementById("caseModalTitle");
+      const caseModalBodyContent = document.getElementById("caseModalBodyContent");
+      let activeCaseData = null;
+
+      function renderStarTab(data, tabKey) {
+        if (!data) return;
+        if (tabKey === "all") {
+          caseModalBodyContent.innerHTML = `
+            <div style="margin-bottom:12px;"><strong class="crt-amber">[ S ] SITUACIÓN:</strong><p class="crt-glow" style="margin-top:4px;">${data.s}</p></div>
+            <div style="margin-bottom:12px;"><strong class="crt-amber">[ T ] TAREA:</strong><p class="crt-glow" style="margin-top:4px;">${data.t}</p></div>
+            <div style="margin-bottom:12px;"><strong class="crt-amber">[ A ] ACCIÓN:</strong><p class="crt-glow" style="margin-top:4px;">${data.a}</p></div>
+            <div><strong class="crt-amber">[ R ] RESULTADO:</strong><p class="crt-bright" style="margin-top:4px;">${data.r}</p></div>
+          `;
+        } else {
+          const map = {
+            s: { title: "SITUACIÓN", text: data.s },
+            t: { title: "TAREA", text: data.t },
+            a: { title: "ACCIÓN", text: data.a },
+            r: { title: "RESULTADO", text: data.r }
+          };
+          const item = map[tabKey];
+          caseModalBodyContent.innerHTML = `
+            <div>
+              <h4 class="crt-amber" style="font-size:0.9rem; margin-bottom:6px;">[ ${tabKey.toUpperCase()} ] ${item.title}:</h4>
+              <p class="crt-glow" style="font-size:0.84rem; line-height:1.5;">${item.text}</p>
+            </div>
+          `;
+        }
+      }
+
+      function openCaseModal(caseKey) {
+        const data = STAR_CASES[caseKey];
+        if (!data) return;
+        activeCaseData = data;
+        caseModalTitle.textContent = data.title;
+        document.querySelectorAll(".crt-tab-btn").forEach(btn => {
+          btn.classList.toggle("active", btn.getAttribute("data-tab") === "all");
+        });
+        renderStarTab(data, "all");
+        caseModalBackdrop.classList.add("is-open");
+        showToast(`Caso abierto: ${data.title}`);
+      }
+
+      function closeCaseModal() {
+        caseModalBackdrop.classList.remove("is-open");
+      }
+
+      document.getElementById("btnCloseCaseModal").addEventListener("click", closeCaseModal);
+      caseModalBackdrop.addEventListener("click", (e) => {
+        if (e.target === caseModalBackdrop) closeCaseModal();
+      });
+
+      document.querySelectorAll(".crt-tab-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".crt-tab-btn").forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          renderStarTab(activeCaseData, btn.getAttribute("data-tab"));
+        });
+      });
+
+      document.querySelectorAll("[data-case]").forEach(card => {
+        card.addEventListener("click", () => {
+          openCaseModal(card.getAttribute("data-case"));
+        });
+      });
+
+      // =========================================================================
+      // CV Preview Modal Logic
+      // =========================================================================
+      const cvModalBackdrop = document.getElementById("cvModalBackdrop");
+      function openCvModal() {
+        cvModalBackdrop.classList.add("is-open");
+        showToast("Abriendo visor de CV en PDF...");
+      }
+      function closeCvModal() {
+        cvModalBackdrop.classList.remove("is-open");
+      }
+
+      document.getElementById("btnOpenCvModal")?.addEventListener("click", openCvModal);
+      document.getElementById("btnOpenCvContact")?.addEventListener("click", openCvModal);
+      document.getElementById("btnCloseCvModal")?.addEventListener("click", closeCvModal);
+      cvModalBackdrop.addEventListener("click", (e) => {
+        if (e.target === cvModalBackdrop) closeCvModal();
+      });
+
+      // =========================================================================
+      // CLI Terminal Engine
+      // =========================================================================
+      const cliLog = document.getElementById("cliLog");
+      const cliForm = document.getElementById("cliForm");
+      const cliInput = document.getElementById("cliInput");
+
+      const CLI_COMMANDS = {
+        help: "Comandos disponibles:\n• bio         - Resumen profesional y propuesta de valor\n• cases       - Casos de estudio STAR disponibles\n• star <caso> - Detalle: star primax | star etl | star ml | star vasmad\n• skills      - Stack tecnológico certificado\n• stats       - Métricas de impacto cuantificable\n• contact     - Información de contacto y correo\n• download-cv - Abrir y descargar CV en PDF\n• clear       - Limpiar pantalla de la consola",
+        bio: "ALESSANDRO ALTAMIRANO SALAZAR\nEspecialista en Business Intelligence, Data Pipelines & Automatización.\nEnfoque en arquitecturas analíticas de alto ROI, modelado dimensional Kimball,\nPower BI PBIR, Python, BigQuery y Snowflake. Disponible de inmediato.",
+        cases: "Casos de estudio STAR disponibles:\n1. primax  - PRIMAX Perú: Analítica comercial & telemetría en tiempo real (T-0)\n2. etl     - Pipelines Medallion Lakehouse en Snowflake & dbt (48K docs/día)\n3. ml      - Scoring predictivo de retención B2B con Scikit-Learn / XGBoost\n4. vasmad  - Dashboard directivo PBIR con tiempo de carga < 0.8s",
+        skills: "Stack Tecnológico Certificado:\n• Power BI (PL-300 Certified) · DAX Vectorizado · Tabular Editor · PBIR\n• Google Cloud Certified Data Engineering · BigQuery · Cloud Functions\n• Python (Pandas, PySpark, Scikit-Learn, XGBoost, Streamlit)\n• Snowflake, dbt Core, SQL Avanzado, Airflow\n• SAP ERP, Bizagi BPMN, Supply Chain (MRP, 5S)",
+        stats: "Métricas de Impacto Comprobadas:\n• +35% Eficiencia operativa en procesos analíticos\n• -70% Reducción de horas-hombre en reportería manual\n• 99.8% Uptime y confiabilidad en pipelines productivos\n• +$120,000 USD/año en ahorro de cómputo y mermas",
+        contact: "Canales de Contacto:\n• Correo: alessandro.altamirano23@gmail.com\n• LinkedIn: linkedin.com/in/alessandroaltamirano\n• GitHub: github.com/legacyum\n• Ubicación: Lima, Perú (Disponible para proyectos remotos / híbridos)",
+        "download-cv": "Abriendo visor de Currículum Vitae...",
+        clear: ""
+      };
+
+      function runCli(cmdRaw) {
+        const cmd = cmdRaw.trim().toLowerCase();
+        if (!cmd) return;
+        let response = "";
+
+        if (cmd === "clear") {
+          cliLog.textContent = "alessandro@crt:~ $";
+          return;
+        } else if (cmd === "download-cv" || cmd === "cv") {
+          openCvModal();
+          response = "Visor de Currículum Vitae activado.";
+        } else if (cmd.startsWith("star ")) {
+          const caseName = cmd.split(" ")[1];
+          if (STAR_CASES[caseName]) {
+            openCaseModal(caseName);
+            response = `Desplegando modal del caso STAR: ${caseName.toUpperCase()}`;
+          } else {
+            response = `Caso no reconocido: '${caseName}'. Casos válidos: primax, etl, ml, vasmad`;
+          }
+        } else if (CLI_COMMANDS[cmd]) {
+          response = CLI_COMMANDS[cmd];
+        } else {
+          response = `Comando no reconocido: '${cmd}'. Escribe 'help' para ver los comandos válidos.`;
+        }
+
+        cliLog.textContent += `\n\nalessandro@crt:~ $ ${cmdRaw}\n${response}`;
+        cliLog.scrollTop = cliLog.scrollHeight;
+      }
+
+      cliForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const val = cliInput.value;
+        if (val) {
+          runCli(val);
+          cliInput.value = "";
+        }
+      });
+
+      document.querySelectorAll("[data-cmd]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const cmd = btn.getAttribute("data-cmd");
+          runCli(cmd);
+          showToast(`Ejecutando comando: ${cmd}`);
+        });
+      });
+
+      // Quick Contact Form Handler
+      const contactForm = document.getElementById("contactForm");
+      if (contactForm) {
+        contactForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const name = document.getElementById("formName").value;
+          const email = document.getElementById("formEmail").value;
+          const msg = document.getElementById("formMsg").value;
+          const subject = encodeURIComponent(`Contacto desde Monitor CRT - ${name}`);
+          const body = encodeURIComponent(`Hola Alessandro,\n\nSoy ${name} (${email}).\n\nMensaje:\n${msg}\n\nEnviado desde el monitor CRT.`);
+          showToast("Redirigiendo a tu cliente de correo...");
+          setTimeout(() => {
+            window.location.href = `mailto:alessandro.altamirano23@gmail.com?subject=${subject}&body=${body}`;
+          }, 500);
+        });
+      }
+
+    })();
+  </script>
+</body>
+</html>

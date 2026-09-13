@@ -62,6 +62,9 @@ distHtml = distHtml.replace(
   () => `<script data-canvasui-asciify>\n${asciifyJs}\n  </script>`
 );
 
+// Inline the ThreeUI CRT vendor engine.
+inlineVendor('vendor/crt-engine.js', 'data-vendor="crt"');
+
 // Replace script.js script tag with inline <script> — MUST remain the first plain script
 distHtml = distHtml.replace(
   /<script src="script\.js"[^>]*><\/script>/i,
@@ -70,5 +73,13 @@ distHtml = distHtml.replace(
 
 const outPath = path.join(DIST_DIR, 'portfolio-mejorado.html');
 fs.writeFileSync(outPath, distHtml, 'utf8');
+
+// Copy shaders directory to dist/shaders so ThreeDPaper sources resolve cleanly
+const srcShaders = path.join(SRC_DIR, 'shaders');
+const distShaders = path.join(DIST_DIR, 'shaders');
+if (fs.existsSync(srcShaders)) {
+  fs.cpSync(srcShaders, distShaders, { recursive: true });
+}
+
 console.log(`✓ Generated ${path.relative(ROOT_DIR, outPath)} (${distHtml.length} bytes)`);
 

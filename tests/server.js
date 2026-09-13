@@ -14,7 +14,9 @@ const MIME = {
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
   '.svg': 'image/svg+xml',
-  '.pdf': 'application/pdf'
+  '.pdf': 'application/pdf',
+  '.glb': 'model/gltf-binary',
+  '.gltf': 'model/gltf+json'
 };
 
 const ROOT_DIR = path.resolve(__dirname, '..');
@@ -35,14 +37,22 @@ const server = http.createServer((req, res) => {
   }
 
   if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+    const stat = fs.statSync(filePath);
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME[ext] || 'application/octet-stream';
+    console.log(`[HTTP 200] ${req.url} -> ${filePath} (${stat.size} bytes)`);
     res.writeHead(200, {
       'Content-Type': contentType,
-      'Access-Control-Allow-Origin': '*'
+      'Content-Length': stat.size,
+      'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
     });
     fs.createReadStream(filePath).pipe(res);
   } else {
+    console.warn(`[HTTP 404] ${req.url} -> not found`);
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('404 Not Found');
   }
