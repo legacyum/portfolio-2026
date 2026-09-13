@@ -3939,7 +3939,8 @@ function initThreeUiCrtSystem() {
   const canvas = document.getElementById('threeuiCrtCanvas');
   const bootFlash = document.getElementById('crtBootFlash');
 
-  let isEnabled = true;
+  // El monitor abre apagado; el usuario puede activarlo luego desde los controles físicos.
+  let isEnabled = false;
 
   try {
     const saved = localStorage.getItem('portfolio_crt_enabled');
