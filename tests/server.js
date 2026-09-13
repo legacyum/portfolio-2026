@@ -95,9 +95,17 @@ const server = http.createServer((req, res) => {
     });
     fs.createReadStream(filePath).pipe(res);
   } else {
-    console.warn(`[HTTP 404] ${req.url} -> not found`);
-    res.writeHead(404, { 'Content-Type': 'text/plain' });
-    res.end('404 Not Found');
+    const errorPagePath = path.join(SRC_DIR, '404.html');
+    const errorPage = fs.readFileSync(errorPagePath);
+    console.warn(`[HTTP 404] ${req.url} -> ${errorPagePath}`);
+    res.writeHead(404, {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Content-Length': errorPage.length,
+      'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+    res.end(errorPage);
   }
 });
 

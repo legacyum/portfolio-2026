@@ -11,7 +11,7 @@ function request(port, requestPath) {
     const req = http.get({ host: HOST, port, path: requestPath }, res => {
       const chunks = [];
       res.on('data', chunk => chunks.push(chunk));
-      res.on('end', () => resolve({ statusCode: res.statusCode, body: Buffer.concat(chunks).toString('utf8') }));
+      res.on('end', () => resolve({ statusCode: res.statusCode, headers: res.headers, body: Buffer.concat(chunks).toString('utf8') }));
     });
     req.once('error', reject);
   });
@@ -50,7 +50,10 @@ async function run() {
       assert.strictEqual(response.statusCode, 200, `${requestPath} should remain available`);
     }
 
-    assert.strictEqual((await request(port, '/not-a-file')).statusCode, 404, 'Missing files should remain 404');
+    const missingFileResponse = await request(port, '/not-a-file');
+    assert.strictEqual(missingFileResponse.statusCode, 404, 'Missing files should remain 404');
+    assert.match(missingFileResponse.headers['content-type'], /^text\/html/, 'Missing files should return the custom HTML page');
+    assert(missingFileResponse.body.includes('Ruta no'), 'Missing files should render the custom 404 page');
 
     for (const requestPath of [
       '/../AGENTS.md',

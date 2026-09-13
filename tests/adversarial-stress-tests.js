@@ -917,8 +917,10 @@ async function runAdversarialTests() {
       doc.dispatchEvent(new win.Event('visibilitychange'));
 
       // In hidden state, background RAF should be cancelled
-      // Note: Lanyard might also run or pause, verify no runaway loop accumulation
+      // Other UI animations may remain queued, but hiding the document must
+      // remove at least the background frame instead of retaining every loop.
       const hiddenRafs = win.getActiveRafCount();
+      assert(hiddenRafs < initialRafs, `Hidden tabs must cancel the background RAF (initial: ${initialRafs}, hidden: ${hiddenRafs})`);
 
       // Show
       doc.hidden = false;
@@ -927,9 +929,11 @@ async function runAdversarialTests() {
       win.stepFrames(1, 16.67);
     }
 
-    // Verify after 20 cycles, we have a clean single/controlled RAF count (no leak/accumulation)
+    // Verify after 20 cycles, no animation frames accumulate. A fixed ceiling
+    // is incorrect here because the sandbox legitimately starts the preloader,
+    // lanyard, and background loops together.
     const finalRafs = win.getActiveRafCount();
-    assert(finalRafs <= 3, `RAF count must remain controlled without runaway leaks (got: ${finalRafs})`);
+    assert(finalRafs <= initialRafs, `RAF count must remain at or below its baseline without runaway leaks (initial: ${initialRafs}, final: ${finalRafs})`);
 
     pass('ADV-PERF-01', 'Tab visibilitychange flapping cleanly stops and resumes RAF loop without loop leaks');
   } catch (err) {
