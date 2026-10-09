@@ -2128,6 +2128,218 @@ h4 {
   transform: rotate(180deg);
 }
 
+/* Poster-inspired portfolio card front */
+.card-front--poster {
+  isolation: isolate;
+  padding: 0;
+  border-color: rgba(var(--accent-rgb), 0.52);
+  background: #11120f;
+}
+
+.card-front--poster::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  z-index: 2;
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: 7px;
+  pointer-events: none;
+}
+
+.card-front--poster::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 7, 6, 0.48) 0%,
+    rgba(5, 7, 6, 0.04) 24%,
+    rgba(5, 7, 6, 0.08) 45%,
+    rgba(5, 7, 6, 0.84) 68%,
+    #070907 100%
+  );
+  pointer-events: none;
+}
+
+.card-front--poster .card-punch-hole {
+  z-index: 6;
+  top: 8px;
+  opacity: 0.75;
+}
+
+.card-front--poster .card-holo-glare {
+  z-index: 3;
+  opacity: 0.18;
+  mix-blend-mode: soft-light;
+}
+
+.card-front--poster .card-header {
+  position: absolute;
+  top: 17px;
+  left: 16px;
+  right: 16px;
+  z-index: 5;
+  gap: 7px;
+  margin: 0;
+  color: #fff;
+}
+
+.card-front--poster .card-chip {
+  width: 21px;
+  height: 21px;
+  flex: 0 0 21px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid rgba(var(--accent-rgb), 0.8);
+  border-radius: 50%;
+  background: rgba(8, 10, 8, 0.55);
+}
+
+.card-monogram {
+  color: var(--accent);
+  font: 700 7px/1 "DM Mono", monospace;
+  letter-spacing: -0.04em;
+}
+
+.card-front--poster .card-tag {
+  flex: 1;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 7px;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.card-front--poster .card-security-lvl {
+  padding: 3px 4px;
+  border-color: rgba(255, 255, 255, 0.42);
+  background: rgba(8, 10, 8, 0.52);
+  color: #fff;
+  font-size: 6px;
+  letter-spacing: 0.07em;
+  white-space: nowrap;
+}
+
+.card-front--poster .card-photo-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: inherit;
+  background: #11120f;
+}
+
+.card-front--poster .card-photo {
+  object-position: 50% 42%;
+  filter: grayscale(0.28) contrast(1.1) brightness(0.86);
+}
+
+.card-front--poster .photo-overlay {
+  background: transparent;
+}
+
+.card-front--poster .status-badge,
+.card-front--poster .nfc-badge {
+  display: none;
+}
+
+.card-front--poster .card-body {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: flex;
+  flex: initial;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 2px;
+  margin: 0;
+  padding: 0 15px 14px;
+}
+
+.card-front--poster .card-name-row {
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.card-front--poster .card-name {
+  max-width: calc(100% - 29px);
+  color: #fff;
+  font-size: 23px;
+  line-height: 0.94;
+  letter-spacing: -0.065em;
+  white-space: normal;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.55);
+}
+
+.card-front--poster .card-corp-badge {
+  flex: 0 0 auto;
+  margin-bottom: 2px;
+  padding: 2px 4px;
+  border-color: rgba(var(--accent-rgb), 0.62);
+  background: rgba(5, 7, 6, 0.55);
+  color: var(--accent);
+  font-size: 6px;
+  letter-spacing: 0.04em;
+}
+
+.card-front--poster .card-role {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 8px;
+  letter-spacing: 0.035em;
+}
+
+.card-front--poster .card-meta-row {
+  margin: 6px 0 1px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(255, 255, 255, 0.34);
+}
+
+.card-front--poster .meta-label {
+  color: rgba(255, 255, 255, 0.58);
+}
+
+.card-front--poster .meta-code {
+  color: var(--accent);
+  font-size: 7px;
+}
+
+.card-front--poster .barcode span {
+  background: rgba(255, 255, 255, 0.76);
+}
+
+.card-front--poster .barcode span:nth-child(3n) {
+  background: var(--accent);
+}
+
+.card-front--poster .card-stack-pills {
+  gap: 3px;
+  margin: 3px 0 5px;
+}
+
+.card-front--poster .card-pill {
+  padding: 2px 4px;
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(5, 7, 6, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 6.5px;
+}
+
+.card-front--poster .card-flip-btn {
+  position: relative;
+  z-index: 1;
+  margin-top: 5px;
+  padding: 6px;
+  border-color: rgba(var(--accent-rgb), 0.62);
+  background: rgba(5, 7, 6, 0.74);
+  color: var(--accent);
+  font-size: 7px;
+  letter-spacing: 0.07em;
+}
+
 /* Back Face Styling */
 .card-back {
   transform: rotateY(180deg);
@@ -12159,16 +12371,18 @@ const T = {
     copiedToast: '✓ Copiado al portapapeles',
     lanyardRole: 'Ingeniería Industrial · Data & Ops',
     lanyardQr: 'ESCANEAR LINKEDIN ↗',
-        lanyardHint: '✦ ARRASTRA / TIRA DE LA CREDENCIAL',
-    lanyardStageAria: 'Credencial interactiva 3D de Alessandro Altamirano',
-    lanyardCardAria: 'Credencial física 3D de Alessandro Altamirano. Arrastra o gira la tarjeta.',
-    lanyardFlipAria: 'Girar credencial para ver reverso',
-    lanyardBackAria: 'Volver al frente de la credencial',
+    lanyardHint: '✦ ARRASTRA / SUELTA LA TARJETA',
+    lanyardStageAria: 'Tarjeta de perfil interactiva 3D de Alessandro Altamirano',
+    lanyardCardAria: 'Tarjeta de perfil física 3D de Alessandro Altamirano. Arrastra o gira la tarjeta.',
+    lanyardFlipAria: 'Girar tarjeta para ver el reverso',
+    lanyardBackAria: 'Volver al frente de la tarjeta',
     terminalAiTitle: 'Alternar Bitácora Técnica',
     terminalInputPh: 'escribe un comando...',
     inProgressBadge: '● En curso (10° Ciclo)',
-    lanyardFlipBtn: 'GIRAR CREDENCIAL / FLIP 3D',
+    lanyardFlipBtn: 'VER REVERSO · GIRAR 3D',
     lanyardBackFlipBtn: 'VOLVER AL FRENTE',
+    lanyardPosterTag: 'AA · PERFIL / 2026',
+    lanyardPosterPlace: 'LIMA / PERÚ',
     lanyardEduLabel: 'UNIVERSIDAD:',
     lanyardSpecLabel: 'ENFOQUE:',
     lanyardCoreLabel: 'CORE:',
@@ -12286,16 +12500,18 @@ const T = {
     copiedToast: '✓ Copied to clipboard',
     lanyardRole: 'Industrial Engineering · Data & Ops',
     lanyardQr: 'SCAN LINKEDIN ↗',
-        lanyardHint: '✦ DRAG / TOSS THE ID BADGE',
-    lanyardStageAria: 'Interactive 3D ID badge for Alessandro Altamirano',
-    lanyardCardAria: 'Physical 3D ID badge for Alessandro Altamirano. Drag or flip the card.',
-    lanyardFlipAria: 'Flip badge to see the back',
-    lanyardBackAria: 'Return to the front of the badge',
+    lanyardHint: '✦ DRAG / RELEASE THE CARD',
+    lanyardStageAria: 'Interactive 3D profile card for Alessandro Altamirano',
+    lanyardCardAria: 'Physical 3D profile card for Alessandro Altamirano. Drag or flip the card.',
+    lanyardFlipAria: 'Flip card to see the back',
+    lanyardBackAria: 'Return to the front of the card',
     terminalAiTitle: 'Toggle technical log mode',
     terminalInputPh: 'type a command...',
     inProgressBadge: '● In progress (10th cycle)',
-    lanyardFlipBtn: 'FLIP BADGE 3D',
+    lanyardFlipBtn: 'VIEW BACK · FLIP 3D',
     lanyardBackFlipBtn: 'FLIP TO FRONT',
+    lanyardPosterTag: 'AA · PROFILE / 2026',
+    lanyardPosterPlace: 'LIMA / PERU',
     lanyardEduLabel: 'UNIVERSITY:',
     lanyardSpecLabel: 'FOCUS:',
     lanyardCoreLabel: 'CORE:',
@@ -18183,9 +18399,9 @@ if (typeof document !== 'undefined') {
             </div>
           </div>
           <div class="hero-lanyard-wrapper">
-            <div class="lanyard-stage" id="lanyardStage" aria-label="Credencial interactiva 3D de Alessandro Altamirano">
+            <div class="lanyard-stage" id="lanyardStage" aria-label="Tarjeta de perfil interactiva 3D de Alessandro Altamirano">
               <canvas class="lanyard-canvas" id="lanyardCanvas"></canvas>
-              <div class="lanyard-card" id="lanyardCard" tabindex="0" role="button" aria-label="Credencial física 3D de Alessandro Altamirano. Arrastra o gira la tarjeta.">
+              <div class="lanyard-card" id="lanyardCard" tabindex="0" role="button" aria-label="Tarjeta de perfil física 3D de Alessandro Altamirano. Arrastra o gira la tarjeta.">
                 <div class="lanyard-clip" aria-hidden="true">
                   <svg class="clip-svg" viewBox="0 0 36 66" width="36" height="66" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <!-- Top D-Ring Loop -->
@@ -18225,13 +18441,13 @@ if (typeof document !== 'undefined') {
                 </div>
                 <div class="lanyard-card-inner">
                   <!-- Front Face -->
-                  <div class="card-face card-front">
+                  <div class="card-face card-front card-front--poster">
                     <div class="card-punch-hole" aria-hidden="true"></div>
                     <div class="card-holo-glare" aria-hidden="true"></div>
                     <div class="card-header">
-                      <div class="card-chip"><span class="chip-line"></span><span class="chip-line"></span></div>
-                      <span class="card-tag">AA-2026 // ACCESS ID</span>
-                      <span class="card-security-lvl">SEC-LVL 4</span>
+                      <div class="card-chip" aria-hidden="true"><span class="card-monogram">AA</span></div>
+                      <span class="card-tag" data-t="lanyardPosterTag">AA · PERFIL / 2026</span>
+                      <span class="card-security-lvl" data-t="lanyardPosterPlace">LIMA / PERÚ</span>
                     </div>
                     <div class="card-photo-wrap">
                       <picture>
@@ -18239,13 +18455,11 @@ if (typeof document !== 'undefined') {
                         <img src="assets/alessandro-photo.png" alt="Fotografía profesional de Alessandro Altamirano" class="card-photo" loading="eager" width="220" height="220" decoding="async" fetchpriority="high" />
                       </picture>
                       <div class="photo-overlay"></div>
-                      <span class="status-badge"><i class="status-dot"></i> ACTIVO</span>
-                      <span class="nfc-badge" title="NFC Enabled">NFC 🛈</span>
                     </div>
                     <div class="card-body">
                       <div class="card-name-row">
                         <h3 class="card-name">Alessandro Altamirano</h3>
-                        <span class="card-corp-badge">PX-OPS</span>
+                        <span class="card-corp-badge">AA / 01</span>
                       </div>
                       <p class="card-role" data-t="lanyardRole">Ingeniería Industrial · Data & Ops</p>
                       
@@ -18272,9 +18486,9 @@ if (typeof document !== 'undefined') {
                       </div>
 
                       <!-- Interactive Flip Trigger Bar -->
-                      <button class="card-flip-btn" id="lanyardFlipTrigger" type="button" aria-label="Girar credencial para ver reverso">
+                      <button class="card-flip-btn" id="lanyardFlipTrigger" type="button" aria-label="Girar tarjeta para ver el reverso">
                         <span class="flip-icon">⟳</span>
-                        <span data-t="lanyardFlipBtn">GIRAR CREDENCIAL / FLIP 3D</span>
+                        <span data-t="lanyardFlipBtn">VER REVERSO · GIRAR 3D</span>
                       </button>
                     </div>
                   </div>
@@ -18312,7 +18526,7 @@ if (typeof document !== 'undefined') {
                         <span>Lima, Perú · UTC-5</span>
                         <code>SEC: 944521832</code>
                       </div>
-                      <button class="card-flip-btn back-flip-btn" type="button" aria-label="Volver al frente de la credencial">
+                      <button class="card-flip-btn back-flip-btn" type="button" aria-label="Volver al frente de la tarjeta">
                         <span class="flip-icon">⟳</span>
                         <span data-t="lanyardBackFlipBtn">VOLVER AL FRENTE</span>
                       </button>
@@ -18320,7 +18534,7 @@ if (typeof document !== 'undefined') {
                   </div>
                 </div>
                 <div class="lanyard-drag-hint" id="lanyardHint">
-                  <span data-t="lanyardHint">✦ ARRASTRA / TIRA DE LA CREDENCIAL</span>
+                  <span data-t="lanyardHint">✦ ARRASTRA / SUELTA LA TARJETA</span>
                 </div>
               </div>
             </div>

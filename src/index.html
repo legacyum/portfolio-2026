@@ -222,9 +222,9 @@
             </div>
           </div>
           <div class="hero-lanyard-wrapper">
-            <div class="lanyard-stage" id="lanyardStage" aria-label="Credencial interactiva 3D de Alessandro Altamirano">
+            <div class="lanyard-stage" id="lanyardStage" aria-label="Tarjeta de perfil interactiva 3D de Alessandro Altamirano">
               <canvas class="lanyard-canvas" id="lanyardCanvas"></canvas>
-              <div class="lanyard-card" id="lanyardCard" tabindex="0" role="button" aria-label="Credencial física 3D de Alessandro Altamirano. Arrastra o gira la tarjeta.">
+              <div class="lanyard-card" id="lanyardCard" tabindex="0" role="button" aria-label="Tarjeta de perfil física 3D de Alessandro Altamirano. Arrastra o gira la tarjeta.">
                 <div class="lanyard-clip" aria-hidden="true">
                   <svg class="clip-svg" viewBox="0 0 36 66" width="36" height="66" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <!-- Top D-Ring Loop -->
@@ -264,13 +264,13 @@
                 </div>
                 <div class="lanyard-card-inner">
                   <!-- Front Face -->
-                  <div class="card-face card-front">
+                  <div class="card-face card-front card-front--poster">
                     <div class="card-punch-hole" aria-hidden="true"></div>
                     <div class="card-holo-glare" aria-hidden="true"></div>
                     <div class="card-header">
-                      <div class="card-chip"><span class="chip-line"></span><span class="chip-line"></span></div>
-                      <span class="card-tag">AA-2026 // ACCESS ID</span>
-                      <span class="card-security-lvl">SEC-LVL 4</span>
+                      <div class="card-chip" aria-hidden="true"><span class="card-monogram">AA</span></div>
+                      <span class="card-tag" data-t="lanyardPosterTag">AA · PERFIL / 2026</span>
+                      <span class="card-security-lvl" data-t="lanyardPosterPlace">LIMA / PERÚ</span>
                     </div>
                     <div class="card-photo-wrap">
                       <picture>
@@ -278,13 +278,11 @@
                         <img src="assets/alessandro-photo.png" alt="Fotografía profesional de Alessandro Altamirano" class="card-photo" loading="eager" width="220" height="220" decoding="async" fetchpriority="high" />
                       </picture>
                       <div class="photo-overlay"></div>
-                      <span class="status-badge"><i class="status-dot"></i> ACTIVO</span>
-                      <span class="nfc-badge" title="NFC Enabled">NFC 🛈</span>
                     </div>
                     <div class="card-body">
                       <div class="card-name-row">
                         <h3 class="card-name">Alessandro Altamirano</h3>
-                        <span class="card-corp-badge">PX-OPS</span>
+                        <span class="card-corp-badge">AA / 01</span>
                       </div>
                       <p class="card-role" data-t="lanyardRole">Ingeniería Industrial · Data & Ops</p>
                       
@@ -311,9 +309,9 @@
                       </div>
 
                       <!-- Interactive Flip Trigger Bar -->
-                      <button class="card-flip-btn" id="lanyardFlipTrigger" type="button" aria-label="Girar credencial para ver reverso">
+                      <button class="card-flip-btn" id="lanyardFlipTrigger" type="button" aria-label="Girar tarjeta para ver el reverso">
                         <span class="flip-icon">⟳</span>
-                        <span data-t="lanyardFlipBtn">GIRAR CREDENCIAL / FLIP 3D</span>
+                        <span data-t="lanyardFlipBtn">VER REVERSO · GIRAR 3D</span>
                       </button>
                     </div>
                   </div>
@@ -351,7 +349,7 @@
                         <span>Lima, Perú · UTC-5</span>
                         <code>SEC: 944521832</code>
                       </div>
-                      <button class="card-flip-btn back-flip-btn" type="button" aria-label="Volver al frente de la credencial">
+                      <button class="card-flip-btn back-flip-btn" type="button" aria-label="Volver al frente de la tarjeta">
                         <span class="flip-icon">⟳</span>
                         <span data-t="lanyardBackFlipBtn">VOLVER AL FRENTE</span>
                       </button>
@@ -359,7 +357,7 @@
                   </div>
                 </div>
                 <div class="lanyard-drag-hint" id="lanyardHint">
-                  <span data-t="lanyardHint">✦ ARRASTRA / TIRA DE LA CREDENCIAL</span>
+                  <span data-t="lanyardHint">✦ ARRASTRA / SUELTA LA TARJETA</span>
                 </div>
               </div>
             </div>
