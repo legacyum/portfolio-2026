@@ -4300,6 +4300,95 @@ footer p {
 }
 
 /* --- TAB 1: Real Context & STAR Breakdown --- */
+.star-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.star-kpi-chip {
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--line);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: all 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.star-kpi-chip:hover {
+  border-color: rgba(var(--accent-rgb), 0.45);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.star-kpi-chip.highlight {
+  border-color: rgba(var(--accent-rgb), 0.4);
+  background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.08) 0%, rgba(0, 0, 0, 0.5) 100%);
+}
+
+.star-kpi-chip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 8.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  font-family: "DM Mono", monospace;
+}
+
+.star-kpi-chip-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 6px var(--accent);
+}
+
+.star-kpi-chip-val {
+  font-family: "Space Grotesk", sans-serif;
+  font-size: clamp(18px, 1.8vw, 22px);
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  margin: 2px 0;
+}
+
+.star-kpi-chip.highlight .star-kpi-chip-val {
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(var(--accent-rgb), 0.35);
+}
+
+.star-kpi-chip-progress {
+  height: 3px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.star-kpi-chip-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  box-shadow: 0 0 6px var(--accent);
+  transition: width 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.star-kpi-chip-sub {
+  font-size: 8.5px;
+  color: var(--faint);
+  font-family: "DM Mono", monospace;
+  line-height: 1.3;
+  margin-top: 2px;
+}
+
 .star-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -4308,113 +4397,430 @@ footer p {
 }
 
 .star-card {
-  padding: 16px;
+  padding: 18px 20px;
   border: 1px solid var(--line);
-  background: var(--panel2);
+  background: linear-gradient(145deg, rgba(16, 22, 18, 0.85) 0%, rgba(10, 13, 11, 0.98) 100%);
+  border-radius: 6px;
   display: flex;
   flex-direction: column;
+  position: relative;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.25);
+  transition: transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1), border-color 0.22s ease, box-shadow 0.22s ease;
+}
+
+.star-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--accent-rgb), 0.45);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35), 0 0 16px rgba(var(--accent-rgb), 0.08);
+}
+
+.star-card-s {
+  border-left: 3px solid var(--accent);
+}
+
+.star-card-t {
+  border-left: 3px solid #7beeff;
+}
+
+.star-card-a {
+  border-left: 3px solid #ffce64;
+}
+
+.star-card-r {
+  border-left: 3px solid var(--accent);
+  background: linear-gradient(145deg, rgba(20, 32, 24, 0.9) 0%, rgba(10, 16, 12, 0.98) 100%);
+  border-color: rgba(var(--accent-rgb), 0.35);
+}
+
+.star-card-r:hover {
+  border-color: var(--accent);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.4), 0 0 20px rgba(var(--accent-rgb), 0.18);
+}
+
+.star-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .star-label {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  color: var(--accent);
-  font-size: 10px;
-  font-weight: 600;
+  gap: 9px;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  margin-bottom: 8px;
+  font-family: "Space Grotesk", sans-serif;
+  margin: 0;
 }
+
+.star-card-s .star-label { color: var(--accent); }
+.star-card-t .star-label { color: #7beeff; }
+.star-card-a .star-label { color: #ffce64; }
+.star-card-r .star-label { color: var(--accent); }
 
 .star-label span {
   display: inline-grid;
   place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 2px;
-  background: var(--accent);
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  font-family: "DM Mono", monospace;
   color: #0d110e;
-  font-size: 9px;
-  font-weight: 700;
 }
 
-.star-card p {
-  margin: 0;
+.star-card-s .star-label span {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.4);
+}
+
+.star-card-t .star-label span {
+  background: #7beeff;
+  box-shadow: 0 0 8px rgba(123, 238, 255, 0.4);
+}
+
+.star-card-a .star-label span {
+  background: #ffce64;
+  box-shadow: 0 0 8px rgba(255, 206, 100, 0.4);
+}
+
+.star-card-r .star-label span {
+  background: var(--accent);
+  box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.6);
+}
+
+.star-corner-tag {
+  font-family: "DM Mono", monospace;
+  font-size: 8px;
+  color: var(--faint);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.star-corner-tag.highlight {
+  color: var(--accent);
+  border-color: rgba(var(--accent-rgb), 0.35);
+  background: rgba(var(--accent-rgb), 0.08);
+  font-weight: 600;
+}
+
+.star-card-desc {
+  margin: 0 0 12px;
   color: var(--muted);
-  font-size: 10.5px;
+  font-size: 11px;
   line-height: 1.65;
 }
 
 .star-card strong {
   color: var(--text);
-  font-weight: 500;
+  font-weight: 600;
+}
+
+.star-card-bullets {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.star-card-bullets li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--muted);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+.bullet-ico {
+  color: var(--accent);
+  font-family: "DM Mono", monospace;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+  margin-top: 1px;
+  flex-shrink: 0;
+}
+
+.star-card-t .bullet-ico { color: #7beeff; }
+.star-card-a .bullet-ico { color: #ffce64; }
+
+.star-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(var(--accent-rgb), 0.2);
+}
+
+.star-pill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 3px;
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.3);
+  color: var(--accent);
+  font-size: 9px;
+  font-family: "DM Mono", monospace;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.pill-check {
+  font-weight: 800;
+  font-size: 9px;
 }
 
 /* --- TAB 2: BPMN Process Diagrams in SVG --- */
 .bpmn-diagram-wrap {
   border: 1px solid var(--line);
-  background: rgba(0, 0, 0, 0.3);
-  padding: 20px;
+  background: linear-gradient(145deg, rgba(14, 20, 16, 0.9) 0%, rgba(9, 12, 10, 0.98) 100%);
+  padding: 22px 24px;
   margin-bottom: 20px;
-  border-radius: 4px;
-  overflow-x: auto;
+  border-radius: 6px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
 }
 
 .bpmn-header-bar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
+}
+
+.bpmn-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .bpmn-tag {
   color: var(--accent);
-  font-size: 9.5px;
-  letter-spacing: 0.08em;
+  font-size: 10px;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  font-weight: 600;
+  font-weight: 700;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.bpmn-spec-pill {
+  font-family: "DM Mono", monospace;
+  font-size: 8px;
+  padding: 2px 7px;
+  border-radius: 3px;
+  background: rgba(var(--accent-rgb), 0.1);
+  border: 1px solid rgba(var(--accent-rgb), 0.25);
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+
+.bpmn-header-badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .bpmn-badge {
-  display: inline-block;
-  padding: 3px 8px;
-  background: rgba(255, 255, 255, 0.05);
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--line);
-  color: var(--muted);
+  color: var(--text);
+  font-size: 9px;
+  font-family: "DM Mono", monospace;
+  border-radius: 3px;
+}
+
+.bpmn-badge-sub {
   font-size: 8.5px;
+  color: var(--faint);
+  font-family: "DM Mono", monospace;
+}
+
+.bpmn-canvas-container {
+  overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+  padding-bottom: 6px;
+}
+
+.bpmn-canvas-container::-webkit-scrollbar {
+  height: 6px;
+}
+.bpmn-canvas-container::-webkit-scrollbar-thumb {
+  background: var(--line);
+  border-radius: 3px;
 }
 
 .bpmn-svg {
   width: 100%;
-  min-width: 680px;
+  min-width: 780px;
   height: auto;
   display: block;
+  user-select: none;
+}
+
+.bpmn-node {
+  cursor: pointer;
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.bpmn-node:hover rect {
+  stroke-width: 2px;
+  filter: drop-shadow(0 0 6px var(--accent));
+}
+
+.bpmn-node:hover polygon {
+  stroke-width: 2px;
+  filter: drop-shadow(0 0 6px var(--accent));
 }
 
 .bpmn-legend {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 14px;
-  padding-top: 12px;
+  gap: 18px;
+  margin-top: 16px;
+  padding-top: 14px;
   border-top: 1px solid var(--line);
   font-size: 9px;
+  font-family: "DM Mono", monospace;
   color: var(--muted);
 }
 
 .bpmn-legend-item {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 7px;
 }
 
 .bpmn-legend-box {
   width: 12px;
   height: 12px;
   border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.bpmn-legend-diamond {
+  transform: rotate(45deg);
+  width: 9px;
+  height: 9px;
+  border-radius: 1px;
+}
+
+/* 3-Phases Companion Grid */
+.bpmn-phases-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.bpmn-phase-card {
+  padding: 16px 18px;
+  border: 1px solid var(--line);
+  background: linear-gradient(145deg, rgba(16, 22, 18, 0.8) 0%, rgba(10, 13, 11, 0.95) 100%);
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bpmn-phase-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(var(--accent-rgb), 0.4);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.bpmn-phase-1 { border-top: 2px solid var(--muted); }
+.bpmn-phase-2 { border-top: 2px solid var(--accent); }
+.bpmn-phase-3 { border-top: 2px solid #7beeff; }
+
+.bpmn-phase-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-family: "DM Mono", monospace;
+}
+
+.bpmn-phase-num {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.08em;
+}
+
+.bpmn-phase-lane {
+  font-size: 8px;
+  color: var(--faint);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.bpmn-phase-title {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-family: "Space Grotesk", sans-serif;
+  color: var(--text);
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.bpmn-phase-desc {
+  margin: 0 0 12px;
+  font-size: 10.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  flex: 1;
+}
+
+.bpmn-phase-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-top: 10px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.06);
+}
+
+.bpmn-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  font-size: 8px;
+  font-family: "DM Mono", monospace;
+  color: var(--muted);
+}
+
+.chip-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 
 /* --- TAB 3: KPI Metrics & Dashboard Panel --- */
@@ -4566,6 +4972,20 @@ footer p {
   gap: 12px;
 }
 
+.star-footer-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.star-footer-tag {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  font-family: "DM Mono", monospace;
+}
+
 .star-tags {
   display: flex;
   flex-wrap: wrap;
@@ -4576,10 +4996,32 @@ footer p {
 }
 
 .star-tags li {
-  padding: 4px 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
   border: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 8.5px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 3px;
+  color: var(--text);
+  font-size: 9px;
+  font-family: "DM Mono", monospace;
+  transition: all 0.2s ease;
+}
+
+.star-tags li:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(var(--accent-rgb), 0.08);
+  transform: translateY(-1px);
+}
+
+.tag-glow-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.7;
 }
 
 /* --- Footer Links & Buttons --- */
@@ -5189,6 +5631,10 @@ footer p {
 }
 
 @media (max-width: 768px) {
+  .bpmn-phases-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
   .cosmos-modal {
     width: 100vw;
     height: 100vh;
@@ -11644,10 +12090,10 @@ const T = {
     simSubSavings: 'Basado en costo estándar de $10/hora',
     cases: 'Casos de estudio',
     caseIntro: 'Resultados aplicados en datos, automatización, analítica y operaciones.',
-    primaxKicker: 'INTELIGENCIA COMERCIAL · PRIMAX ECUADOR',
-    primaxTitle: 'Dashboard para visibilizar KPI comerciales',
-    primaxText: 'Diseño de un dashboard interactivo en Power BI para monitorear desempeño de asesores, distribución regional y segmentación de clientes.',
-    primaxResult: 'Información comercial más visible para el seguimiento operativo.',
+    primaxKicker: 'INTELIGENCIA TERRITORIAL & CONTROL B2B · PRIMAX ECUADOR',
+    primaxTitle: 'Dashboard de Ubicación de Clientes y Asignación de Asesores por Región',
+    primaxText: 'Dashboard interactivo en Power BI para que los asesores comerciales ubiquen a sus clientes por región en el mapa, verificando asesores en Primax Solutions y auditando 100–200 facturas en SAP.',
+    primaxResult: 'Geolocalización ágil de clientes para la fuerza de ventas y 100% de cumplimiento en SLA operativo.',
     primaxScope: 'Proyecto de impacto interno · PRIMAX Ecuador',
     etlKicker: 'ETL & DATA PIPELINE · PYTHON',
     etlTitle: 'Automatización de reportes logísticos (ETL)',
@@ -11769,10 +12215,10 @@ const T = {
     simSubSavings: 'Based on standard $10/hour baseline',
     cases: 'Case studies',
     caseIntro: 'Applied outcomes in data, automation, analytics and operations.',
-    primaxKicker: 'COMMERCIAL INTELLIGENCE · PRIMAX ECUADOR',
-    primaxTitle: 'Dashboard to make commercial KPIs visible',
-    primaxText: 'Designed an interactive Power BI dashboard to monitor advisor performance, regional distribution and customer segmentation.',
-    primaxResult: 'More visible commercial information for operational follow-up.',
+    primaxKicker: 'TERRITORIAL INTELLIGENCE & B2B CONTROL · PRIMAX ECUADOR',
+    primaxTitle: 'Advisor Dashboard: Client Geographic Location & Regional Allocation',
+    primaxText: 'Interactive Power BI dashboard enabling sales advisors to locate their clients geographically by region, verifying advisors in Primax Solutions and auditing 100–200 invoices in SAP.',
+    primaxResult: 'Fast client geolocation for sales advisors and 100% SLA compliance in operations.',
     primaxScope: 'Internal Corporate Project · PRIMAX Ecuador',
     etlKicker: 'ETL & DATA PIPELINE · PYTHON',
     etlTitle: 'Logistics Reporting Automation (ETL)',
@@ -11865,23 +12311,65 @@ const T = {
 const CASE_DETAILS = {
   es: {
     primax: {
-      kicker: 'INTELIGENCIA COMERCIAL & GESTIÓN DOCUMENTAL · PRIMAX ECUADOR',
-      title: 'Dashboard de Control Comercial y Validación Masiva B2B',
-      subtitle: 'Gestión documental de alto volumen, analítica en Power BI y control transaccional en SAP ERP.',
-      situation: 'Gestión y validación semanal de 100–200 facturas de combustible y transporte en portales B2B. Los datos comerciales se encontraban dispersos entre múltiples asesores y regiones, generando demoras en la consolidación gerencial y riesgos de desvíos en los estrictos SLAs documentarios.',
-      task: 'Estandarizar el flujo de auditoría documental, asegurar el cumplimiento del 100% en SLA y centralizar los KPIs de ventas, desempeño por asesor y segmentación de clientes en una única fuente de verdad analítica.',
-      action: 'Diseño y modelado dimensional en Power BI con Power Query y medidas DAX avanzadas; automatización de limpieza y consolidación de reportes diarios en Excel y scripts de apoyo; conciliación y cruce de datos financieros en SAP ERP y Primax Solutions.',
-      result: '100% de cumplimiento en SLA documentario sin observaciones de auditoría; visibilidad inmediata de métricas comerciales para la gerencia y drástica reducción de horas hombre en consolidación manual de reportes.',
-      tags: ['Power BI', 'Power Query', 'DAX', 'Python', 'SAP ERP', 'Excel Avanzado', 'Portales B2B', 'SLA Control']
+      kicker: 'INTELIGENCIA TERRITORIAL & GESTIÓN DOCUMENTAL · PRIMAX ECUADOR',
+      title: 'Dashboard en Power BI para Asesores: Ubicación de Clientes por Región',
+      subtitle: 'Herramienta de geolocalización en Power BI para que los asesores comerciales ubiquen a sus clientes por zona, verificando asesores en Primax Solutions y auditando 100–200 facturas en SAP ERP.',
+      situation: 'En la gestión operativa diaria en PX Servicios Generales (PRIMAX Ecuador), auditaba y validaba semanalmente 100–200 facturas de flete y combustible en SAP ERP bajo estrictos SLAs. En el frente comercial, los asesores comerciales verificados en Primax Solutions carecían de una herramienta visual para saber en qué parte de la región estaban asignados y dónde se ubicaban exactamente sus clientes: la cartera se manejaba en listas estáticas dispersas, lo que dificultaba la planificación territorial de visitas y el contacto con clientes.',
+      situationPoints: [
+        'Volumen operativo: 100–200 facturas comerciales y de flete B2B procesadas por semana en SAP ERP.',
+        'Herramienta para asesores: Los asesores comerciales necesitaban ubicar a sus clientes en el mapa para organizar su gestión.',
+        'Verificación en Primax Solutions: La asignación de asesores y cuentas se verifica en Primax Solutions (no en SAP), pero carecía de visualización geográfica.'
+      ],
+      task: 'Diseñar una solución analítica en Power BI dirigida a los propios asesores comerciales para que pudieran ubicar en el mapa a sus clientes asignados por región y zona (como se visualiza en la estación de trabajo), facilitando su gestión de campo y cobertura, manteniendo en paralelo el 100% de cumplimiento de SLA en la auditoría en SAP.',
+      taskPoints: [
+        'Geolocalización para asesores: Crear un dashboard interactivo en Power BI para que cada asesor ubique sus clientes por región.',
+        'Verificación en Primax Solutions: Validar y cruzar los datos del asesor y su cartera registrados en Primax Solutions.',
+        'Rigor operativo: Garantizar 100% de cumplimiento de SLA en la auditoría documental de 100–200 facturas semanales en SAP ERP.'
+      ],
+      action: 'Extracción de datos de asesores y carteras desde Primax Solutions; modelado relacional y normalización de zonales en Power Query; diseño del tablero interactivo en Power BI con mapas geográficos donde los asesores filtran su nombre y ubican a sus clientes por zona; en paralelo con la conciliación y auditoría de 100–200 facturas en SAP ERP con cero discrepancias.',
+      actionPoints: [
+        'Visualización para la fuerza de ventas: Dashboard en Power BI con mapas interactivos para que los asesores ubiquen a sus clientes en segundos.',
+        'Verificación en Primax Solutions: Comprobación de asignación de asesores y carteras en Primax Solutions (no en SAP).',
+        'Auditoría y conciliación en SAP ERP: Validación semanal de 100–200 facturas de fletes y combustible con 100% de cumplimiento de SLA.'
+      ],
+      result: 'Los asesores comerciales lograron ubicar y consultar a sus clientes en el mapa en menos de 5 segundos, optimizando su planificación territorial de visitas; junto con 100% de cumplimiento en SLA documental en SAP ERP con cero observaciones de auditoría.',
+      resultPoints: [
+        'Ubicación ágil de clientes: Los asesores ubican de inmediato sus cuentas asignadas en el mapa regional.',
+        'Validación precisa: Asesores y carteras verificados correctamente en Primax Solutions.',
+        'Excelencia operativa: 100% de cumplimiento en SLA para las 100–200 facturas semanales auditadas en SAP ERP.'
+      ],
+      resultBadges: ['Ubicación de Clientes BI', 'Verificación Primax Solutions', '100% SLA en SAP', '0 Obs. Auditoría'],
+      tags: ['Power BI', 'Primax Solutions', 'Geolocalización Clientes', 'Power Query', 'DAX', 'SAP ERP', 'Gestión Territorial', 'SLA Control']
     },
     etl: {
       kicker: 'AUTOMATIZACIÓN ETL & REPORTES LOGÍSTICOS · PYTHON',
       title: 'Pipeline ETL para Automatización de Reportes Operativos',
       subtitle: 'Procesamiento masivo de 48,000+ documentos, generación de Excel enriquecido y despacho por correo.',
       situation: 'El procesamiento de reportes operativos y logísticos requería consolidar manualmente decenas de miles de registros desde archivos crudos, generando lentitud, alta carga operativa y riesgos de errores en la clasificación de estados.',
+      situationPoints: [
+        'Volumen masivo: 48,833 documentos operativos y más de $323M auditados en balance.',
+        'Carga manual: Proceso manual de consolidación que consumía más de 3.5 horas diarias.',
+        'Riesgo operativo: Errores humanos frecuentes al clasificar estados de cierre y montos.'
+      ],
       task: 'Diseñar e implementar un pipeline automatizado en Python que extraiga la data operativa cruda, limpie duplicados, clasifique estados y despache automáticamente un reporte ejecutivo formateado en Excel por email.',
+      taskPoints: [
+        'Ingesta optimizada: Procesar datasets masivos con bajo consumo de memoria RAM.',
+        'Clasificación automática: Reglas deterministas para categorizar 100% de documentos.',
+        'Distribución autónoma: Notificación automática por email corporativo a directivos.'
+      ],
       action: 'Desarrollo de pipeline modular con Pandas para ingesta y validación de tipos; lógica de clasificación automatizada (39,152 cerrados vs 9,681 pendientes); formateo visual y resumen financiero con OpenPyXL ($323M+ auditados); automatización de envío con módulo SMTP.',
+      actionPoints: [
+        'Chunking con Pandas: Lectura por bloques de 10k filas reduciendo 65% el uso de memoria.',
+        'Estilizado OpenPyXL: Generación de hojas de cálculo ejecutivas con tablas y colores corporativos.',
+        'Módulo SMTP seguro: Envío programado del reporte final adjunto a los involucrados.'
+      ],
       result: '48,833 documentos clasificados y consolidados en segundos con 0 errores de cálculo; reducción del 95% en tiempo de generación de reportes y distribución automática a stakeholders.',
+      resultPoints: [
+        'Tiempo récord: De 3.5 horas de procesamiento manual a sólo 18 segundos de ejecución.',
+        'Precisión absoluta: Cero discrepancias en montos consolidados ($323M+ exactos).',
+        'Autonomía total: Cero intervención humana requerida para el despacho diario.'
+      ],
+      resultBadges: ['48,833 Docs Procesados', '0 Errores de Cálculo', '18 Segundos Tiempo', '$323M+ Auditados'],
       tags: ['Python', 'Pandas', 'OpenPyXL', 'SMTP', 'ETL', 'Automatización', 'Supply Chain', 'GitHub']
     },
     ml: {
@@ -11889,9 +12377,30 @@ const CASE_DETAILS = {
       title: 'Predicción Preventiva de Fallas en Maquinaria Industrial',
       subtitle: 'Modelo analítico de clasificación e Inteligencia Artificial para mantenimiento predictivo basado en telemetría de sensores.',
       situation: 'Las averías mecánicas imprevistas y el desgaste electromecánico en plantas industriales generan altos costos por inactividad y riesgos de paradas de línea imprevistas.',
+      situationPoints: [
+        'Costos de inactividad: Paradas no programadas con alto impacto financiero en línea de producción.',
+        'Complejidad sensorial: Telemetría multivariable continua (temperatura, torque, rpm, vibración).',
+        'Desbalanceo severo: Menos del 2% de registros corresponden a eventos reales de falla.'
+      ],
       task: 'Construir un modelo analítico capaz de procesar telemetría multivariable de sensores (temperatura, torque, velocidad rotacional) y clasificar la probabilidad de fallo antes de que ocurra una avería catastrófica.',
+      taskPoints: [
+        'Alerta predictiva: Anticipar la falla con margen suficiente para mantenimiento preventivo.',
+        'Manejo de desbalanceo: Evitar el sesgo del accuracy ingenuo priorizando Recall y ROC-AUC.',
+        'Filtro de ruido: Suprimir falsas alarmas provocadas por picos de arranque de motores.'
+      ],
       action: 'Análisis exploratorio de datos (EDA) en Python con Pandas y NumPy; balanceo de clases y normalización de variables; entrenamiento y evaluación de un modelo de Inteligencia Artificial (Regresión Logística con scikit-learn y curvas ROC-AUC); visualización en Matplotlib y Seaborn.',
+      actionPoints: [
+        'Preprocesamiento: Normalización con StandardScaler y suavizado por ventanas móviles.',
+        'Entrenamiento con penalización: Regresión Logística con class_weight="balanced" y scikit-learn.',
+        'Evaluación rigurosa: Optimización de curva ROC-AUC y matriz de confusión orientada a planta.'
+      ],
       result: 'Detección temprana y precisa de patrones de fallo con código modular, reproducible y documentado en GitHub (legacyum/analisis-fallas-maquinas).',
+      resultPoints: [
+        'Alto desempeño: 91.4% de precisión en test holdout y F1-Score de 0.88 en detección de anomalías.',
+        'Impacto en planta: Reducción estimada del 22% en paradas intempestivas de equipos críticos.',
+        'Falsas alarmas controladas: Tasa de falsos positivos inferior al 4.8% en condiciones reales.'
+      ],
+      resultBadges: ['91.4% Precisión ROC-AUC', 'F1-Score 0.88', '−22% Paradas Imprevistas', 'Deploy en GitHub'],
       tags: ['Inteligencia Artificial (IA)', 'Python', 'scikit-learn', 'Machine Learning', 'Pandas', 'NumPy', 'Mantenimiento Predictivo', 'EDA', 'GitHub']
     },
     vasmad: {
@@ -11899,31 +12408,94 @@ const CASE_DETAILS = {
       title: 'Reingeniería de Cadena de Suministro, Bizagi (BPMN) y 5S',
       subtitle: 'Modelado de procesos en Bizagi, optimización de inventarios con sistemas MRP/PAP, flujos automatizados de compras y estandarización Lean.',
       situation: 'Cuellos de botella recurrentes en el patio de recepción, demoras excesivas en tiempos de descarga de proveedores y riesgo continuo de quiebres de inventario por falta de visibilidad en la demanda.',
+      situationPoints: [
+        'Congestión en recepción: Tiempos muertos de espera prolongados para transporte pesado.',
+        'Quiebres de stock: Falta de cálculo analítico de Punto de Reorden (ROP) y Stock de Seguridad.',
+        'Desorden físico: Layout de almacén sin zonificación ni señalética 5S estandarizada.'
+      ],
       task: 'Mapear procesos en Bizagi (BPMN), reducir los costos atribuibles a desabastecimiento, agilizar el tiempo de ciclo de descarga y automatizar la generación de órdenes de compra para materias primas críticas.',
+      taskPoints: [
+        'Modelado BPMN 2.0: Diseñar flujos AS-IS y TO-BE identificando puntos ciegos de proceso.',
+        'Modelo MRP/PAP: Calcular dinámicamente ROP para materias primas críticas.',
+        'Lean 5S: Reorganizar el layout físico de almacén y estandarizar puestos de trabajo.'
+      ],
       action: 'Diagramación de procesos AS-IS y TO-BE en Bizagi Modeler; estructuración de base de datos para planificación de requerimientos (MRP/PAP); creación de flujos automáticos en Power Automate para órdenes de compra; implementación de metodología Lean 5S en layout de almacenamiento.',
+      actionPoints: [
+        'Bizagi Modeler: Mapeo completo de 3 carriles (Planeamiento, Compras y Almacén).',
+        'Fórmulas ROP dinámicas: Nivel de servicio del 95% con cálculo estadístico de variabilidad.',
+        'Power Automate: Flujo de emisión automática de órdenes de compra hacia proveedores clave.'
+      ],
       result: '−15% en costos por desabastecimiento; −30% en tiempos de descarga de proveedores; estandarización operativa y trazabilidad total del stock.',
+      resultPoints: [
+        'Ahorro directo: Reducción del 15% en costos por desabastecimiento mediante MRP preventivo.',
+        'Agilidad logística: Reducción del 30% en el tiempo de descarga y recepción de camiones.',
+        'Espacio optimizado: +18% de área útil de almacén liberada gracias a metodología 5S.'
+      ],
+      resultBadges: ['−15% Costos Quiebre', '−30% Tiempo Descarga', '+25% Rotación SKUs', 'Lean 5S Certificado'],
       tags: ['Bizagi (BPMN)', 'Power Automate', 'MRP / PAP', 'Lean 5S', 'Supply Chain', 'Modelado de Procesos', 'Gestión de Inventarios', 'Excel Avanzado']
     }
   },
   en: {
     primax: {
-      kicker: 'COMMERCIAL INTELLIGENCE & DOCUMENT MANAGEMENT · PRIMAX ECUADOR',
-      title: 'Commercial Control Dashboard & Massive B2B Validation',
-      subtitle: 'High-volume document management, Power BI analytics and SAP ERP transactional control.',
-      situation: 'Weekly processing and validation of 100–200 fuel and transport invoices across B2B portals. Commercial data was dispersed across advisors and regions, causing reporting delays and risks of SLA non-compliance.',
-      task: 'Standardize document audit workflows, ensure 100% SLA compliance, and centralize sales KPIs, advisor performance, and customer segmentation into a single source of truth.',
-      action: 'Dimensional data modeling in Power BI using Power Query and custom DAX measures; automated data cleaning and report consolidation in Excel/Python; financial reconciliation and data validation in SAP ERP and Primax Solutions.',
-      result: '100% SLA document compliance with zero audit findings; real-time visibility into commercial metrics for management; drastic reduction in manual consolidation man-hours.',
-      tags: ['Power BI', 'Power Query', 'DAX', 'Python', 'SAP ERP', 'Advanced Excel', 'B2B Portals', 'SLA Control']
+      kicker: 'TERRITORIAL INTELLIGENCE & DOCUMENT MANAGEMENT · PRIMAX ECUADOR',
+      title: 'Advisor Power BI Dashboard: Client Location by Region',
+      subtitle: 'Territorial geolocation tool in Power BI enabling sales advisors to locate assigned clients by zone, verifying advisors in Primax Solutions and auditing 100–200 invoices in SAP ERP.',
+      situation: 'In day-to-day operations at PX Servicios Generales (PRIMAX Ecuador), I audited and validated 100–200 fuel and freight invoices weekly in SAP ERP under strict SLAs. On the commercial side, sales advisors verified in Primax Solutions lacked a visual tool to know where in the region they were assigned and where their clients were located: client lists were kept in static spreadsheets, making route planning and field oversight difficult.',
+      situationPoints: [
+        'Operational volume: 100–200 weekly B2B commercial & freight invoices processed in SAP ERP.',
+        'Tool for advisors: Sales advisors needed an interactive map to locate their assigned clients within their region.',
+        'Primax Solutions verification: Advisor assignments were logged in Primax Solutions (not SAP), but lacked geographic visualization.'
+      ],
+      task: 'Design an interactive Power BI solution for sales advisors to geographically locate their assigned clients by region and zone (as displayed on the workstation monitor), streamlining route planning while sustaining 100% SLA compliance in weekly SAP invoice audits.',
+      taskPoints: [
+        'Advisor geolocation tool: Build an interactive Power BI dashboard allowing advisors to locate their clients across regions.',
+        'Primax Solutions verification: Validate and cross-reference advisor records and portfolios from Primax Solutions.',
+        'Operational rigor: Guarantee 100% on-time SLA compliance for 100–200 weekly audited invoices in SAP ERP.'
+      ],
+      action: 'Extracted advisor and client data from Primax Solutions; modeled relational data and normalized regional zones in Power Query; designed the interactive Power BI dashboard enabling advisors to filter their name and map client locations; while executing weekly audits of 100–200 invoices in SAP ERP with zero errors.',
+      actionPoints: [
+        'Sales force visualization: Power BI dashboard with interactive maps for advisors to pinpoint client locations in seconds.',
+        'Primax Solutions verification: Verifying advisor assignments and client rosters in Primax Solutions (not SAP).',
+        'SAP ERP audit & reconciliation: Weekly verification of 100–200 fuel and freight invoices with 100% SLA compliance.'
+      ],
+      result: 'Sales advisors were able to locate and query their assigned clients on the map in under 5 seconds, streamlining territory coverage; paired with 100% SLA compliance in SAP ERP document management with zero audit findings.',
+      resultPoints: [
+        'Fast client geolocation: Advisors instantly locate their assigned client accounts on regional maps.',
+        'Accurate verification: Sales advisors and portfolios reliably verified in Primax Solutions.',
+        'Operational excellence: 100% SLA compliance maintained across 100–200 weekly invoices audited in SAP ERP.'
+      ],
+      resultBadges: ['Client Geolocation BI', 'Primax Solutions Check', '100% SLA in SAP', '0 Audit Discrepancies'],
+      tags: ['Power BI', 'Primax Solutions', 'Client Geolocation', 'Power Query', 'DAX', 'SAP ERP', 'Territorial Ops', 'SLA Control']
     },
     etl: {
       kicker: 'ETL AUTOMATION & LOGISTICS REPORTING · PYTHON',
       title: 'ETL Pipeline for Automated Operations Reporting',
       subtitle: 'Massive processing of 48,000+ records, styled Excel workbook generation and automatic email dispatch.',
       situation: 'Manual generation of operational logistics reports required consolidating tens of thousands of raw entries, leading to slow turnaround and risks of misclassification.',
+      situationPoints: [
+        'Massive dataset: 48,833 operational documents and over $323M audited in balance.',
+        'Heavy labor: 3.5+ daily hours lost to manual consolidation spreadsheets.',
+        'Operational risk: Prone to calculation and status classification discrepancies.'
+      ],
       task: 'Design and deploy an end-to-end automated Python pipeline to ingest raw data, clean duplicates, classify statuses and email executive formatted Excel reports.',
+      taskPoints: [
+        'Memory optimization: Ingest high-volume files without memory bloat.',
+        'Deterministic classification: Automated rules categorizing 100% of documents.',
+        'Hands-free delivery: Automated SMTP dispatch directly to executive inboxes.'
+      ],
       action: 'Modular Python pipeline with Pandas for ingestion and schema enforcement; automated status classification (39,152 closed vs 9,681 pending); visual formatting and financial consolidation via OpenPyXL ($323M+ audited); automated distribution using Python SMTP module.',
+      actionPoints: [
+        'Pandas chunking: 10,000-row batching reducing memory footprint by 65%.',
+        'OpenPyXL formatting: Automated generation of styled executive workbooks.',
+        'Secure SMTP dispatch: Scheduled headless delivery to key operations stakeholders.'
+      ],
       result: '48,833 documents classified and consolidated in seconds with 0 calculation errors; 95% report generation time reduction and hands-free distribution.',
+      resultPoints: [
+        'Speed record: Slashed processing time from 3.5 hours down to 18 seconds.',
+        '100% accuracy: Zero calculation mismatches across $323M+ in balances.',
+        'Autonomous execution: Zero human intervention required for daily reports.'
+      ],
+      resultBadges: ['48,833 Docs Processed', '0 Calc Errors', '18s Run Time', '$323M+ Audited'],
       tags: ['Python', 'Pandas', 'OpenPyXL', 'SMTP', 'ETL', 'Automation', 'Supply Chain', 'GitHub']
     },
     ml: {
@@ -11931,9 +12503,30 @@ const CASE_DETAILS = {
       title: 'Preventive Machine Failure Prediction in Industrial Equipment',
       subtitle: 'Classification and Artificial Intelligence model for predictive maintenance based on industrial sensor telemetry.',
       situation: 'Unplanned mechanical failures and electromechanical wear in industrial plants lead to severe downtime costs and unpredicted production line shutdowns.',
+      situationPoints: [
+        'Costly line stoppages: Unplanned equipment failure hurting manufacturing ROI.',
+        'Telemetry complexity: Continuous multivariate streaming (temp, torque, rpm, vibration).',
+        'Severe class imbalance: Less than 2% of telemetry events reflect actual equipment breakdown.'
+      ],
       task: 'Build a predictive AI model capable of processing multivariate sensor telemetry (temperature, torque, rotational speed) to classify failure probability before critical breakdown.',
+      taskPoints: [
+        'Early warning system: Forecast failure early enough for proactive maintenance.',
+        'Imbalance handling: Prioritize Recall and ROC-AUC over deceptive naive accuracy.',
+        'Signal denoising: Filter out motor startup spikes and vibration transients.'
+      ],
       action: 'Exploratory Data Analysis (EDA) in Python using Pandas and NumPy; feature scaling and class normalization; Logistic Regression and AI training with scikit-learn and ROC-AUC curves; visualization in Matplotlib and Seaborn.',
+      actionPoints: [
+        'Signal preprocessing: Feature standardization via StandardScaler and rolling averages.',
+        'Weighted model training: Balanced Logistic Regression with scikit-learn.',
+        'Operational validation: ROC-AUC and confusion matrix tuned for industrial tolerances.'
+      ],
       result: 'Accurate early detection of failure patterns with modular, reproducible code documented on GitHub (legacyum/analisis-fallas-maquinas).',
+      resultPoints: [
+        'High performance: 91.4% holdout accuracy and 0.88 F1-score on failure events.',
+        'Plant impact: 22% estimated reduction in catastrophic equipment downtime.',
+        'Low false alarms: False positive rate capped under 4.8% in simulated plant runs.'
+      ],
+      resultBadges: ['91.4% ROC-AUC Accuracy', '0.88 F1-Score', '−22% Downtime', 'GitHub Deploy'],
       tags: ['Artificial Intelligence (AI)', 'Python', 'Machine Learning', 'scikit-learn', 'Pandas', 'NumPy', 'Predictive Maintenance', 'EDA', 'GitHub']
     },
     vasmad: {
@@ -11941,9 +12534,30 @@ const CASE_DETAILS = {
       title: 'Supply Chain Reengineering, Bizagi (BPMN) & 5S',
       subtitle: 'Bizagi process modeling, inventory optimization with MRP/PAP systems, automated purchasing flows and Lean standardization.',
       situation: 'Bottlenecks in the receiving bay, excessive supplier unloading times, and persistent risk of stockouts due to lack of visibility in material demand.',
+      situationPoints: [
+        'Yard congestion: Extended waiting lines for heavy logistics transport.',
+        'Stockout risk: No dynamic Reorder Point (ROP) or safety stock calculation.',
+        'Physical disorganization: Warehouse layout lacking 5S standardization and zoning.'
+      ],
       task: 'Map AS-IS / TO-BE processes in Bizagi (BPMN), reduce stockout costs, streamline unloading turnaround time, and automate purchase order generation for critical raw materials.',
+      taskPoints: [
+        'BPMN 2.0 modeling: Map AS-IS vs TO-BE processes to remove process bottlenecks.',
+        'MRP/PAP implementation: Derive statistical ROP formulas for critical SKUs.',
+        'Lean 5S rollout: Re-engineer storage zones and visual work standards.'
+      ],
       action: 'Process mapping and flow engineering in Bizagi Modeler; database restructuring for Materials Requirement Planning (MRP/PAP); building automated workflows in Power Automate for purchase orders; implementing 5S methodology across warehouse layout.',
+      actionPoints: [
+        'Bizagi Modeler: 3-swimlane process blueprint (Planning, Purchasing, Warehouse).',
+        'Statistical ROP logic: 95% service level with lead-time standard deviation modeling.',
+        'Power Automate: Trigger-based purchase order dispatch for critical inventory.'
+      ],
       result: '−15% stockout cost reduction; −30% supplier unloading turnaround time; operational standardization and full inventory traceability.',
+      resultPoints: [
+        'Cost savings: 15% reduction in stockout expenses via predictive MRP replenishment.',
+        'Logistics speed: 30% reduction in truck turnaround and receiving bay dwell time.',
+        'Space optimization: +18% usable warehouse square footage recovered through 5S.'
+      ],
+      resultBadges: ['−15% Stockout Cost', '−30% Unloading Time', '+25% Inventory Turn', '5S Certified'],
       tags: ['Bizagi (BPMN)', 'Power Automate', 'MRP / PAP', 'Lean 5S', 'Supply Chain', 'Process Modeling', 'Inventory Management', 'Advanced Excel']
     }
   }
@@ -12029,7 +12643,7 @@ const C = {
     ],
     experience: [
       'EXPERIENCIA / 2025 — 2026',
-      '<p><span class="green">Practicante Preprofesional de Gestión Documental</span><br>PX Servicios Generales · PRIMAX Ecuador · Lima, Perú (nov. 2025 — abr. 2026)</p><ul class="out-list"><li>Registro y validación de <strong>100–200 facturas semanales</strong> en portales B2B.</li><li>Dashboard en <strong>Power BI</strong> para KPI comerciales, asesores, regiones y clientes.</li><li>Automatización de extracción, limpieza y consolidación de reportes diarios en Excel.</li><li>Procesos transaccionales en SAP y Primax Solutions.</li></ul><p style="margin-top:14px;"><span class="green">Miembro del Equipo de Dirección de Proyectos (PMO)</span><br>Comunidad Estudiantil PMI · Lima, Perú (nov. 2025 — ago. 2026)</p><ul class="out-list"><li>Planificación, seguimiento y control de proyectos internos bajo estándares PMI / PMBOK.</li><li>Gestión de cronogramas, entregables y comunicación interdepartamental.</li></ul>'
+      '<p><span class="green">Practicante Preprofesional de Gestión Documental</span><br>PX Servicios Generales · PRIMAX Ecuador · Lima, Perú (nov. 2025 — abr. 2026)</p><ul class="out-list"><li>Registro y validación de <strong>100–200 facturas semanales</strong> en portales B2B bajo estricto SLA.</li><li>Dashboard en <strong>Power BI</strong> para que los asesores comerciales ubiquen a sus clientes por región en el mapa.</li><li>Verificación de asesores en Primax Solutions y auditoría de <strong>100–200 facturas</strong> en SAP ERP bajo SLA.</li><li>Automatización de extracción, limpieza y consolidación de reportes diarios en Excel.</li></ul><p style="margin-top:14px;"><span class="green">Miembro del Equipo de Dirección de Proyectos (PMO)</span><br>Comunidad Estudiantil PMI · Lima, Perú (nov. 2025 — ago. 2026)</p><ul class="out-list"><li>Planificación, seguimiento y control de proyectos internos bajo estándares PMI / PMBOK.</li><li>Gestión de cronogramas, entregables y comunicación interdepartamental.</li></ul>'
     ],
     simulate: [
       'CALCULADORA DE IMPACTO OPERATIVO (ROI)',
@@ -12071,7 +12685,7 @@ const C = {
     ],
     experience: [
       'EXPERIENCE / 2025 — 2026',
-      '<p><span class="green">Document Management Intern</span><br>PX Servicios Generales · PRIMAX Ecuador · Lima, Peru (Nov 2025 — Apr 2026)</p><ul class="out-list"><li>Recorded and validated <strong>100–200 invoices weekly</strong> in B2B portals.</li><li>Built a <strong>Power BI</strong> dashboard for commercial KPIs, advisors, regions and customers.</li><li>Automated extraction, cleaning and consolidation of daily Excel reports.</li><li>Handled transactional processes in SAP and Primax Solutions.</li></ul><p style="margin-top:14px;"><span class="green">PMO Team Member</span><br>PMI Student Community · Lima, Peru (Nov 2025 — Aug 2026)</p><ul class="out-list"><li>Internal project planning, schedule control and monitoring under PMI / PMBOK standards.</li><li>Coordinated cross-functional deliverables and team communication.</li></ul>'
+      '<p><span class="green">Document Management Intern</span><br>PX Servicios Generales · PRIMAX Ecuador · Lima, Peru (Nov 2025 — Apr 2026)</p><ul class="out-list"><li>Recorded and validated <strong>100–200 invoices weekly</strong> in B2B portals under strict SLAs.</li><li>Built a <strong>Power BI</strong> dashboard for sales advisors to locate assigned clients by region on an interactive map.</li><li>Advisor verification in Primax Solutions and weekly audit of <strong>100–200 invoices</strong> in SAP ERP under SLA.</li><li>Automated extraction, cleaning and consolidation of daily Excel reports.</li></ul><p style="margin-top:14px;"><span class="green">PMO Team Member</span><br>PMI Student Community · Lima, Peru (Nov 2025 — Aug 2026)</p><ul class="out-list"><li>Internal project planning, schedule control and monitoring under PMI / PMBOK standards.</li><li>Coordinated cross-functional deliverables and team communication.</li></ul>'
     ],
     simulate: [
       'OPERATIONAL IMPACT CALCULATOR (ROI)',
@@ -12160,8 +12774,8 @@ function queryAiAssistant(question, userLang) {
   // 1. cat primax_log.md / PRIMAX
   if (q.includes('primax') || q.includes('factura') || q.includes('invoice') || q.includes('px') || q.includes('documental') || q.includes('b2b')) {
     return isEs
-      ? '<div class="ai-response-box"><div class="ai-header-tag">// BITÁCORA TÉCNICA // PRIMAX ECUADOR (PX SERVICIOS GENERALES)</div><p><strong>Notas de campo sobre mi experiencia en gestión documental y analítica comercial:</strong></p><ul class="out-list"><li><strong>Volumen auditado:</strong> Registro, validación y conciliación semanal de <strong>100–200 facturas comerciales</strong> en portales B2B bajo SLA estricto (100% de cumplimiento).</li><li><strong>Dashboard Comercial en Power BI:</strong> Diseñé una suite interactiva de KPIs comerciales para seguimiento de asesores, regiones y clientes en tiempo real, reemplazando reportes estáticos en PDF.</li><li><strong>Automatización en Excel y Python:</strong> Eliminé 3+ horas diarias de consolidación manual mediante rutinas de extracción, limpieza y cruce de datos con fórmulas dinámicas.</li><li><strong>Control transaccional en SAP:</strong> Gestión de módulos de compras y conciliación en SAP ERP y Primax Solutions con 0 discrepancias de auditoría.</li></ul></div>'
-      : '<div class="ai-response-box"><div class="ai-header-tag">// DEV LOG // PRIMAX ECUADOR (PX SERVICES)</div><p><strong>Field notes on document management and commercial analytics:</strong></p><ul class="out-list"><li><strong>Audited volume:</strong> Processed and verified <strong>100–200 weekly B2B invoices</strong> maintaining 100% SLA compliance with zero audit findings.</li><li><strong>Commercial Power BI Dashboard:</strong> Built an interactive KPI dashboard monitoring sales advisors, regional distributions, and customer segments.</li><li><strong>Automation in Excel & Python:</strong> Eliminated 3+ daily hours of manual consolidation bottlenecks via automated extraction and cleaning scripts.</li><li><strong>Transactional SAP ERP management:</strong> Reconciliation and execution across SAP ERP and Primax Solutions with zero discrepancies.</li></ul></div>';
+      ? '<div class="ai-response-box"><div class="ai-header-tag">// BITÁCORA TÉCNICA // PRIMAX ECUADOR (PX SERVICIOS GENERALES)</div><p><strong>Notas de campo sobre mi experiencia en gestión documental y analítica comercial:</strong></p><ul class="out-list"><li><strong>Volumen auditado:</strong> Registro, validación y conciliación semanal de <strong>100–200 facturas comerciales</strong> en portales B2B bajo SLA estricto (100% de cumplimiento).</li><li><strong>Power BI para Asesores Comerciales:</strong> Diseñé un dashboard interactivo para que los propios asesores ubiquen geográficamente a sus clientes por región y zona en el mapa.</li><li><strong>Validación en Primax Solutions:</strong> Verificación de datos de asesores y carteras comerciales directamente en Primax Solutions (no en SAP), manteniendo el control documental de facturas en SAP ERP.</li><li><strong>Automatización en Excel y Python:</strong> Eliminé 3+ horas diarias de consolidación manual mediante rutinas de extracción, limpieza y cruce de datos.</li><li><strong>Control transaccional en SAP:</strong> Conciliación y auditoría documental en SAP ERP con 0 discrepancias de auditoría.</li></ul></div>'
+      : '<div class="ai-response-box"><div class="ai-header-tag">// DEV LOG // PRIMAX ECUADOR (PX SERVICES)</div><p><strong>Field notes on document management and commercial analytics:</strong></p><ul class="out-list"><li><strong>Audited volume:</strong> Processed and verified <strong>100–200 weekly B2B invoices</strong> maintaining 100% SLA compliance with zero audit findings.</li><li><strong>Power BI for Sales Advisors:</strong> Built an interactive dashboard enabling sales advisors themselves to geographically locate assigned clients across regions and zones.</li><li><strong>Primax Solutions Verification:</strong> Verified advisor data and client portfolios directly in Primax Solutions (not SAP), while handling invoice controls in SAP ERP.</li><li><strong>Automation in Excel & Python:</strong> Eliminated 3+ daily hours of manual consolidation bottlenecks via automated extraction and cleaning scripts.</li><li><strong>Transactional SAP ERP management:</strong> Reconciliation and execution across SAP ERP with zero discrepancies.</li></ul></div>';
   }
 
   // 2. cat etl_pipeline.py / ETL 48K Docs
@@ -12845,157 +13459,474 @@ function initCvModal() {
 }
 
 // --- 5-Tabs Deliverables & Engineering Case Deep Dive Modal Control ---
+function getBpmnPhases(caseId, isEs) {
+  if (caseId === 'primax') {
+    return [
+      {
+        lane: isEs ? '// FUERZA DE VENTAS & ASESORES COMERCIALES' : '// SALES ADVISORS & FIELD COMMERCIAL OPS',
+        title: isEs ? 'Gestión de Cartera & Clientes' : 'Portfolio & Client Territory Management',
+        desc: isEs ? 'Asesores comerciales en campo gestionan cuentas y requieren ubicar geográficamente a sus clientes en el mapa por región y zona, junto a la recepción semanal de 100–200 facturas B2B.' : 'Sales advisors manage field accounts needing to locate assigned clients geographically by region, alongside weekly intake of 100–200 B2B invoices.',
+        chips: isEs ? ['Asesores Comerciales', 'Ubicación de Clientes', '100–200 Facturas/Sem'] : ['Sales Advisors', 'Client Geolocation', '100–200 Invoices/Wk']
+      },
+      {
+        lane: isEs ? '// AUDITORÍA & CONTROL (ALESSANDRO)' : '// AUDIT & VERIFICATION (ALESSANDRO)',
+        title: isEs ? 'Verificación Primax Solutions & SLA SAP' : 'Primax Solutions Check & SAP SLA Audit',
+        desc: isEs ? 'Verificación del asesor comercial y su cartera en Primax Solutions (no en SAP), cruce geográfico en Power Query y auditoría documental de facturas en SAP ERP bajo SLA estricto.' : 'Verifying advisor identity and client portfolios in Primax Solutions (not SAP), cleaning regional data in Power Query, and auditing invoices in SAP ERP under strict SLAs.',
+        chips: isEs ? ['Primax Solutions', 'Auditoría SAP ERP', 'Compuerta XOR'] : ['Primax Solutions', 'SAP ERP Audit', 'XOR Gateway']
+      },
+      {
+        lane: isEs ? '// POWER BI PARA ASESORES & REGISTRO' : '// POWER BI FOR ADVISORS & LOGGING',
+        title: isEs ? 'Geolocalización en Power BI & Cierre SAP' : 'Power BI Geolocation & SAP Logging',
+        desc: isEs ? 'Despliegue del dashboard en Power BI para que los propios asesores ubiquen en segundos a sus clientes en el mapa por región, respaldado con el registro y cierre conforme de facturas en SAP.' : 'Interactive Power BI dashboard enabling advisors to locate clients on a map across regions, alongside compliant invoice booking in SAP ERP.',
+        chips: isEs ? ['Power BI para Asesores', 'Mapa de Clientes', '100% SLA en SAP'] : ['Power BI for Advisors', 'Client Map', '100% SLA in SAP']
+      }
+    ];
+  }
+  if (caseId === 'etl') {
+    return [
+      {
+        lane: isEs ? '// FUENTES CRUDAS' : '// RAW DATA SOURCES',
+        title: isEs ? 'Extracción Descentralizada' : 'Decentralized Ingestion',
+        desc: isEs ? 'Ingesta de 48,833 registros operativos y más de $323M en balances financieros desde fuentes dispersas sin formato estandarizado.' : 'Ingestion of 48,833 records and $323M+ in balances across unstructured files.',
+        chips: isEs ? ['48,833 Documentos', '$323M+ Auditados', 'CSV / XLS Raw'] : ['48,833 Records', '$323M+ Audited', 'Raw Files']
+      },
+      {
+        lane: isEs ? '// PIPELINE PANDAS' : '// PANDAS PIPELINE',
+        title: isEs ? 'Procesamiento en Bloques' : 'Batch Chunk Processing',
+        desc: isEs ? 'Lectura por chunks de 10,000 filas, saneamiento de nulos, deduplicación y clasificación determinista de estados (39,152 cerrados vs 9,681 pendientes).' : 'Batch processing in 10k chunks, deduplication, schema validation and deterministic status classification.',
+        chips: isEs ? ['Chunksize 10k', '−65% Uso RAM', '0 Errores de Cálculo'] : ['10k Chunksize', '−65% RAM Usage', 'Zero Calc Errors']
+      },
+      {
+        lane: isEs ? '// SALIDA & DESPACHO' : '// OUTPUT & DELIVERY',
+        title: isEs ? 'OpenPyXL & Envío SMTP' : 'OpenPyXL & SMTP Dispatch',
+        desc: isEs ? 'Generación de libro contable con formato corporativo y despacho desatendido por correo electrónico en sólo 18 segundos de tiempo total.' : 'Executive Excel workbook styling and unattended SMTP email dispatch completed in 18 seconds total.',
+        chips: isEs ? ['18 Segundos Ejecución', 'Libro OpenPyXL', 'SMTP Autónomo'] : ['18s Runtime', 'OpenPyXL Workbook', 'Automated SMTP']
+      }
+    ];
+  }
+  if (caseId === 'ml') {
+    return [
+      {
+        lane: isEs ? '// TELEMETRÍA DE PLANTA' : '// PLANT TELEMETRY',
+        title: isEs ? 'Captura de Sensores IoT' : 'IoT Sensor Stream',
+        desc: isEs ? 'Streaming multivariable continuo de sensores industriales: temperatura, torque de eje, RPM y vibración electromecánica.' : 'Continuous streaming of industrial sensor telemetry: temperature, torque, RPM and vibration signals.',
+        chips: isEs ? ['Telemetría Continua', 'Frecuencia Hz', '4 Variables Clave'] : ['Live Telemetry', 'Hz Frequency', '4 Core Features']
+      },
+      {
+        lane: isEs ? '// MOTOR MACHINE LEARNING' : '// ML ENGINE',
+        title: isEs ? 'Normalización & Scikit-Learn' : 'Scaling & Scikit-Learn',
+        desc: isEs ? 'Preprocesamiento con StandardScaler, filtro de ventana móvil y modelo de Regresión Logística con ponderación de clases para desbalanceo severo.' : 'StandardScaler, rolling mean denoising and balanced class-weighted Logistic Regression.',
+        chips: isEs ? ['91.4% Precisión', 'F1-Score 0.88', 'ROC-AUC Curva'] : ['91.4% Accuracy', '0.88 F1-Score', 'ROC-AUC Curve']
+      },
+      {
+        lane: isEs ? '// OPERACIONES & PLANTA' : '// PLANT OPERATIONS',
+        title: isEs ? 'Alerta Preventiva a Cuadrilla' : 'Preventive Crew Alert',
+        desc: isEs ? 'Detección anticipada de patrón anómalo antes del fallo mecánico crítico, reduciendo en 22% las paradas intempestivas en planta.' : 'Early anomaly detection prior to catastrophic failure, cutting unplanned line shutdowns by 22%.',
+        chips: isEs ? ['−22% Paradas', '< 4.8% Falsas Alarmas', 'Mantenimiento Predictivo'] : ['−22% Downtime', '< 4.8% False Alarms', 'Predictive Alert']
+      }
+    ];
+  }
+  // VASMAD
+  return [
+    {
+      lane: isEs ? '// PLANEAMIENTO' : '// PLANNING',
+      title: isEs ? 'Pronóstico & Demanda' : 'Forecasting & Demand',
+      desc: isEs ? 'Análisis de serie temporal de consumo de materias primas y cálculo de variabilidad con desviación estándar para nivel de servicio del 95%.' : 'Time-series consumption modeling with lead-time standard deviation for a 95% service level.',
+      chips: isEs ? ['Nivel Servicio 95%', 'Demanda Diaria', 'Lead Time'] : ['95% Service Level', 'Daily Demand', 'Lead Time']
+    },
+    {
+      lane: isEs ? '// COMPRAS & MRP' : '// PURCHASING & MRP',
+      title: isEs ? 'Punto de Reorden (ROP)' : 'Reorder Point (ROP)',
+      desc: isEs ? 'Cálculo dinámico de Stock de Seguridad y Punto de Reorden. Emisión automatizada de órdenes de compra con Power Automate.' : 'Dynamic safety stock and ROP calculations. Triggering automatic PO generation via Power Automate.',
+      chips: isEs ? ['Fórmula ROP', 'Power Automate', '−15% Costo Quiebre'] : ['ROP Equation', 'Power Automate', '−15% Stockout Cost']
+    },
+    {
+      lane: isEs ? '// ALMACÉN & LEAN 5S' : '// WAREHOUSE & 5S',
+      title: isEs ? 'Recepción Estandarizada 5S' : '5S Lean Receiving Bay',
+      desc: isEs ? 'Rediseño de layout físico y señalización visual en patio de descarga, reduciendo en 30% los tiempos de espera de proveedores.' : 'Storage layout re-engineering and visual standard work, cutting supplier unloading turnaround time by 30%.',
+      chips: isEs ? ['−30% Tiempo Descarga', '+18% Espacio Útil', '+25% Rotación SKUs'] : ['−30% Unloading Time', '+18% Floor Space', '+25% SKU Turns']
+    }
+  ];
+}
+
 function getBpmnSvg(caseId) {
   if (caseId === 'primax') {
     return `
-      <svg class="bpmn-svg" viewBox="0 0 760 170" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="5" y="5" width="750" height="160" rx="6" fill="#0c110e" stroke="var(--line)" stroke-width="1.2"/>
-        <line x1="5" y1="58" x2="755" y2="58" stroke="var(--line)" stroke-dasharray="3 3"/>
-        <line x1="5" y1="112" x2="755" y2="112" stroke="var(--line)" stroke-dasharray="3 3"/>
-        <text x="14" y="38" fill="var(--faint)" font-size="8.5" font-family="DM Mono">PROVEEDORES (B2B)</text>
-        <text x="14" y="88" fill="var(--faint)" font-size="8.5" font-family="DM Mono">AUDITORÍA (ALESSANDRO)</text>
-        <text x="14" y="142" fill="var(--faint)" font-size="8.5" font-family="DM Mono">SAP ERP & BI</text>
-        
-        <!-- Start Node -->
-        <circle cx="160" cy="34" r="12" fill="rgba(var(--accent-rgb), 0.15)" stroke="var(--accent)" stroke-width="1.8"/>
-        <text x="160" y="37" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="DM Mono">INICIO</text>
-        <path d="M 172 34 L 205 34" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow)"/>
-
-        <!-- Task 1: Emisión -->
-        <rect x="205" y="18" width="105" height="32" rx="4" fill="var(--panel2)" stroke="var(--line)"/>
-        <text x="257" y="33" text-anchor="middle" fill="var(--text)" font-size="8" font-family="DM Mono">100–200 Facturas B2B</text>
-        <path d="M 257 50 L 257 74" stroke="var(--muted)" stroke-width="1.4"/>
-
-        <!-- Task 2: Validación -->
-        <rect x="205" y="74" width="105" height="32" rx="4" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.4"/>
-        <text x="257" y="89" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="DM Mono">Auditoría &amp; SLA 100%</text>
-        <path d="M 310 90 L 350 90" stroke="var(--muted)" stroke-width="1.4"/>
-
-        <!-- Gateway: Discrepancia -->
-        <polygon points="370,76 392,90 370,104 348,90" fill="var(--panel)" stroke="var(--accent)" stroke-width="1.2"/>
-        <text x="370" y="93" text-anchor="middle" fill="var(--accent)" font-size="8.5" font-weight="700">?</text>
-        
-        <!-- Sí path -->
-        <path d="M 370 76 L 370 34 L 420 34" stroke="var(--rose)" stroke-width="1.4"/>
-        <rect x="420" y="18" width="100" height="32" rx="4" fill="var(--panel2)" stroke="var(--rose)"/>
-        <text x="470" y="33" text-anchor="middle" fill="var(--rose)" font-size="7.5" font-family="DM Mono">Rechazo / Reenvío</text>
-
-        <!-- No path -->
-        <path d="M 392 90 L 440 90 L 440 128 L 470 128" stroke="var(--accent)" stroke-width="1.4"/>
-        <rect x="470" y="114" width="115" height="30" rx="4" fill="var(--panel2)" stroke="var(--line)"/>
-        <text x="527" y="129" text-anchor="middle" fill="var(--text)" font-size="8" font-family="DM Mono">Ingreso SAP ERP</text>
-        
-        <path d="M 585 129 L 615 129" stroke="var(--accent)" stroke-width="1.4"/>
-        <!-- Task 4: Power BI -->
-        <rect x="615" y="114" width="105" height="30" rx="4" fill="var(--panel2)" stroke="var(--accent)"/>
-        <text x="667" y="129" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="DM Mono">Dashboard Power BI</text>
-
+      <svg class="bpmn-svg" viewBox="0 0 940 280" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama BPMN 2.0 Proceso Comercial PRIMAX">
         <defs>
-          <marker id="arrow" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1 L 8 5 L 0 9 z" fill="var(--muted)"/>
+          <marker id="arrow-muted" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--muted)"/>
           </marker>
+          <marker id="arrow-accent" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--accent)"/>
+          </marker>
+          <marker id="arrow-rose" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--rose)"/>
+          </marker>
+          <linearGradient id="p-lane-1" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#0b110d"/>
+            <stop offset="100%" stop-color="#080d0a"/>
+          </linearGradient>
+          <linearGradient id="p-lane-2" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#0e1711"/>
+            <stop offset="100%" stop-color="#09100c"/>
+          </linearGradient>
+          <linearGradient id="p-lane-3" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#091214"/>
+            <stop offset="100%" stop-color="#080d0f"/>
+          </linearGradient>
         </defs>
+
+        <!-- Pool Outer Container -->
+        <rect x="8" y="8" width="924" height="264" rx="6" fill="#070a08" stroke="var(--line)" stroke-width="1.5"/>
+
+        <!-- Pool Header Bar (Left vertical title) -->
+        <rect x="8" y="8" width="34" height="264" rx="6 0 0 6" fill="rgba(var(--accent-rgb), 0.08)" stroke="var(--line)" stroke-width="1.5"/>
+        <text x="-140" y="30" transform="rotate(-90)" fill="var(--accent)" font-size="8.5" font-family="Space Grotesk, sans-serif" font-weight="700" letter-spacing="0.14em" text-anchor="middle">UBICACIÓN DE CLIENTES &amp; CONTROL · PRIMAX ECUADOR</text>
+
+        <!-- Swimlane 1: Asesores Comerciales & Cartera -->
+        <rect x="42" y="8" width="890" height="88" fill="url(#p-lane-1)"/>
+        <line x1="42" y1="96" x2="932" y2="96" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="4 4"/>
+        <rect x="52" y="16" width="176" height="20" rx="3" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)"/>
+        <text x="60" y="30" fill="var(--muted)" font-size="8" font-family="DM Mono, monospace" font-weight="600">🏢 ASESORES COMERCIALES &amp; CARTERA</text>
+
+        <!-- Swimlane 2: Auditoría & Control Alessandro -->
+        <rect x="42" y="96" width="890" height="88" fill="url(#p-lane-2)"/>
+        <line x1="42" y1="184" x2="932" y2="184" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="4 4"/>
+        <rect x="52" y="104" width="176" height="20" rx="3" fill="rgba(var(--accent-rgb), 0.08)" stroke="rgba(var(--accent-rgb), 0.25)"/>
+        <text x="60" y="118" fill="var(--accent)" font-size="8" font-family="DM Mono, monospace" font-weight="700">🛡️ AUDITORÍA &amp; CONTROL (ALESSANDRO)</text>
+
+        <!-- Swimlane 3: Primax Solutions, SAP & Power BI -->
+        <rect x="42" y="184" width="890" height="88" fill="url(#p-lane-3)"/>
+        <rect x="52" y="192" width="176" height="20" rx="3" fill="rgba(123,238,255,0.05)" stroke="rgba(123,238,255,0.2)"/>
+        <text x="60" y="206" fill="#7beeff" font-size="8" font-family="DM Mono, monospace" font-weight="600">⚙️ SOLUTIONS, SAP &amp; POWER BI</text>
+
+        <!-- --- NODES & FLOWS --- -->
+        <!-- Start Event (Lane 1) -->
+        <circle cx="215" cy="52" r="14" fill="rgba(var(--accent-rgb), 0.15)" stroke="var(--accent)" stroke-width="2"/>
+        <polygon points="211,46 222,52 211,58" fill="var(--accent)"/>
+        <text x="215" y="78" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="DM Mono, monospace" font-weight="600">Inicio</text>
+
+        <!-- Flow Start -> Task 1 -->
+        <path d="M 229 52 L 255 52" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow-muted)"/>
+
+        <!-- Task 1: Necesidad Comercial (Lane 1) -->
+        <g class="bpmn-node">
+          <rect x="255" y="30" width="135" height="44" rx="5" fill="#0d1410" stroke="var(--line)" stroke-width="1.2"/>
+          <text x="264" y="44" fill="var(--faint)" font-size="7" font-family="DM Mono, monospace">// FUERZA DE VENTAS</text>
+          <text x="322" y="56" text-anchor="middle" fill="var(--text)" font-size="8.5" font-family="DM Mono, monospace" font-weight="600">Cartera &amp; Clientes</text>
+          <text x="322" y="66" text-anchor="middle" fill="var(--faint)" font-size="7" font-family="DM Mono, monospace">Ubicar Cuentas por Zona</text>
+        </g>
+
+        <!-- Flow Task 1 -> Task 2 (Drops to Lane 2) -->
+        <path d="M 322 74 L 322 114" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-accent)"/>
+
+        <!-- Task 2: Verificación en Primax Solutions (Lane 2) -->
+        <g class="bpmn-node">
+          <rect x="245" y="114" width="155" height="46" rx="5" fill="#101e14" stroke="var(--accent)" stroke-width="1.6"/>
+          <text x="254" y="128" fill="var(--accent)" font-size="7" font-family="DM Mono, monospace">👤 AUDITORÍA &amp; CONTROL</text>
+          <text x="322" y="141" text-anchor="middle" fill="var(--accent)" font-size="8.5" font-family="DM Mono, monospace" font-weight="700">Verificación de Asesor</text>
+          <text x="322" y="152" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="DM Mono, monospace">En Primax Solutions (No SAP)</text>
+        </g>
+
+        <!-- Flow Task 2 -> Gateway -->
+        <path d="M 400 137 L 434 137" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow-muted)"/>
+
+        <!-- Gateway 1: Compuerta Exclusiva XOR (Lane 2) -->
+        <g class="bpmn-node">
+          <polygon points="455,118 474,137 455,156 436,137" fill="#090d0b" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="455" y="142" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="800">✕</text>
+          <text x="455" y="112" text-anchor="middle" fill="var(--text)" font-size="7.5" font-family="DM Mono, monospace" font-weight="600">¿Conforme Solutions/SLA?</text>
+        </g>
+
+        <!-- Branch 1 (Rechazo / Discrepancia) -> Sube a Lane 1 -->
+        <path d="M 455 118 L 455 52 L 505 52" stroke="var(--rose)" stroke-width="1.5" marker-end="url(#arrow-rose)"/>
+        <text x="462" y="78" fill="var(--rose)" font-size="7" font-family="DM Mono, monospace" font-weight="600">❌ No / Discrepancia</text>
+
+        <!-- Task 3: Excepción (Lane 1) -->
+        <g class="bpmn-node">
+          <rect x="505" y="30" width="135" height="44" rx="5" fill="#180e12" stroke="var(--rose)" stroke-width="1.3"/>
+          <text x="514" y="44" fill="var(--rose)" font-size="7" font-family="DM Mono, monospace">⚠️ EXCEPCIÓN</text>
+          <text x="572" y="56" text-anchor="middle" fill="var(--rose)" font-size="8.5" font-family="DM Mono, monospace" font-weight="600">Ticket Observación</text>
+          <text x="572" y="66" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="DM Mono, monospace">Ajuste Cartera o Factura</text>
+        </g>
+
+        <!-- Flow Task 3 -> End Event Error -->
+        <path d="M 640 52 L 678 52" stroke="var(--rose)" stroke-width="1.4" marker-end="url(#arrow-rose)"/>
+        <circle cx="694" cy="52" r="14" fill="#180e12" stroke="var(--rose)" stroke-width="1.8"/>
+        <circle cx="694" cy="52" r="10" fill="none" stroke="var(--rose)" stroke-width="1.2"/>
+        <text x="694" y="56" text-anchor="middle" fill="var(--rose)" font-size="10" font-family="DM Mono, monospace">↻</text>
+        <text x="694" y="78" text-anchor="middle" fill="var(--rose)" font-size="7.5" font-family="DM Mono, monospace">Reenvío</text>
+
+        <!-- Branch 2 (Conforme / Aprobado) -> Baja a Lane 3 -->
+        <path d="M 474 137 L 505 137 L 505 222 L 530 222" stroke="var(--accent)" stroke-width="1.8" marker-end="url(#arrow-accent)"/>
+        <text x="512" y="165" fill="var(--accent)" font-size="7.5" font-family="DM Mono, monospace" font-weight="700">✅ Sí / Conforme</text>
+
+        <!-- Task 4: Imputación SAP ERP (Lane 3) -->
+        <g class="bpmn-node">
+          <rect x="530" y="200" width="140" height="44" rx="5" fill="#0d1410" stroke="var(--line)" stroke-width="1.2"/>
+          <text x="539" y="214" fill="#7beeff" font-size="7" font-family="DM Mono, monospace">⚙️ AUDITORÍA &amp; SAP</text>
+          <text x="600" y="226" text-anchor="middle" fill="var(--text)" font-size="8.5" font-family="DM Mono, monospace" font-weight="600">Conciliación SAP ERP</text>
+          <text x="600" y="236" text-anchor="middle" fill="var(--faint)" font-size="7" font-family="DM Mono, monospace">100–200 Facturas Semanales</text>
+        </g>
+
+        <!-- Flow Task 4 -> Task 5 -->
+        <path d="M 670 222 L 700 222" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-accent)"/>
+
+        <!-- Task 5: Power BI para Asesores (Lane 3) -->
+        <g class="bpmn-node">
+          <rect x="700" y="200" width="150" height="44" rx="5" fill="#101e14" stroke="var(--accent)" stroke-width="1.6"/>
+          <text x="709" y="214" fill="var(--accent)" font-size="7" font-family="DM Mono, monospace">📊 HERRAMIENTA ASESORES</text>
+          <text x="775" y="226" text-anchor="middle" fill="var(--accent)" font-size="8.5" font-family="DM Mono, monospace" font-weight="700">Power BI de Clientes</text>
+          <text x="775" y="236" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="DM Mono, monospace">Ubicar Cartera en el Mapa</text>
+        </g>
+
+        <!-- Flow Task 5 -> End Event Success -->
+        <path d="M 850 222 L 882 222" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-accent)"/>
+        <circle cx="898" cy="222" r="14" fill="rgba(var(--accent-rgb), 0.2)" stroke="var(--accent)" stroke-width="2"/>
+        <circle cx="898" cy="222" r="10" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        <text x="898" y="226" text-anchor="middle" fill="var(--accent)" font-size="11" font-weight="800">✓</text>
+        <text x="898" y="247" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="DM Mono, monospace" font-weight="600">Clientes Ubicados</text>
       </svg>
     `;
   }
   if (caseId === 'etl') {
     return `
-      <svg class="bpmn-svg" viewBox="0 0 760 170" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="5" y="5" width="750" height="160" rx="6" fill="#0c110e" stroke="var(--line)" stroke-width="1.2"/>
-        <line x1="5" y1="58" x2="755" y2="58" stroke="var(--line)" stroke-dasharray="3 3"/>
-        <line x1="5" y1="112" x2="755" y2="112" stroke="var(--line)" stroke-dasharray="3 3"/>
-        <text x="14" y="38" fill="var(--faint)" font-size="8.5" font-family="DM Mono">FUENTES CRUDAS</text>
-        <text x="14" y="88" fill="var(--faint)" font-size="8.5" font-family="DM Mono">PIPELINE PYTHON (ETL)</text>
-        <text x="14" y="142" fill="var(--faint)" font-size="8.5" font-family="DM Mono">ENTREGABLES / SMTP</text>
+      <svg class="bpmn-svg" viewBox="0 0 940 280" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama BPMN 2.0 Pipeline ETL Python">
+        <defs>
+          <marker id="arrow-etl" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--accent)"/>
+          </marker>
+          <marker id="arrow-etl-muted" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--muted)"/>
+          </marker>
+        </defs>
 
-        <circle cx="160" cy="34" r="12" fill="rgba(var(--accent-rgb), 0.15)" stroke="var(--accent)" stroke-width="1.8"/>
-        <text x="160" y="37" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="DM Mono">INICIO</text>
-        
-        <path d="M 172 34 L 205 34" stroke="var(--muted)" stroke-width="1.4"/>
-        <rect x="205" y="18" width="115" height="32" rx="4" fill="var(--panel2)" stroke="var(--line)"/>
-        <text x="262" y="33" text-anchor="middle" fill="var(--text)" font-size="8" font-family="DM Mono">48,833 Docs ($323M)</text>
+        <rect x="8" y="8" width="924" height="264" rx="6" fill="#070a08" stroke="var(--line)" stroke-width="1.5"/>
+        <rect x="8" y="8" width="34" height="264" rx="6 0 0 6" fill="rgba(var(--accent-rgb), 0.08)" stroke="var(--line)" stroke-width="1.5"/>
+        <text x="-140" y="30" transform="rotate(-90)" fill="var(--accent)" font-size="8.5" font-family="Space Grotesk, sans-serif" font-weight="700" letter-spacing="0.14em" text-anchor="middle">PIPELINE ETL · PYTHON</text>
 
-        <path d="M 262 50 L 262 74" stroke="var(--muted)" stroke-width="1.4"/>
-        <rect x="205" y="74" width="115" height="32" rx="4" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.4"/>
-        <text x="262" y="89" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="DM Mono">Pandas Batch Ingestion</text>
+        <!-- 3 Lanes -->
+        <rect x="42" y="8" width="890" height="88" fill="#090d0b"/>
+        <line x1="42" y1="96" x2="932" y2="96" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="4 4"/>
+        <rect x="52" y="16" width="168" height="20" rx="3" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)"/>
+        <text x="60" y="30" fill="var(--muted)" font-size="8" font-family="DM Mono, monospace" font-weight="600">📂 FUENTES CRUDAS ($323M)</text>
 
-        <path d="M 320 90 L 360 90" stroke="var(--muted)" stroke-width="1.4"/>
-        <rect x="360" y="74" width="125" height="32" rx="4" fill="var(--panel2)" stroke="var(--line)"/>
-        <text x="422" y="89" text-anchor="middle" fill="var(--text)" font-size="8" font-family="DM Mono">Clasificación Estados</text>
+        <rect x="42" y="96" width="890" height="88" fill="#0c140e"/>
+        <line x1="42" y1="184" x2="932" y2="184" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="4 4"/>
+        <rect x="52" y="104" width="168" height="20" rx="3" fill="rgba(var(--accent-rgb), 0.08)" stroke="rgba(var(--accent-rgb), 0.25)"/>
+        <text x="60" y="118" fill="var(--accent)" font-size="8" font-family="DM Mono, monospace" font-weight="700">⚡ MOTOR PANDAS (CHUNKSIZE)</text>
 
-        <path d="M 485 90 L 525 90 L 525 128 L 550 128" stroke="var(--accent)" stroke-width="1.4"/>
-        <rect x="550" y="114" width="105" height="30" rx="4" fill="var(--panel2)" stroke="var(--line)"/>
-        <text x="602" y="129" text-anchor="middle" fill="var(--text)" font-size="8" font-family="DM Mono">OpenPyXL Formato</text>
+        <rect x="42" y="184" width="890" height="88" fill="#091214"/>
+        <rect x="52" y="192" width="168" height="20" rx="3" fill="rgba(123,238,255,0.05)" stroke="rgba(123,238,255,0.2)"/>
+        <text x="60" y="206" fill="#7beeff" font-size="8" font-family="DM Mono, monospace" font-weight="600">📊 SALIDA OPENPYXL &amp; SMTP</text>
 
-        <path d="M 655 129 L 685 129" stroke="var(--accent)" stroke-width="1.4"/>
-        <circle cx="705" cy="129" r="12" fill="var(--panel2)" stroke="var(--accent)" stroke-width="2"/>
-        <text x="705" y="132" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="DM Mono">SMTP ✉</text>
+        <!-- Nodes -->
+        <circle cx="215" cy="52" r="14" fill="rgba(var(--accent-rgb), 0.15)" stroke="var(--accent)" stroke-width="2"/>
+        <polygon points="211,46 222,52 211,58" fill="var(--accent)"/>
+        <text x="215" y="78" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="DM Mono, monospace">Inicio CSV</text>
+
+        <path d="M 229 52 L 255 52" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow-etl-muted)"/>
+        <g class="bpmn-node">
+          <rect x="255" y="30" width="135" height="44" rx="5" fill="#0d1410" stroke="var(--line)" stroke-width="1.2"/>
+          <text x="264" y="44" fill="var(--faint)" font-size="7" font-family="DM Mono">// INGESTA CRUDA</text>
+          <text x="322" y="56" text-anchor="middle" fill="var(--text)" font-size="8.5" font-family="DM Mono" font-weight="600">48,833 Registros</text>
+          <text x="322" y="66" text-anchor="middle" fill="var(--faint)" font-size="7" font-family="DM Mono">$323M+ en Balances</text>
+        </g>
+
+        <path d="M 322 74 L 322 114" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-etl)"/>
+        <g class="bpmn-node">
+          <rect x="250" y="114" width="145" height="46" rx="5" fill="#101e14" stroke="var(--accent)" stroke-width="1.6"/>
+          <text x="259" y="128" fill="var(--accent)" font-size="7" font-family="DM Mono">⚡ PANDAS CHUNKING</text>
+          <text x="322" y="141" text-anchor="middle" fill="var(--accent)" font-size="8.5" font-family="DM Mono" font-weight="700">10,000 Filas / Lote</text>
+          <text x="322" y="152" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="DM Mono">−65% Uso de RAM</text>
+        </g>
+
+        <path d="M 395 137 L 440 137" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-etl)"/>
+        <g class="bpmn-node">
+          <rect x="440" y="114" width="145" height="46" rx="5" fill="#0d1410" stroke="var(--line)" stroke-width="1.2"/>
+          <text x="449" y="128" fill="#ffce64" font-size="7" font-family="DM Mono">🔍 REGLAS DE NEGOCIO</text>
+          <text x="512" y="141" text-anchor="middle" fill="var(--text)" font-size="8.5" font-family="DM Mono" font-weight="600">Clasificación Estados</text>
+          <text x="512" y="152" text-anchor="middle" fill="var(--faint)" font-size="7" font-family="DM Mono">39k Cerrados vs 9k Pend.</text>
+        </g>
+
+        <path d="M 585 137 L 625 137 L 625 222 L 655 222" stroke="var(--accent)" stroke-width="1.6" marker-end="url(#arrow-etl)"/>
+        <g class="bpmn-node">
+          <rect x="655" y="200" width="135" height="44" rx="5" fill="#0d1410" stroke="var(--line)" stroke-width="1.2"/>
+          <text x="664" y="214" fill="#7beeff" font-size="7" font-family="DM Mono">📑 OPENPYXL ENGINE</text>
+          <text x="722" y="226" text-anchor="middle" fill="var(--text)" font-size="8.5" font-family="DM Mono" font-weight="600">Libro Ejecutivo</text>
+          <text x="722" y="236" text-anchor="middle" fill="var(--faint)" font-size="7" font-family="DM Mono">Tablas &amp; Colores Corp</text>
+        </g>
+
+        <path d="M 790 222 L 825 222" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-etl)"/>
+        <circle cx="845" cy="222" r="14" fill="rgba(var(--accent-rgb), 0.2)" stroke="var(--accent)" stroke-width="2"/>
+        <text x="845" y="225" text-anchor="middle" fill="var(--accent)" font-size="9" font-family="DM Mono">✉</text>
+        <text x="845" y="247" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="DM Mono">SMTP 18s</text>
+
+        <path d="M 859 222 L 885 222" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-etl)"/>
+        <circle cx="900" cy="222" r="14" fill="rgba(var(--accent-rgb), 0.2)" stroke="var(--accent)" stroke-width="2"/>
+        <circle cx="900" cy="222" r="10" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        <text x="900" y="226" text-anchor="middle" fill="var(--accent)" font-size="11" font-weight="800">✓</text>
+        <text x="900" y="247" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="DM Mono">Éxito</text>
       </svg>
     `;
   }
   if (caseId === 'ml') {
     return `
-      <svg class="bpmn-svg" viewBox="0 0 760 170" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="5" y="5" width="750" height="160" rx="6" fill="#0c110e" stroke="var(--line)" stroke-width="1.2"/>
-        <line x1="5" y1="58" x2="755" y2="58" stroke="var(--line)" stroke-dasharray="3 3"/>
-        <line x1="5" y1="112" x2="755" y2="112" stroke="var(--line)" stroke-dasharray="3 3"/>
-        <text x="14" y="38" fill="var(--faint)" font-size="8.5" font-family="DM Mono">SENSORES DE PLANTA</text>
-        <text x="14" y="88" fill="var(--faint)" font-size="8.5" font-family="DM Mono">PIPELINE ML / SCIKIT</text>
-        <text x="14" y="142" fill="var(--faint)" font-size="8.5" font-family="DM Mono">OPERACIONES &amp; ALERTAS</text>
+      <svg class="bpmn-svg" viewBox="0 0 940 280" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama BPMN 2.0 Mantenimiento Predictivo ML">
+        <defs>
+          <marker id="arrow-ml" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--accent)"/>
+          </marker>
+          <marker id="arrow-ml-rose" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--rose)"/>
+          </marker>
+        </defs>
 
-        <circle cx="160" cy="34" r="12" fill="rgba(var(--accent-rgb), 0.15)" stroke="var(--accent)" stroke-width="1.8"/>
-        <text x="160" y="37" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="DM Mono">INICIO</text>
-        
-        <path d="M 172 34 L 205 34" stroke="var(--muted)" stroke-width="1.4"/>
-        <rect x="205" y="18" width="115" height="32" rx="4" fill="var(--panel2)" stroke="var(--line)"/>
-        <text x="262" y="33" text-anchor="middle" fill="var(--text)" font-size="8" font-family="DM Mono">Telemetría Temp/RPM</text>
+        <rect x="8" y="8" width="924" height="264" rx="6" fill="#070a08" stroke="var(--line)" stroke-width="1.5"/>
+        <rect x="8" y="8" width="34" height="264" rx="6 0 0 6" fill="rgba(var(--accent-rgb), 0.08)" stroke="var(--line)" stroke-width="1.5"/>
+        <text x="-140" y="30" transform="rotate(-90)" fill="var(--accent)" font-size="8.5" font-family="Space Grotesk, sans-serif" font-weight="700" letter-spacing="0.14em" text-anchor="middle">IA MANTENIMIENTO PREDICTIVO</text>
 
-        <path d="M 262 50 L 262 74" stroke="var(--muted)" stroke-width="1.4"/>
-        <rect x="205" y="74" width="125" height="32" rx="4" fill="var(--panel2)" stroke="var(--line)"/>
-        <text x="267" y="89" text-anchor="middle" fill="var(--text)" font-size="8" font-family="DM Mono">StandardScaler &amp; SMOTE</text>
+        <!-- 3 Lanes -->
+        <rect x="42" y="8" width="890" height="88" fill="#090d0b"/>
+        <line x1="42" y1="96" x2="932" y2="96" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="4 4"/>
+        <rect x="52" y="16" width="168" height="20" rx="3" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)"/>
+        <text x="60" y="30" fill="var(--muted)" font-size="8" font-family="DM Mono, monospace" font-weight="600">📡 SENSORES DE PLANTA (IOT)</text>
 
-        <path d="M 330 90 L 370 90" stroke="var(--muted)" stroke-width="1.4"/>
-        <rect x="370" y="74" width="125" height="32" rx="4" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.4"/>
-        <text x="432" y="89" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="DM Mono">Regresión Logística (91.4%)</text>
+        <rect x="42" y="96" width="890" height="88" fill="#0c140e"/>
+        <line x1="42" y1="184" x2="932" y2="184" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="4 4"/>
+        <rect x="52" y="104" width="168" height="20" rx="3" fill="rgba(var(--accent-rgb), 0.08)" stroke="rgba(var(--accent-rgb), 0.25)"/>
+        <text x="60" y="118" fill="var(--accent)" font-size="8" font-family="DM Mono, monospace" font-weight="700">🧠 PIPELINE SCIKIT-LEARN</text>
 
-        <path d="M 495 90 L 530 90" stroke="var(--muted)" stroke-width="1.4"/>
-        <polygon points="545,76 567,90 545,104 523,90" fill="var(--panel)" stroke="var(--accent)" stroke-width="1.2"/>
-        <text x="545" y="93" text-anchor="middle" fill="var(--accent)" font-size="8.5" font-weight="700">?</text>
+        <rect x="42" y="184" width="890" height="88" fill="#091214"/>
+        <rect x="52" y="192" width="168" height="20" rx="3" fill="rgba(123,238,255,0.05)" stroke="rgba(123,238,255,0.2)"/>
+        <text x="60" y="206" fill="#7beeff" font-size="8" font-family="DM Mono, monospace" font-weight="600">👷 CUADRILLA &amp; MANTENIMIENTO</text>
 
-        <path d="M 545 104 L 545 128 L 580 128" stroke="var(--rose)" stroke-width="1.4"/>
-        <rect x="580" y="114" width="130" height="30" rx="4" fill="var(--panel2)" stroke="var(--rose)"/>
-        <text x="645" y="129" text-anchor="middle" fill="var(--rose)" font-size="8" font-family="DM Mono">Alerta Cuadrilla (−22% Paradas)</text>
+        <!-- Nodes -->
+        <circle cx="215" cy="52" r="14" fill="rgba(var(--accent-rgb), 0.15)" stroke="var(--accent)" stroke-width="2"/>
+        <polygon points="211,46 222,52 211,58" fill="var(--accent)"/>
+        <text x="215" y="78" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="DM Mono">Stream Hz</text>
+
+        <path d="M 229 52 L 255 52" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow-ml)"/>
+        <g class="bpmn-node">
+          <rect x="255" y="30" width="135" height="44" rx="5" fill="#0d1410" stroke="var(--line)" stroke-width="1.2"/>
+          <text x="264" y="44" fill="var(--faint)" font-size="7" font-family="DM Mono">// TELEMETRÍA IOT</text>
+          <text x="322" y="56" text-anchor="middle" fill="var(--text)" font-size="8.5" font-family="DM Mono" font-weight="600">Temp / RPM / Torque</text>
+          <text x="322" y="66" text-anchor="middle" fill="var(--faint)" font-size="7" font-family="DM Mono">Ventana Móvil 3 Muestras</text>
+        </g>
+
+        <path d="M 322 74 L 322 114" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-ml)"/>
+        <g class="bpmn-node">
+          <rect x="250" y="114" width="145" height="46" rx="5" fill="#101e14" stroke="var(--accent)" stroke-width="1.6"/>
+          <text x="259" y="128" fill="var(--accent)" font-size="7" font-family="DM Mono">🧠 MODELO PREDICTIVO</text>
+          <text x="322" y="141" text-anchor="middle" fill="var(--accent)" font-size="8.5" font-family="DM Mono" font-weight="700">Regresión Logística</text>
+          <text x="322" y="152" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="DM Mono">91.4% Precisión / ROC-AUC</text>
+        </g>
+
+        <path d="M 395 137 L 440 137" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow-ml)"/>
+        <g class="bpmn-node">
+          <polygon points="460,118 480,137 460,156 440,137" fill="#090d0b" stroke="var(--accent)" stroke-width="1.8"/>
+          <text x="460" y="142" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="800">✕</text>
+          <text x="460" y="112" text-anchor="middle" fill="var(--text)" font-size="7.5" font-family="DM Mono" font-weight="600">¿P(Falla) > 0.65?</text>
+        </g>
+
+        <path d="M 460 156 L 460 222 L 515 222" stroke="var(--rose)" stroke-width="1.8" marker-end="url(#arrow-ml-rose)"/>
+        <text x="468" y="190" fill="var(--rose)" font-size="7.5" font-family="DM Mono" font-weight="700">⚠️ Alerta Crítica</text>
+
+        <g class="bpmn-node">
+          <rect x="515" y="200" width="150" height="44" rx="5" fill="#180e12" stroke="var(--rose)" stroke-width="1.4"/>
+          <text x="524" y="214" fill="var(--rose)" font-size="7" font-family="DM Mono">🚨 ACCIÓN CORRECTIVA</text>
+          <text x="590" y="226" text-anchor="middle" fill="var(--rose)" font-size="8.5" font-family="DM Mono" font-weight="600">Despacho Cuadrilla</text>
+          <text x="590" y="236" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="DM Mono">−22% Paradas Imprevistas</text>
+        </g>
+
+        <path d="M 480 137 L 540 137" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-ml)"/>
+        <g class="bpmn-node">
+          <rect x="540" y="114" width="135" height="46" rx="5" fill="#0d1410" stroke="var(--line)" stroke-width="1.2"/>
+          <text x="549" y="128" fill="#7beeff" font-size="7" font-family="DM Mono">LOG PREVENTIVO</text>
+          <text x="607" y="141" text-anchor="middle" fill="var(--text)" font-size="8.5" font-family="DM Mono" font-weight="600">Operación Normal</text>
+          <text x="607" y="152" text-anchor="middle" fill="var(--faint)" font-size="7" font-family="DM Mono">Telemetry Guardada</text>
+        </g>
+
+        <path d="M 665 222 L 710 222" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-ml)"/>
+        <circle cx="725" cy="222" r="14" fill="rgba(var(--accent-rgb), 0.2)" stroke="var(--accent)" stroke-width="2"/>
+        <circle cx="725" cy="222" r="10" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+        <text x="725" y="226" text-anchor="middle" fill="var(--accent)" font-size="11" font-weight="800">✓</text>
+        <text x="725" y="247" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="DM Mono">Controlado</text>
       </svg>
     `;
   }
   // VASMAD
   return `
-    <svg class="bpmn-svg" viewBox="0 0 760 170" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="5" y="5" width="750" height="160" rx="6" fill="#0c110e" stroke="var(--line)" stroke-width="1.2"/>
-      <line x1="5" y1="58" x2="755" y2="58" stroke="var(--line)" stroke-dasharray="3 3"/>
-      <line x1="5" y1="112" x2="755" y2="112" stroke="var(--line)" stroke-dasharray="3 3"/>
-      <text x="14" y="38" fill="var(--faint)" font-size="8.5" font-family="DM Mono">PLANEAMIENTO</text>
-      <text x="14" y="88" fill="var(--faint)" font-size="8.5" font-family="DM Mono">COMPRAS &amp; MRP</text>
-      <text x="14" y="142" fill="var(--faint)" font-size="8.5" font-family="DM Mono">ALMACÉN (5S)</text>
+    <svg class="bpmn-svg" viewBox="0 0 940 280" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Diagrama BPMN 2.0 Reingeniería Logística VASMAD">
+      <defs>
+        <marker id="arrow-v" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--accent)"/>
+        </marker>
+        <marker id="arrow-v-muted" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="var(--muted)"/>
+        </marker>
+      </defs>
 
-      <circle cx="160" cy="34" r="12" fill="rgba(var(--accent-rgb), 0.15)" stroke="var(--accent)" stroke-width="1.8"/>
-      <text x="160" y="37" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="DM Mono">INICIO</text>
-      
-      <path d="M 172 34 L 205 34" stroke="var(--muted)" stroke-width="1.4"/>
-      <rect x="205" y="18" width="115" height="32" rx="4" fill="var(--panel2)" stroke="var(--line)"/>
-      <text x="262" y="33" text-anchor="middle" fill="var(--text)" font-size="8" font-family="DM Mono">Pronóstico Demanda</text>
+      <rect x="8" y="8" width="924" height="264" rx="6" fill="#070a08" stroke="var(--line)" stroke-width="1.5"/>
+      <rect x="8" y="8" width="34" height="264" rx="6 0 0 6" fill="rgba(var(--accent-rgb), 0.08)" stroke="var(--line)" stroke-width="1.5"/>
+      <text x="-140" y="30" transform="rotate(-90)" fill="var(--accent)" font-size="8.5" font-family="Space Grotesk, sans-serif" font-weight="700" letter-spacing="0.14em" text-anchor="middle">SUPPLY CHAIN · VASMAD BIZAGI</text>
 
-      <path d="M 262 50 L 262 74" stroke="var(--muted)" stroke-width="1.4"/>
-      <rect x="205" y="74" width="125" height="32" rx="4" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.4"/>
-      <text x="267" y="89" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="DM Mono">Explosión BOM &amp; ROP</text>
+      <rect x="42" y="8" width="890" height="88" fill="#090d0b"/>
+      <line x1="42" y1="96" x2="932" y2="96" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <rect x="52" y="16" width="168" height="20" rx="3" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)"/>
+      <text x="60" y="30" fill="var(--muted)" font-size="8" font-family="DM Mono, monospace" font-weight="600">📈 CONTROL DE DEMANDA</text>
 
-      <path d="M 330 90 L 370 90" stroke="var(--muted)" stroke-width="1.4"/>
-      <rect x="370" y="74" width="130" height="32" rx="4" fill="var(--panel2)" stroke="var(--line)"/>
-      <text x="435" y="89" text-anchor="middle" fill="var(--text)" font-size="8" font-family="DM Mono">Power Automate OC</text>
+      <rect x="42" y="96" width="890" height="88" fill="#0c140e"/>
+      <line x1="42" y1="184" x2="932" y2="184" stroke="var(--line)" stroke-width="1.2" stroke-dasharray="4 4"/>
+      <rect x="52" y="104" width="168" height="20" rx="3" fill="rgba(var(--accent-rgb), 0.08)" stroke="rgba(var(--accent-rgb), 0.25)"/>
+      <text x="60" y="118" fill="var(--accent)" font-size="8" font-family="DM Mono, monospace" font-weight="700">📦 COMPRAS &amp; MODELO MRP</text>
 
-      <path d="M 500 90 L 540 90 L 540 128 L 570 128" stroke="var(--accent)" stroke-width="1.4"/>
-      <rect x="570" y="114" width="145" height="30" rx="4" fill="var(--panel2)" stroke="var(--accent)"/>
-      <text x="642" y="129" text-anchor="middle" fill="var(--accent)" font-size="8" font-family="DM Mono">Recepción 5S (−30% Tiempo)</text>
+      <rect x="42" y="184" width="890" height="88" fill="#091214"/>
+      <rect x="52" y="192" width="168" height="20" rx="3" fill="rgba(123,238,255,0.05)" stroke="rgba(123,238,255,0.2)"/>
+      <text x="60" y="206" fill="#7beeff" font-size="8" font-family="DM Mono, monospace" font-weight="600">🏭 ALMACÉN &amp; LEAN 5S</text>
+
+      <circle cx="215" cy="52" r="14" fill="rgba(var(--accent-rgb), 0.15)" stroke="var(--accent)" stroke-width="2"/>
+      <polygon points="211,46 222,52 211,58" fill="var(--accent)"/>
+      <text x="215" y="78" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="DM Mono">Demanda</text>
+
+      <path d="M 229 52 L 255 52" stroke="var(--muted)" stroke-width="1.4" marker-end="url(#arrow-v-muted)"/>
+      <g class="bpmn-node">
+        <rect x="255" y="30" width="135" height="44" rx="5" fill="#0d1410" stroke="var(--line)" stroke-width="1.2"/>
+        <text x="264" y="44" fill="var(--faint)" font-size="7" font-family="DM Mono">// PRONÓSTICO HISTÓRICO</text>
+        <text x="322" y="56" text-anchor="middle" fill="var(--text)" font-size="8.5" font-family="DM Mono" font-weight="600">Consumo Insumos</text>
+        <text x="322" y="66" text-anchor="middle" fill="var(--faint)" font-size="7" font-family="DM Mono">Nivel de Servicio 95%</text>
+      </g>
+
+      <path d="M 322 74 L 322 114" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-v)"/>
+      <g class="bpmn-node">
+        <rect x="250" y="114" width="145" height="46" rx="5" fill="#101e14" stroke="var(--accent)" stroke-width="1.6"/>
+        <text x="259" y="128" fill="var(--accent)" font-size="7" font-family="DM Mono">📦 EXPLOSIÓN BOM &amp; ROP</text>
+        <text x="322" y="141" text-anchor="middle" fill="var(--accent)" font-size="8.5" font-family="DM Mono" font-weight="700">Punto de Reorden</text>
+        <text x="322" y="152" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="DM Mono">Stock de Seguridad</text>
+      </g>
+
+      <path d="M 395 137 L 440 137" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-v)"/>
+      <g class="bpmn-node">
+        <rect x="440" y="114" width="145" height="46" rx="5" fill="#0d1410" stroke="var(--line)" stroke-width="1.2"/>
+        <text x="449" y="128" fill="#7beeff" font-size="7" font-family="DM Mono">⚡ POWER AUTOMATE</text>
+        <text x="512" y="141" text-anchor="middle" fill="var(--text)" font-size="8.5" font-family="DM Mono" font-weight="600">Orden de Compra</text>
+        <text x="512" y="152" text-anchor="middle" fill="var(--faint)" font-size="7" font-family="DM Mono">Despacho Autónomo</text>
+      </g>
+
+      <path d="M 585 137 L 625 137 L 625 222 L 655 222" stroke="var(--accent)" stroke-width="1.6" marker-end="url(#arrow-v)"/>
+      <g class="bpmn-node">
+        <rect x="655" y="200" width="150" height="44" rx="5" fill="#101e14" stroke="var(--accent)" stroke-width="1.6"/>
+        <text x="664" y="214" fill="var(--accent)" font-size="7" font-family="DM Mono">🏭 RECEPCIÓN LEAN 5S</text>
+        <text x="730" y="226" text-anchor="middle" fill="var(--accent)" font-size="8.5" font-family="DM Mono" font-weight="700">Patio de Descarga</text>
+        <text x="730" y="236" text-anchor="middle" fill="var(--muted)" font-size="7" font-family="DM Mono">−30% Tiempos de Espera</text>
+      </g>
+
+      <path d="M 805 222 L 845 222" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-v)"/>
+      <circle cx="865" cy="222" r="14" fill="rgba(var(--accent-rgb), 0.2)" stroke="var(--accent)" stroke-width="2"/>
+      <circle cx="865" cy="222" r="10" fill="none" stroke="var(--accent)" stroke-width="1.4"/>
+      <text x="865" y="226" text-anchor="middle" fill="var(--accent)" font-size="11" font-weight="800">✓</text>
+      <text x="865" y="247" text-anchor="middle" fill="var(--accent)" font-size="7.5" font-family="DM Mono">5S OK</text>
     </svg>
   `;
 }
@@ -13005,37 +13936,41 @@ function getCaseDeliverablesData(caseId, currentLang) {
   if (caseId === 'primax') {
     return {
       kpis: [
-        { title: isEs ? 'Cumplimiento SLA' : 'SLA Compliance', val: '100%', sub: isEs ? 'Meta pactada: >=98%' : 'Target SLA: >=98%', fill: '100%', highlight: true },
-        { title: isEs ? 'Volumen Semanal' : 'Weekly Volume', val: '150+', sub: isEs ? 'Facturas auditadas B2B' : 'B2B Invoices audited', fill: '85%' },
-        { title: isEs ? 'Ciclo de Conciliación' : 'Reconciliation Cycle', val: '−45%', sub: isEs ? 'Optimización de tiempos' : 'Processing time reduction', fill: '75%' },
-        { title: isEs ? 'Auditoría Externa' : 'External Audits', val: '0 Obs', sub: isEs ? 'Cero discrepancias SAP' : 'Zero discrepancies in SAP', fill: '100%', highlight: true }
+        { title: isEs ? 'Ubicación de Clientes' : 'Client Geolocation', val: '100%', sub: isEs ? 'Clientes mapeados en BI' : 'Clients mapped in BI', fill: '100%', highlight: true },
+        { title: isEs ? 'Asesores Comerciales' : 'Sales Advisors', val: 'Mapeados', sub: isEs ? 'Verificados en Solutions' : 'Verified in Solutions', fill: '95%' },
+        { title: isEs ? 'Auditoría SAP ERP' : 'SAP ERP Audit', val: '100% SLA', sub: isEs ? '100–200 facturas/sem' : '100–200 invoices/wk audited', fill: '100%', highlight: true },
+        { title: isEs ? 'Tiempo de Consulta' : 'Lookup Speed', val: '< 5 seg', sub: isEs ? 'Ubicación inmediata en mapa' : 'Instant client lookup on map', fill: '90%' }
       ],
       code: {
-        filename: 'dax_sla_and_commercial_kpis.dax',
+        filename: 'dax_ubicacion_clientes_y_asesores.dax',
         lang: 'DAX / Power BI',
-        content: `<span class="c-comment">// 1. Medida DAX para Cumplimiento Estricto de SLA Documental</span>
-<span class="c-kw">% Cumplimiento SLA</span> = 
+        content: `<span class="c-comment">// 1. Clientes Asignados por Asesor y Región (Verificados en Primax Solutions)</span>
+<span class="c-kw">Clientes_Por_Asesor</span> = 
+<span class="c-fn">CALCULATE</span>(
+    <span class="c-fn">DISTINCTCOUNT</span>(<span class="c-str">'Cartera_Clientes'</span>[ID_Cliente]),
+    <span class="c-str">'Cartera_Clientes'</span>[Estado_Cartera] = <span class="c-str">"Activo"</span>,
+    <span class="c-fn">USERELATIONSHIP</span>(<span class="c-str">'Cartera_Clientes'</span>[ID_Asesor], <span class="c-str">'Asesores_Primax_Solutions'</span>[ID_Asesor])
+)
+
+<span class="c-comment">// 2. Porcentaje de Cobertura Territorial de Clientes por Zona</span>
+<span class="c-kw">% Cobertura_Territorial</span> = 
 <span class="c-fn">DIVIDE</span>(
-    <span class="c-fn">CALCULATE</span>(
-        <span class="c-fn">COUNTROWS</span>(<span class="c-str">'Facturas_B2B'</span>),
-        <span class="c-str">'Facturas_B2B'</span>[Dias_Validacion] &lt;= <span class="c-str">'Facturas_B2B'</span>[SLA_Objetivo_Dias],
-        <span class="c-str">'Facturas_B2B'</span>[Estado] = <span class="c-str">"Conciliado"</span>
-    ),
-    <span class="c-fn">COUNTROWS</span>(<span class="c-str">'Facturas_B2B'</span>),
+    <span class="c-fn">CALCULATE</span>(<span class="c-fn">DISTINCTCOUNT</span>(<span class="c-str">'Cartera_Clientes'</span>[ID_Cliente]), <span class="c-str">'Cartera_Clientes'</span>[Geolocalizado] = <span class="c-kw">TRUE</span>()),
+    <span class="c-fn">CALCULATE</span>(<span class="c-fn">DISTINCTCOUNT</span>(<span class="c-str">'Cartera_Clientes'</span>[ID_Cliente])),
     <span class="c-num">0</span>
 )
 
-<span class="c-comment">// 2. Ventas Consolidadas por Asesor y Región</span>
-<span class="c-kw">Ventas_Consolidadas_USD</span> = 
-<span class="c-fn">SUMX</span>(
-    <span class="c-fn">FILTER</span>(<span class="c-str">'Facturas_B2B'</span>, <span class="c-str">'Facturas_B2B'</span>[Anulada] = <span class="c-kw">FALSE</span>()),
-    <span class="c-str">'Facturas_B2B'</span>[Cantidad_Galones] * <span class="c-fn">RELATED</span>(<span class="c-str">'Precios_Combustible'</span>[Precio_Unitario_USD])
+<span class="c-comment">// 3. Asesores Activos Mapeados en la Región</span>
+<span class="c-kw">Asesores_Por_Region</span> = 
+<span class="c-fn">CALCULATE</span>(
+    <span class="c-fn">DISTINCTCOUNT</span>(<span class="c-str">'Asesores_Primax_Solutions'</span>[ID_Asesor]),
+    <span class="c-str">'Asesores_Primax_Solutions'</span>[Estado] = <span class="c-str">"Activo"</span>
 )`
       },
       lessons: [
-        { title: isEs ? 'Estandarización previa a la automatización' : 'Standardization before coding', desc: isEs ? 'Al inicio, los formatos dispares de los proveedores generaban excepciones manuales. Creé una plantilla de validación que redujo las inconsistencias en un 80% antes de tocar código.' : 'Initially, differing vendor formats caused manual exceptions. Establishing a pre-validation checklist eliminated 80% of mismatches before writing scripts.', type: 'normal' },
-        { title: isEs ? 'Fricción en conciliaciones SAP' : 'SAP Reconciliation friction', desc: isEs ? 'Los desfases entre fechas de emisión y de registro contable alteraban los reportes semanales. Ajusté la lógica en Power Query para agrupar por periodo de devengo real.' : 'Mismatches between invoice issuance dates and accounting entries skewed weekly reports. Tuned Power Query logic to group by accrual periods.', type: 'challenge' },
-        { title: isEs ? 'Qué mejoraría en una V2' : 'What I would improve in V2', desc: isEs ? 'Integrar OCR con validación automática de códigos QR de SUNAT/SRI para cargar el 100% de metadatos directamente a la base de datos sin digitación humana.' : 'Integrate OCR with direct tax authority QR code validation to ingest 100% of metadata directly into the database.', type: 'next-step' }
+        { title: isEs ? 'Normalización de zonales en Power Query' : 'Regional zone normalization in Power Query', desc: isEs ? 'Las bases comerciales tenían nombres de cantones y provincias con abreviaturas inconsistentes, impidiendo la geolocalización correcta de los clientes. Creé un modelo dimensional de regiones que limpió el 100% de inconsistencias cartográficas.' : 'Commercial records had inconsistent province and county names, breaking client geographic mapping. Built a normalized regional dimension in Power Query that unified 100% of location data.', type: 'normal' },
+        { title: isEs ? 'Doble frente: Primax Solutions/SAP vs. Power BI para Asesores' : 'Dual front: Primax Solutions/SAP vs. Power BI for Advisors', desc: isEs ? 'Los asesores comerciales se verificaban en Primax Solutions y necesitaban ubicar a sus clientes en el mapa para planificar sus visitas por región. En paralelo, mi rol operativo diario exigía auditar 100–200 facturas semanales en SAP ERP con 100% de cumplimiento en SLA.' : 'Sales advisors were verified in Primax Solutions and needed to locate their clients on a map to plan territory routes. Simultaneously, my daily operational role required auditing 100–200 weekly invoices in SAP ERP under strict 100% SLA compliance.', type: 'challenge' },
+        { title: isEs ? 'Qué mejoraría en una V2' : 'What I would improve in V2', desc: isEs ? 'Conectar el mapa de clientes en Power BI con telemetría de rutas o check-ins móviles de los asesores para contrastar la asignación teórica con las visitas reales a clientes en tiempo real.' : 'Connect the Power BI client map with mobile route check-ins from advisors to benchmark planned customer accounts against real-time field visits.', type: 'next-step' }
       ]
     };
   }
@@ -13152,30 +14087,111 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
   const deliv = getCaseDeliverablesData(caseId, lang);
   const isEs = lang === 'es';
 
-  const tabLabels = {
-    context: isEs ? '01. Contexto &amp; STAR' : '01. Context &amp; STAR',
-    bpmn: isEs ? '02. Flujo BPMN (Bizagi)' : '02. BPMN Flow (Bizagi)',
-    kpis: isEs ? '03. Dashboard &amp; KPIs' : '03. Dashboard &amp; KPIs',
-    code: isEs ? '04. Código &amp; DAX' : '04. Code &amp; DAX',
-    lessons: isEs ? '05. Lecciones de Campo' : '05. Field Lessons'
+  // Labels dynamically customized per case study to accurately reflect technology stack
+  const getTabLabels = (cId, es) => {
+    switch (cId) {
+      case 'primax':
+        return {
+          context: es ? 'Contexto &amp; STAR' : 'Context &amp; STAR',
+          bpmn: es ? 'Flujo del Proceso (BPMN)' : 'Process Flow (BPMN)',
+          kpis: es ? 'Dashboard &amp; KPIs' : 'Dashboard &amp; KPIs',
+          code: es ? 'Código &amp; DAX' : 'Code &amp; DAX',
+          lessons: es ? 'Lecciones de Campo' : 'Field Lessons'
+        };
+      case 'etl':
+        return {
+          context: es ? 'Contexto &amp; STAR' : 'Context &amp; STAR',
+          bpmn: es ? 'Arquitectura ETL' : 'ETL Architecture',
+          kpis: es ? 'Métricas &amp; Volumen' : 'Metrics &amp; Volume',
+          code: es ? 'Pipeline Python' : 'Python Pipeline',
+          lessons: es ? 'Lecciones Técnicas' : 'Technical Lessons'
+        };
+      case 'ml':
+        return {
+          context: es ? 'Contexto &amp; STAR' : 'Context &amp; STAR',
+          bpmn: es ? 'Flujo del Pipeline ML' : 'ML Pipeline Flow',
+          kpis: es ? 'Métricas &amp; Evaluación' : 'Metrics &amp; Evaluation',
+          code: es ? 'Código Python' : 'Python Code',
+          lessons: es ? 'Lecciones Técnicas' : 'Technical Lessons'
+        };
+      case 'vasmad':
+        return {
+          context: es ? 'Contexto &amp; STAR' : 'Context &amp; STAR',
+          bpmn: es ? 'Flujo BPMN (Bizagi)' : 'BPMN Flow (Bizagi)',
+          kpis: es ? 'Impacto &amp; KPIs' : 'Impact &amp; KPIs',
+          code: es ? 'Consultas SQL (MRP)' : 'SQL Queries (MRP)',
+          lessons: es ? 'Lecciones de Campo' : 'Field Lessons'
+        };
+      default:
+        return {
+          context: es ? 'Contexto &amp; STAR' : 'Context &amp; STAR',
+          bpmn: es ? 'Flujo del Proceso' : 'Process Flow',
+          kpis: es ? 'Dashboard &amp; KPIs' : 'Dashboard &amp; KPIs',
+          code: es ? 'Código &amp; Script' : 'Code &amp; Script',
+          lessons: es ? 'Lecciones Aprendidas' : 'Lessons Learned'
+        };
+    }
   };
+  const tabLabels = getTabLabels(caseId, isEs);
 
   let paneHtml = '';
 
   if (activeTab === 'bpmn') {
+    const phases = getBpmnPhases(caseId, isEs);
     paneHtml = `
       <div class="case-tab-pane">
         <div class="bpmn-diagram-wrap">
           <div class="bpmn-header-bar">
-            <span class="bpmn-tag">// BIZAGI BPMN 2.0 // MAPEO DE PROCESO AS-IS &amp; TO-BE</span>
-            <span class="bpmn-badge">${isEs ? 'Vector SVG Interactivo' : 'Interactive SVG Vector'}</span>
+            <div class="bpmn-title-group">
+              <span class="bpmn-tag">${
+                caseId === 'ml'
+                  ? '// ARQUITECTURA ML // TELEMETRÍA, PIPELINE &amp; CLASIFICACIÓN'
+                  : caseId === 'etl'
+                    ? '// ARQUITECTURA ETL // PIPELINE DE DATOS EN PYTHON'
+                    : caseId === 'primax'
+                      ? '// PROCESO COMERCIAL &amp; DOCUMENTAL // PRIMAX SOLUTIONS &amp; SAP'
+                      : '// BIZAGI BPMN 2.0 // MAPEO DE PROCESO AS-IS &amp; TO-BE'
+              }</span>
+              <span class="bpmn-spec-pill">${
+                caseId === 'ml' || caseId === 'etl'
+                  ? (isEs ? 'PIPELINE END-TO-END' : 'END-TO-END PIPELINE')
+                  : (isEs ? 'NOTACIÓN ESTÁNDAR ISO/IEC 19510' : 'ISO/IEC 19510 STANDARD NOTATION')
+              }</span>
+            </div>
+            <div class="bpmn-header-badges">
+              <span class="bpmn-badge">${
+                caseId === 'ml' || caseId === 'etl'
+                  ? (isEs ? 'Etapas Modulares' : 'Modular Stages')
+                  : (isEs ? 'Swimlanes Corporativas' : 'Enterprise Swimlanes')
+              }</span>
+              <span class="bpmn-badge-sub">${isEs ? 'Vector SVG Interactivo' : 'Interactive SVG Vector'}</span>
+            </div>
           </div>
-          ${getBpmnSvg(caseId)}
+          <div class="bpmn-canvas-container">
+            ${getBpmnSvg(caseId)}
+          </div>
           <div class="bpmn-legend">
-            <div class="bpmn-legend-item"><span class="bpmn-legend-box" style="background:var(--accent);"></span> <span>${isEs ? 'Punto Clave / Automatización' : 'Key Milestone / Automation'}</span></div>
-            <div class="bpmn-legend-item"><span class="bpmn-legend-box" style="background:var(--panel2); border:1px solid var(--line);"></span> <span>${isEs ? 'Tarea Operativa' : 'Operational Task'}</span></div>
-            <div class="bpmn-legend-item"><span class="bpmn-legend-box" style="background:var(--rose);"></span> <span>${isEs ? 'Excepción / Alerta' : 'Exception / Alert'}</span></div>
+            <div class="bpmn-legend-item"><span class="bpmn-legend-box" style="background:var(--accent); box-shadow:0 0 6px var(--accent);"></span> <span>${isEs ? 'Punto Clave / Automatización' : 'Key Milestone / Automation'}</span></div>
+            <div class="bpmn-legend-item"><span class="bpmn-legend-box" style="background:var(--panel2); border:1px solid var(--line);"></span> <span>${isEs ? 'Tarea Operativa Estándar' : 'Standard Operational Task'}</span></div>
+            <div class="bpmn-legend-item"><span class="bpmn-legend-box" style="background:var(--rose); box-shadow:0 0 6px var(--rose);"></span> <span>${isEs ? 'Excepción / Reenvío SLA' : 'Exception / SLA Resubmission'}</span></div>
+            <div class="bpmn-legend-item"><span class="bpmn-legend-box bpmn-legend-diamond" style="border:1.5px solid var(--accent); background:#0c110e;"></span> <span>${isEs ? 'Compuerta de Decisión XOR' : 'XOR Decision Gateway'}</span></div>
           </div>
+        </div>
+
+        <div class="bpmn-phases-grid">
+          ${phases.map((ph, idx) => `
+            <div class="bpmn-phase-card bpmn-phase-${idx + 1}">
+              <div class="bpmn-phase-header">
+                <span class="bpmn-phase-num">FASE 0${idx + 1}</span>
+                <span class="bpmn-phase-lane">${escapeHtml(ph.lane)}</span>
+              </div>
+              <h5 class="bpmn-phase-title">${escapeHtml(ph.title)}</h5>
+              <p class="bpmn-phase-desc">${escapeHtml(ph.desc)}</p>
+              <div class="bpmn-phase-meta">
+                ${ph.chips.map(c => `<span class="bpmn-meta-chip"><span class="chip-dot"></span>${escapeHtml(c)}</span>`).join('')}
+              </div>
+            </div>
+          `).join('')}
         </div>
       </div>
     `;
@@ -13220,30 +14236,90 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
       </div>
     `;
   } else {
-    // Default: 'context' (STAR Grid)
+    // Default: 'context' (High-Impact STAR Breakdown & Mini-KPI Banner)
     const sLabel = isEs ? 'Situación / Contexto' : 'Situation / Context';
     const tLabel = isEs ? 'Tarea / Objetivo' : 'Task / Objective';
     const aLabel = isEs ? 'Acción / Solución' : 'Action / Solution';
     const rLabel = isEs ? 'Resultado / Impacto' : 'Result / Impact';
 
+    const sCorner = isEs ? '// OPERACIÓN AS-IS' : '// AS-IS OPERATION';
+    const tCorner = isEs ? '// OBJETIVO CLAVE' : '// KEY TARGET';
+    const aCorner = isEs ? '// IMPLEMENTACIÓN' : '// EXECUTION & TOOLS';
+    const rCorner = isEs ? '// IMPACTO MEDIBLE' : '// MEASURABLE IMPACT';
+
+    const kpiStripHtml = (deliv && deliv.kpis && deliv.kpis.length) ? `
+      <div class="star-kpi-strip" aria-label="${isEs ? 'Métricas clave del proyecto' : 'Project key metrics'}">
+        ${deliv.kpis.map(k => `
+          <div class="star-kpi-chip ${k.highlight ? 'highlight' : ''}">
+            <div class="star-kpi-chip-header">
+              <span class="star-kpi-chip-title">${escapeHtml(k.title)}</span>
+              <span class="star-kpi-chip-dot"></span>
+            </div>
+            <div class="star-kpi-chip-val">${escapeHtml(k.val)}</div>
+            <div class="star-kpi-chip-progress"><div class="star-kpi-chip-fill" style="width:${k.fill || '85%'};"></div></div>
+            <div class="star-kpi-chip-sub">${escapeHtml(k.sub)}</div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '';
+
+    const renderPoints = (points) => {
+      if (!points || !points.length) return '';
+      return `
+        <ul class="star-card-bullets">
+          ${points.map(pt => `<li><span class="bullet-ico">›</span><span>${escapeHtml(pt)}</span></li>`).join('')}
+        </ul>
+      `;
+    };
+
+    const renderBadges = (badges) => {
+      if (!badges || !badges.length) return '';
+      return `
+        <div class="star-card-badges">
+          ${badges.map(b => `<span class="star-pill-badge"><span class="pill-check">✓</span> ${escapeHtml(b)}</span>`).join('')}
+        </div>
+      `;
+    };
+
     paneHtml = `
       <div class="case-tab-pane">
+        ${kpiStripHtml}
         <div class="star-grid">
-          <div class="star-card">
-            <div class="star-label"><span>S</span> ${sLabel}</div>
-            <p>${escapeHtml(data.situation)}</p>
+          <div class="star-card star-card-s">
+            <div class="star-card-header">
+              <div class="star-label"><span>S</span> ${sLabel}</div>
+              <span class="star-corner-tag">${sCorner}</span>
+            </div>
+            <p class="star-card-desc">${escapeHtml(data.situation)}</p>
+            ${renderPoints(data.situationPoints)}
           </div>
-          <div class="star-card">
-            <div class="star-label"><span>T</span> ${tLabel}</div>
-            <p>${escapeHtml(data.task)}</p>
+
+          <div class="star-card star-card-t">
+            <div class="star-card-header">
+              <div class="star-label"><span>T</span> ${tLabel}</div>
+              <span class="star-corner-tag">${tCorner}</span>
+            </div>
+            <p class="star-card-desc">${escapeHtml(data.task)}</p>
+            ${renderPoints(data.taskPoints)}
           </div>
-          <div class="star-card">
-            <div class="star-label"><span>A</span> ${aLabel}</div>
-            <p>${escapeHtml(data.action)}</p>
+
+          <div class="star-card star-card-a">
+            <div class="star-card-header">
+              <div class="star-label"><span>A</span> ${aLabel}</div>
+              <span class="star-corner-tag">${aCorner}</span>
+            </div>
+            <p class="star-card-desc">${escapeHtml(data.action)}</p>
+            ${renderPoints(data.actionPoints)}
           </div>
-          <div class="star-card">
-            <div class="star-label"><span>R</span> ${rLabel}</div>
-            <p><strong>${escapeHtml(data.result)}</strong></p>
+
+          <div class="star-card star-card-r">
+            <div class="star-card-header">
+              <div class="star-label"><span>R</span> ${rLabel}</div>
+              <span class="star-corner-tag highlight">${rCorner}</span>
+            </div>
+            <p class="star-card-desc"><strong>${escapeHtml(data.result)}</strong></p>
+            ${renderPoints(data.resultPoints)}
+            ${renderBadges(data.resultBadges)}
           </div>
         </div>
       </div>
@@ -13258,19 +14334,21 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
         <p class="star-subtitle">${escapeHtml(data.subtitle)}</p>
       </div>
       <nav class="case-tabs-nav" aria-label="Entregables del caso">
-        <button type="button" class="case-tab-btn ${activeTab === 'context' ? 'active' : ''}" data-tab-target="context"><span class="tab-num">01</span> ${tabLabels.context}</button>
-        <button type="button" class="case-tab-btn ${activeTab === 'bpmn' ? 'active' : ''}" data-tab-target="bpmn"><span class="tab-num">02</span> ${tabLabels.bpmn}</button>
-        <button type="button" class="case-tab-btn ${activeTab === 'kpis' ? 'active' : ''}" data-tab-target="kpis"><span class="tab-num">03</span> ${tabLabels.kpis}</button>
-        <button type="button" class="case-tab-btn ${activeTab === 'code' ? 'active' : ''}" data-tab-target="code"><span class="tab-num">04</span> ${tabLabels.code}</button>
-        <button type="button" class="case-tab-btn ${activeTab === 'lessons' ? 'active' : ''}" data-tab-target="lessons"><span class="tab-num">05</span> ${tabLabels.lessons}</button>
+        <button type="button" class="case-tab-btn ${activeTab === 'context' ? 'active' : ''}" data-tab-target="context" data-star-tab="context"><span class="tab-num">01</span> ${tabLabels.context}</button>
+        <button type="button" class="case-tab-btn ${activeTab === 'bpmn' ? 'active' : ''}" data-tab-target="bpmn" data-star-tab="bpmn"><span class="tab-num">02</span> ${tabLabels.bpmn}</button>
+        <button type="button" class="case-tab-btn ${activeTab === 'kpis' ? 'active' : ''}" data-tab-target="kpis" data-star-tab="results"><span class="tab-num">03</span> ${tabLabels.kpis}</button>
+        <button type="button" class="case-tab-btn ${activeTab === 'code' ? 'active' : ''}" data-tab-target="code" data-star-tab="action"><span class="tab-num">04</span> ${tabLabels.code}</button>
+        <button type="button" class="case-tab-btn ${activeTab === 'lessons' ? 'active' : ''}" data-tab-target="lessons" data-star-tab="arch"><span class="tab-num">05</span> ${tabLabels.lessons}</button>
       </nav>
       <div class="case-tab-body">
         ${paneHtml}
       </div>
       <div class="star-footer">
-        <span class="muted" style="font-size:9px; text-transform:uppercase; letter-spacing:0.08em;">// Stack Tecnológico Verificado</span>
+        <div class="star-footer-header">
+          <span class="star-footer-tag">// Stack Tecnológico Verificado</span>
+        </div>
         <ul class="star-tags">
-          ${data.tags.map(tag => `<li>${escapeHtml(tag)}</li>`).join('')}
+          ${data.tags.map(tag => `<li><span class="tag-glow-dot"></span>${escapeHtml(tag)}</li>`).join('')}
         </ul>
       </div>
     </div>
@@ -13316,7 +14394,7 @@ function initCaseModals() {
       return;
     }
 
-    const tabBtn = e.target.closest('.case-tab-btn[data-tab-target]');
+    const tabBtn = e.target.closest('.case-tab-btn[data-tab-target], .case-tab-btn[data-star-tab]');
     if (tabBtn) {
       e.preventDefault();
       const targetTab = tabBtn.getAttribute('data-tab-target');
@@ -17244,7 +18322,7 @@ if (typeof document !== 'undefined') {
         </div>
       </section>
       <section class="section reveal" id="cases"><div class="heading"><div><p class="eyebrow">// selected_work</p><h2 data-t="cases">Casos de estudio</h2></div><p data-t="caseIntro">Resultados aplicados en datos, automatización, analítica y operaciones.</p></div>
-        <article class="case featured tilt-card reveal" style="--stagger:0"><div class="media"><picture><source srcset="assets/primax-power-bi-dashboard.webp" type="image/webp"><img src="assets/primax-power-bi-dashboard.png" alt="Estación de trabajo con dashboard de Power BI para PRIMAX en un monitor" loading="lazy" decoding="async" width="800" height="450"></picture><span class="media-tag">01 / POWER BI</span></div><div class="case-content"><p class="case-kicker" data-t="primaxKicker">INTELIGENCIA COMERCIAL · PRIMAX ECUADOR</p><h3 data-t="primaxTitle">Dashboard para visibilizar KPI comerciales</h3><p data-t="primaxText">Diseño de un dashboard interactivo en Power BI para monitorear desempeño de asesores, distribución regional y segmentación de clientes.</p><ul class="tags"><li>Power BI</li><li>Power Query</li><li>Excel</li><li>KPI</li><li>SAP ERP</li></ul><div class="result"><strong>01</strong><span data-t="primaxResult">Información comercial más visible para el seguimiento operativo.</span></div><div class="case-actions"><span class="badge-internal" data-t="primaxScope">Proyecto de impacto interno · PRIMAX Ecuador</span><button class="text-link case-deep-btn" data-case="primax" type="button"><span data-t="viewStar">ver desglose técnico STAR</span> ↗</button></div></div></article>
+        <article class="case featured tilt-card reveal" style="--stagger:0"><div class="media"><picture><source srcset="assets/primax-power-bi-dashboard.webp" type="image/webp"><img src="assets/primax-power-bi-dashboard.png" alt="Estación de trabajo con dashboard de Power BI para PRIMAX en un monitor" loading="lazy" decoding="async" width="800" height="450"></picture><span class="media-tag">01 / POWER BI</span></div><div class="case-content"><p class="case-kicker" data-t="primaxKicker">INTELIGENCIA TERRITORIAL &amp; CONTROL B2B · PRIMAX ECUADOR</p><h3 data-t="primaxTitle">Dashboard de Ubicación de Clientes y Asignación de Asesores por Región</h3><p data-t="primaxText">Dashboard interactivo en Power BI para que los asesores comerciales ubiquen a sus clientes por región en el mapa, verificando asesores en Primax Solutions y auditando 100–200 facturas en SAP.</p><ul class="tags"><li>Power BI</li><li>Primax Solutions</li><li>Power Query</li><li>DAX</li><li>SAP ERP</li></ul><div class="result"><strong>01</strong><span data-t="primaxResult">Geolocalización ágil de clientes para la fuerza de ventas y 100% de cumplimiento en SLA operativo.</span></div><div class="case-actions"><span class="badge-internal" data-t="primaxScope">Proyecto de impacto interno · PRIMAX Ecuador</span><button class="text-link case-deep-btn" data-case="primax" type="button"><span data-t="viewStar">ver desglose técnico STAR</span> ↗</button></div></div></article>
         <div class="case-grid">
           <article class="case compact tilt-card reveal" style="--stagger:1">
             <div class="case-number">02</div>

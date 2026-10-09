@@ -1,45 +1,42 @@
 # AGENTS.md — Portafolio Alessandro Altamirano
 
-## Project Overview
+Static, dependency-free portfolio (vanilla HTML/CSS/JS). No `package.json`, no npm install, no framework. Git repo on branch `main`. All tooling uses Node.js stdlib only (`fs`, `path`, `vm`, `assert`, `http`). Deploy target is Vercel with `outputDirectory: src` (`vercel.json`); mirrored security headers live in `src/_headers` — keep both in sync.
 
-Static, dependency-free portfolio website (vanilla HTML/CSS/JS). No `package.json`, no npm install, no framework, not a git repository. Deployable to any static host (GitHub Pages, Vercel, Netlify, Nginx). All test/build tooling uses Node.js stdlib only (`fs`, `path`, `vm`, `assert`, `http`).
-
-- `src/index.html` — production entry point (source of truth, modular).
-- `src/script.js` (~201KB) — all logic: i18n dictionary `T` (top of file), CLI terminal engine (`runCommand`), theme switcher, modals (STAR cases, CV, terms), ROI simulator, lanyard 3D, background engine.
+- `src/index.html` — production entry point, source of truth (modular).
+- `src/script.js` — all logic: i18n dictionary `T` (top of file), CLI engine (`runCommand`), theme switcher, STAR/CV/terms modals, ROI simulator, lanyard 3D, background engine, cat controller.
+- `src/cat3d-mini.js` — procedural 3D cat widget (Three.js + ASCII fallback).
 - `src/styles.css` — themes via CSS custom properties, responsive layout.
-- `src/assets/`, `src/vendor/`, `src/favicon.svg`, `src/CV_Alessandro_Altamirano_Salazar_2026.pdf` — static media and dependencies.
-- `dist/portfolio-mejorado.html` — compiled single-file bundle built by `tests/build-dist.js`.
-- `tests/` — Node.js E2E suite (103 tests), dist builder, static server.
-- `docs/` — README.md (architecture and testing documentation).
+- `src/vendor/` — Three.js, OrbitControls, asciify, cosmos, crt engines (loaded via `<script src>` in src, inlined on build).
+- `dist/portfolio-mejorado.html` — generated single-file bundle. Never edit by hand.
+- `tests/` — `build-dist.js`, `run-e2e-tests.js` (110 tests, Tiers 1–4), `adversarial-stress-tests.js` (16 tests, Tier 5), `server.js`, `server-security-tests.js`.
+- `docs/` — `README.md` (background/test architecture), `PROJECT.md` (cat + canvas milestones, hook contracts).
 
 ## Commands
 
 ```bash
-node tests/build-dist.js              # Regenerate dist/portfolio-mejorado.html (REQUIRED before e2e tests)
-node tests/run-e2e-tests.js           # E2E suite: 103 tests, DOM emulated via vm.runInContext, no network
-node tests/adversarial-stress-tests.js # Tier 5 adversarial/stress suite (16 tests)
-node tests/server.js                  # Local preview at http://localhost:3000
+node tests/build-dist.js                # Regenerate dist (REQUIRED before e2e/adversarial runs)
+node tests/run-e2e-tests.js             # E2E suite: 110 tests, DOM via vm.runInContext, no network
+node tests/adversarial-stress-tests.js  # Tier 5 stress suite: 16 tests
+node tests/server-security-tests.js     # Preview-server security checks (spawns tests/server.js)
+node tests/server.js                    # Local preview (PORT/HOST env, defaults 3000/0.0.0.0)
 ```
 
-There is no lint or typecheck; `node tests/run-e2e-tests.js` is the automated validation (exit 0 = all 103 tests pass).
+No lint or typecheck; the three test scripts are the validation (exit 0 = pass). Verified: 110/110 E2E + 16/16 adversarial green.
 
-## Architecture Rules
+## Architecture rules
 
-- **Layering**: background layers (`.cyber-aurora-mesh` CSS blobs, `#cyber-canvas`, `.noise`) are `position: fixed`, `pointer-events: none`, z-index 0–1. All interactive UI lives in `.shell` (z-index 2+). Never let background code attach blocking listeners or intercept pointer events on UI.
-- **Themes**: `document.body.dataset.theme` — `""` = green (default), `"cyan"`, `"amber"`. A `MutationObserver` on `data-theme` drives runtime color updates in JS (`updateThemeColors()`); palettes live in CSS variables. Add new theme colors in both places.
-- **i18n**: Spanish is the default (`<html lang="es">`). All user-facing strings go in the `T` dictionary (`es`/`en`) at the top of `script.js`; `translate()` applies them. Do not hardcode visible text.
-- **Dual-file parity**: `dist/portfolio-mejorado.html` is a generated single-file bundle (built by `tests/build-dist.js` from src/index.html + src/script.js + src/styles.css). Never edit it by hand — edit the modular files and rebuild.
-- **Test hooks**: exposed on `window` for the suite — `__triggerRipple(x, y, intensity)`, `__boostBinaryMatrix()`, `__replayPreloader()`. Preserve them when refactoring the background engine.
+- **Layering** (trust `src/index.html`, not `docs/README.md` — its `#ripple-canvas`/`#binary-canvas` names are stale): `.cyber-bg-wrap` > `.cyber-aurora-mesh` + single unified `#cyber-canvas` (z-index 0), `.noise` (z-index 1), interactive UI in `.shell` (`main#content`, z-index 2+, modals higher). Background stays `pointer-events: none` with `{ passive: true }` window listeners; never let it intercept UI events.
+- **Themes**: `document.body.dataset.theme` — `""` = green (default `#c9ff62`), `"cyan"` (`#7beeff`), `"amber"` (`#ffce64`). A `MutationObserver` on `data-theme` drives JS color LERP (`0.08`/frame); palettes live in CSS variables. Update both places.
+- **i18n**: Spanish default (`<html lang="es">`). User-facing strings go in `T` (`es`/`en`) at top of `script.js`, applied via `translate()`. Don't hardcode visible text.
+- **Dual-file parity**: `run-e2e-tests.js` reads `dist/portfolio-mejorado.html` and throws if absent — always rebuild first. Tier 4 test `T4-SCN-04` cross-checks `src/index.html` vs the bundle.
+- **Build-markers are load-bearing**: `build-dist.js` inlines vendor scripts with `data-vendor` / `data-canvasui-asciify` attributes so the app script stays the FIRST plain `<script>` (the e2e harness executes it). Don't change the inlining scheme without updating the harness.
+- **Test hooks** (preserve when refactoring): `__triggerRipple(x, y, intensity)` (shockwave queue clamped ≤ 6), `__boostCyberMatrix()` (canonical; `__boostBinaryMatrix` is an alias), `__replayPreloader()`; cat suite `__catMini`, `__summonCat`/`__hideCat`, `__petCat`, `__sleepCat`/`__wakeUpCat`, roam/fur/mode setters.
+- **Preview server**: resolves `src/` → `dist/` → root, serves `src/404.html` on miss with path-traversal guards. `PORT`/`HOST` env supported.
+- **Test invariants**: single `<h1>`; every `target="_blank"` link keeps `rel="noreferrer"`; physics clamps (`dt <= 2.5`, idle breathing > 5.5s, reduced-motion at 15%).
 
-## Known Gotchas
+## Read before sensitive changes
 
-- **Tests crash without the dist file**: `run-e2e-tests.js` reads `dist/portfolio-mejorado.html` and throws if absent. Always run `node tests/build-dist.js` first.
-- **Current test state (Aug 2026): 103/103 pass (100%), 0 fail, exit code 0.**
-- External links must keep `rel="noreferrer"` with `target="_blank"`; single `<h1>` per page (SEO/accessibility invariants checked by tests).
-
-## Docs to Read Before Sensitive Changes
-
-- `docs/README.md` — layer architecture, feature inventory, interface contracts (theme ↔ engine, engine ↔ UI), and test tier methodology (Tiers 1–5). Read before touching the background engine, theme system, or adding/modifying tests.
+- `docs/README.md` — engine↔theme↔UI contracts, tier methodology. `docs/PROJECT.md` — cat subsystem hooks and canvas physics constants.
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
