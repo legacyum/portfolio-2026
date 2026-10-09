@@ -1507,11 +1507,11 @@ function runAllTests() {
     assert(credCards.length >= 6, 'Credentials section must contain 6 verified certification cards');
     const hasSantander = Array.from(credCards).some(c => c.innerHTML.includes('Santander'));
     const hasTelefonica = Array.from(credCards).some(c => c.innerHTML.includes('Telefónica'));
-    const hasUdemy = Array.from(credCards).some(c => c.innerHTML.includes('Udemy'));
+    const hasDataCamp = Array.from(credCards).some(c => c.innerHTML.includes('DataCamp') && c.innerHTML.includes('SQL Associate'));
     const hasNasa = Array.from(credCards).some(c => c.innerHTML.includes('NASA'));
     const hasAnthropic = Array.from(credCards).some(c => c.innerHTML.includes('Anthropic'));
-    assert(hasSantander && hasTelefonica && hasUdemy && hasNasa && hasAnthropic, 'Credentials must feature Santander, Telefónica, Udemy, NASA, and Anthropic');
-    logPass('Tier 1', 'T1-CRD-01', 'Enriched Certifications Grid (Santander, Telefónica, Udemy, NASA, Anthropic)');
+    assert(hasSantander && hasTelefonica && hasDataCamp && hasNasa && hasAnthropic, 'Credentials must feature Santander, Telefónica, DataCamp SQL Associate, NASA, and Anthropic');
+    logPass('Tier 1', 'T1-CRD-01', 'Enriched Certifications Grid (Santander, Telefónica, DataCamp SQL Associate, NASA, Anthropic)');
   } catch (err) { logFail('Tier 1', 'T1-CRD-01', 'Enriched Certifications Grid', err); }
 
   try {

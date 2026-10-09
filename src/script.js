@@ -6,7 +6,7 @@
 const T = {
   es: {
     profile: '// perfil profesional',
-    available: 'Disponible para oportunidades',
+    available: 'Abierto a prácticas y posiciones junior',
     role: 'Industrial Engineering<br><span>Data · Automation · Operations<br>Supply Chain · Logística · Planeamiento</span>',
     aboutNav: 'acerca de mí',
     casesNav: 'casos de estudio',
@@ -16,7 +16,7 @@ const T = {
     catNav: 'gatito 3D',
     recruiterMode: 'modo reclutador',
     hero: 'Convierto procesos<br><em class="accent">en sistemas más claros.</em>',
-    lead: 'Ingeniero Industrial en formación con experiencia en análisis de datos, automatización, operaciones, Supply Chain y planeamiento.',
+    lead: 'Estudiante de Ingeniería Industrial (10.º ciclo) en Lima. Busco prácticas preprofesionales o posiciones junior en operaciones, logística, Supply Chain y analítica de datos.',
     invoices: 'facturas gestionadas<br>por semana',
     costs: 'costos por<br>desabastecimiento',
     time: 'tiempo de descarga<br>optimizado',
@@ -46,9 +46,9 @@ const T = {
     primaxScope: 'Proyecto de impacto interno · PRIMAX Ecuador',
     etlKicker: 'ETL & DATA PIPELINE · PYTHON',
     etlTitle: 'Automatización de reportes logísticos (ETL)',
-    etlText: 'Pipeline en Python para extraer, limpiar, clasificar y consolidar datos operativos, generando reportes ejecutivos en Excel y despacho por correo.',
-    etlDocsLabel: 'documentos clasificados',
-    etlAmountLabel: 'monto consolidado',
+    etlText: 'Pipeline ETL en Python para extraer, limpiar, clasificar y consolidar registros logísticos, generar reportes ejecutivos en Excel y automatizar su envío por correo. El conjunto procesado incluía más de $323M USD en balances operativos.',
+    etlDocsLabel: 'registros logísticos procesados',
+    etlAmountLabel: 'USD en balances operativos',
     machineTitle: 'Análisis predictivo de fallas en máquinas',
     machineText: 'Modelo de Machine Learning e Inteligencia Artificial (regresión logística) para predecir fallas industriales.',
     mlKpiLabel: 'clasificación multivariable',
@@ -66,9 +66,10 @@ const T = {
     cosmosBodiesLabel: 'física & órbitas',
     launchCosmos: 'explorar en 3D',
     recruiterTitle: 'Perfil en 60 segundos',
+    recruiterCta: 'perfil para reclutadores · 60 s',
     back: 'volver a terminal',
     focus: 'Enfoque',
-    focusText: '<strong>Datos · Automatización · Operaciones</strong><br>Supply Chain, Bizagi (BPMN), analítica avanzada, Excel y automatización con Inteligencia Artificial (IA) para optimizar procesos y reducir costos.',
+    focusText: '<strong>Operaciones · Logística · Supply Chain · Analítica</strong><br>Estudiante de Ingeniería Industrial, 10.º ciclo, en Lima. Busco prácticas preprofesionales o posiciones junior; manejo Power BI, SQL, Python, Excel y mejora de procesos.',
     experience: 'Experiencia',
     experienceText: '<strong>PX Servicios Generales · PRIMAX Ecuador</strong><br>Practicante Preprofesional de Gestión Documental · nov. 2025 — abr. 2026<br><br><strong>PMO · Comunidad Estudiantil PMI</strong><br>Dirección de Proyectos · nov. 2025 — ago. 2026',
     contactMe: 'contactarme',
@@ -92,8 +93,9 @@ const T = {
     certBiSkills: 'DAX · Power Query · Modelado Dimensional · Dashboards KPI',
     certExcelTitle: 'Excel Avanzado & Automatización',
     certExcelSkills: 'Tablas dinámicas · Fórmulas avanzadas · Macros/VBA · Análisis',
-    certTradeTitle: 'Comercio Internacional y Logística',
-    certTradeSkills: 'Importación · Exportación · Cadena de Suministro · Aduanas',
+    certSqlTitle: 'SQL Associate',
+    certSqlSkills: 'SQL · PostgreSQL · Análisis de datos',
+    certSqlMeta: 'Expedida: ago. 2026 · Vence: ago. 2028 · ID: SQA0016606348599',
     contactTitle: '¿Tienes un reto?<br><em class="accent">Conversemos.</em>',
     contactIntro: 'Si buscas mejorar la visibilidad de datos, automatizar una tarea operativa o estructurar un proceso, escríbeme.',
     name: 'Nombre',
@@ -131,7 +133,7 @@ const T = {
   },
   en: {
     profile: '// professional profile',
-    available: 'Open to opportunities',
+    available: 'Open to internships and junior roles',
     role: 'Industrial Engineering<br><span>Data · Automation · Operations<br>Supply Chain · Logistics · Planning</span>',
     aboutNav: 'about me',
     casesNav: 'case studies',
@@ -141,7 +143,7 @@ const T = {
     catNav: '3D cat',
     recruiterMode: 'recruiter mode',
     hero: 'I turn processes<br><em class="accent">into clearer systems.</em>',
-    lead: 'Industrial Engineering student with experience in data analytics, automation, operations, Supply Chain, and planning.',
+    lead: '10th-cycle Industrial Engineering student in Lima, seeking pre-professional internships or junior roles in Operations, Logistics, Supply Chain, and Data Analytics.',
     invoices: 'invoices handled<br>per week',
     costs: 'stockout costs<br>reduced',
     time: 'unloading time<br>optimized',
@@ -171,9 +173,9 @@ const T = {
     primaxScope: 'Internal Corporate Project · PRIMAX Ecuador',
     etlKicker: 'ETL & DATA PIPELINE · PYTHON',
     etlTitle: 'Logistics Reporting Automation (ETL)',
-    etlText: 'Python pipeline to extract, clean, classify and consolidate operational data, generating executive Excel reports and email dispatch.',
-    etlDocsLabel: 'documents classified',
-    etlAmountLabel: 'consolidated value',
+    etlText: 'Python ETL pipeline to extract, clean, classify, and consolidate logistics records, generate executive Excel reports, and automate email delivery. The processed dataset included over $323M USD in operational balances.',
+    etlDocsLabel: 'logistics records processed',
+    etlAmountLabel: 'USD in operational balances',
     machineTitle: 'Predictive analysis of machine failures',
     machineText: 'Machine Learning and Artificial Intelligence (logistic regression) model analyzing sensor data to predict industrial machine failures.',
     mlKpiLabel: 'multivariate classification',
@@ -191,9 +193,10 @@ const T = {
     cosmosBodiesLabel: 'physics & orbits',
     launchCosmos: 'explore in 3D',
     recruiterTitle: 'Profile in 60 seconds',
+    recruiterCta: 'recruiter profile · 60 sec',
     back: 'back to terminal',
     focus: 'Focus',
-    focusText: '<strong>Data · Automation · Operations</strong><br>Supply Chain, Bizagi (BPMN), advanced analytics, Excel, and AI-driven automation workflows to drive decision-making and reduce costs.',
+    focusText: '<strong>Operations · Logistics · Supply Chain · Analytics</strong><br>10th-cycle Industrial Engineering student in Lima, seeking pre-professional internships or junior roles. Skills include Power BI, SQL, Python, Excel, and process improvement.',
     experience: 'Experience',
     experienceText: '<strong>PX Servicios Generales · PRIMAX Ecuador</strong><br>Document Management Intern · Nov 2025 — Apr 2026<br><br><strong>PMO · PMI Student Community</strong><br>Project Management · Nov 2025 — Aug 2026',
     contactMe: 'contact me',
@@ -217,8 +220,9 @@ const T = {
     certBiSkills: 'DAX · Power Query · Dimensional Modeling · KPI Dashboards',
     certExcelTitle: 'Advanced Excel & Automation',
     certExcelSkills: 'Pivot tables · Advanced formulas · Macros/VBA · Data analysis',
-    certTradeTitle: 'International Trade & Logistics',
-    certTradeSkills: 'Imports · Exports · Supply Chain · Customs',
+    certSqlTitle: 'SQL Associate',
+    certSqlSkills: 'SQL · PostgreSQL · Data analysis',
+    certSqlMeta: 'Issued: Aug 2026 · Expires: Aug 2028 · ID: SQA0016606348599',
     contactTitle: 'Have a challenge?<br><em class="accent">Let’s talk.</em>',
     contactIntro: 'If you want to make data more visible, automate an operational task or structure a process, get in touch.',
     name: 'Name',
@@ -533,7 +537,7 @@ const TERMS_CONTENT = {
       },
       {
         title: '04 / Enlaces Externos & Credenciales Verificadas',
-        text: 'Los enlaces dirigidos a servicios externos (LinkedIn, GitHub, Santander Open Academy, NASA Space Apps Challenge, Udemy, Anthropic) corresponden a repositorios y credenciales oficiales del autor y están sujetos a los términos de cada plataforma.'
+        text: 'Los enlaces dirigidos a servicios externos (LinkedIn, GitHub, Santander Open Academy, DataCamp, NASA Space Apps Challenge, Anthropic) corresponden a repositorios y credenciales oficiales del autor y están sujetos a los términos de cada plataforma.'
       }
     ],
     note: 'Última actualización: 2026 · Lima, Perú (UTC−5)'
@@ -557,7 +561,7 @@ const TERMS_CONTENT = {
       },
       {
         title: '04 / External Links & Verified Credentials',
-        text: 'Links to external services (LinkedIn, GitHub, Santander Open Academy, NASA Space Apps, Udemy, Anthropic) point to verified assets and credentials, subject to each platform’s respective policies.'
+        text: 'Links to external services (LinkedIn, GitHub, Santander Open Academy, DataCamp, NASA Space Apps, Anthropic) point to verified assets and credentials, subject to each platform’s respective policies.'
       }
     ],
     note: 'Last updated: 2026 · Lima, Peru (UTC−5)'
@@ -612,7 +616,7 @@ const C = {
     ],
     education: [
       'FORMACIÓN & CREDENCIALES VERIFICADAS',
-      '<ul class="out-list"><li><strong>Ingeniería Industrial</strong> — Universidad Continental, 2022 — presente. Décimo ciclo.</li><li><strong>PMO:</strong> Dirección de Proyectos en Comunidad Estudiantil PMI (2025 — 2026).</li><li><strong>Python para Análisis de Datos:</strong> Santander Open Academy <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1cQc80EHDGVL-HHTvodDKgtxesuoVq0IT/view?usp=sharing">credencial ↗</a></li><li><strong>Power BI para BI:</strong> Santander Open Academy <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1jqEA5AxWUhB4RaCrlOAuPybT3x-dP993/view?usp=sharing">credencial ↗</a></li><li><strong>Excel Avanzado & Automatización:</strong> Fundación Telefónica <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1thaxesW5lzO6yov0ce5aqxhTkFfruI2j/view?usp=sharing">credencial ↗</a></li><li><strong>Comercio Internacional & Logística:</strong> Udemy <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1VJO_tBVTvv6llyoNRzwT90XEhjDDzB2H/view?usp=sharing">credencial ↗</a></li><li><strong>Galactic Problem Solver:</strong> NASA Space Apps Challenge <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1zkQ49YxqPnr1A7bpui4AeKSvIUpMw0BJ/view?usp=sharing">credencial ↗</a></li><li><strong>Claude Code in Action:</strong> Anthropic (Automatización con IA) <a class="out-link" target="_blank" rel="noreferrer" href="https://verify.skilljar.com/c/aeqidtgg2pe2">credencial ↗</a></li></ul>'
+      '<ul class="out-list"><li><strong>Ingeniería Industrial</strong> — Universidad Continental, 2022 — presente. Décimo ciclo.</li><li><strong>PMO:</strong> Dirección de Proyectos en Comunidad Estudiantil PMI (2025 — 2026).</li><li><strong>Python para Análisis de Datos:</strong> Santander Open Academy <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1cQc80EHDGVL-HHTvodDKgtxesuoVq0IT/view?usp=sharing">credencial ↗</a></li><li><strong>Power BI para BI:</strong> Santander Open Academy <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1jqEA5AxWUhB4RaCrlOAuPybT3x-dP993/view?usp=sharing">credencial ↗</a></li><li><strong>Excel Avanzado & Automatización:</strong> Fundación Telefónica <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1thaxesW5lzO6yov0ce5aqxhTkFfruI2j/view?usp=sharing">credencial ↗</a></li><li><strong>SQL Associate:</strong> DataCamp (SQL, PostgreSQL) <a class="out-link" target="_blank" rel="noreferrer" href="https://www.datacamp.com/certificate/SQA0016606348599">credencial ↗</a></li><li><strong>Galactic Problem Solver:</strong> NASA Space Apps Challenge <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1zkQ49YxqPnr1A7bpui4AeKSvIUpMw0BJ/view?usp=sharing">credencial ↗</a></li><li><strong>Claude Code in Action:</strong> Anthropic (Automatización con IA) <a class="out-link" target="_blank" rel="noreferrer" href="https://verify.skilljar.com/c/aeqidtgg2pe2">credencial ↗</a></li></ul>'
     ],
     contact: [
       'CONECTEMOS',
@@ -620,7 +624,7 @@ const C = {
     ],
     terms: [
       'AVISO LEGAL & POLÍTICA DE PRIVACIDAD',
-      '<p>Este sitio web es un portafolio profesional de carácter técnico y demostrativo perteneciente a <span class="green">Alessandro Altamirano</span>.</p><ul class="out-list"><li><strong>Privacidad:</strong> no se recopilan ni almacenan datos personales; el contacto opera exclusivamente mediante <code>mailto:</code>.</li><li><strong>Confidencialidad:</strong> proyectos corporativos presentados bajo abstracción metodológica sin datos sensibles.</li><li><strong>Credenciales:</strong> respaldadas por certificados emitidos por Santander, NASA, Fundación Telefónica, Anthropic y Udemy.</li></ul>'
+      '<p>Este sitio web es un portafolio profesional de carácter técnico y demostrativo perteneciente a <span class="green">Alessandro Altamirano</span>.</p><ul class="out-list"><li><strong>Privacidad:</strong> no se recopilan ni almacenan datos personales; el contacto opera exclusivamente mediante <code>mailto:</code>.</li><li><strong>Confidencialidad:</strong> proyectos corporativos presentados bajo abstracción metodológica sin datos sensibles.</li><li><strong>Credenciales:</strong> respaldadas por certificados emitidos por Santander, DataCamp, NASA, Fundación Telefónica y Anthropic.</li></ul>'
     ]
   },
   en: {
@@ -654,7 +658,7 @@ const C = {
     ],
     education: [
       'EDUCATION & VERIFIED CREDENTIALS',
-      '<ul class="out-list"><li><strong>Industrial Engineering</strong> — Universidad Continental, 2022 — present. 10th semester.</li><li><strong>PMO:</strong> Project Management Office at PMI Student Community (2025 — 2026).</li><li><strong>Python for Data Analytics:</strong> Santander Open Academy <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1cQc80EHDGVL-HHTvodDKgtxesuoVq0IT/view?usp=sharing">credential ↗</a></li><li><strong>Power BI for BI:</strong> Santander Open Academy <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1jqEA5AxWUhB4RaCrlOAuPybT3x-dP993/view?usp=sharing">credential ↗</a></li><li><strong>Advanced Excel & Automation:</strong> Fundación Telefónica <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1thaxesW5lzO6yov0ce5aqxhTkFfruI2j/view?usp=sharing">credential ↗</a></li><li><strong>International Trade & Logistics:</strong> Udemy <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1VJO_tBVTvv6llyoNRzwT90XEhjDDzB2H/view?usp=sharing">credential ↗</a></li><li><strong>Galactic Problem Solver:</strong> NASA Space Apps Challenge <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1zkQ49YxqPnr1A7bpui4AeKSvIUpMw0BJ/view?usp=sharing">credential ↗</a></li><li><strong>Claude Code in Action:</strong> Anthropic (AI Automation) <a class="out-link" target="_blank" rel="noreferrer" href="https://verify.skilljar.com/c/aeqidtgg2pe2">credential ↗</a></li></ul>'
+      '<ul class="out-list"><li><strong>Industrial Engineering</strong> — Universidad Continental, 2022 — present. 10th semester.</li><li><strong>PMO:</strong> Project Management Office at PMI Student Community (2025 — 2026).</li><li><strong>Python for Data Analytics:</strong> Santander Open Academy <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1cQc80EHDGVL-HHTvodDKgtxesuoVq0IT/view?usp=sharing">credential ↗</a></li><li><strong>Power BI for BI:</strong> Santander Open Academy <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1jqEA5AxWUhB4RaCrlOAuPybT3x-dP993/view?usp=sharing">credential ↗</a></li><li><strong>Advanced Excel & Automation:</strong> Fundación Telefónica <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1thaxesW5lzO6yov0ce5aqxhTkFfruI2j/view?usp=sharing">credential ↗</a></li><li><strong>SQL Associate:</strong> DataCamp (SQL, PostgreSQL) <a class="out-link" target="_blank" rel="noreferrer" href="https://www.datacamp.com/certificate/SQA0016606348599">credential ↗</a></li><li><strong>Galactic Problem Solver:</strong> NASA Space Apps Challenge <a class="out-link" target="_blank" rel="noreferrer" href="https://drive.google.com/file/d/1zkQ49YxqPnr1A7bpui4AeKSvIUpMw0BJ/view?usp=sharing">credential ↗</a></li><li><strong>Claude Code in Action:</strong> Anthropic (AI Automation) <a class="out-link" target="_blank" rel="noreferrer" href="https://verify.skilljar.com/c/aeqidtgg2pe2">credential ↗</a></li></ul>'
     ],
     contact: [
       'LET’S CONNECT',
@@ -662,7 +666,7 @@ const C = {
     ],
     terms: [
       'LEGAL NOTICE & PRIVACY POLICY',
-      '<p>This website is a technical and professional demonstration portfolio owned by <span class="green">Alessandro Altamirano</span>.</p><ul class="out-list"><li><strong>Privacy:</strong> No personal data is stored or harvested; contact operates strictly via <code>mailto:</code>.</li><li><strong>Confidenciality:</strong> Corporate case studies presented under generalized methodology with zero sensitive disclosure.</li><li><strong>Credentials:</strong> Backed by verifiable certifications from Santander, NASA, Telefónica, Anthropic & Udemy.</li></ul>'
+      '<p>This website is a technical and professional demonstration portfolio owned by <span class="green">Alessandro Altamirano</span>.</p><ul class="out-list"><li><strong>Privacy:</strong> No personal data is stored or harvested; contact operates strictly via <code>mailto:</code>.</li><li><strong>Confidenciality:</strong> Corporate case studies presented under generalized methodology with zero sensitive disclosure.</li><li><strong>Credentials:</strong> Backed by verifiable certifications from Santander, DataCamp, NASA, Telefónica and Anthropic.</li></ul>'
     ]
   }
 };
@@ -806,7 +810,7 @@ function getNeofetchOutput() {
 '<div class="neofetch-row"><span class="neofetch-key">Uptime:</span><span class="neofetch-val">2022 — 2026 (4+ years continuous growth)</span></div>' +
 '<div class="neofetch-row"><span class="neofetch-key">Shell:</span><span class="neofetch-val">bash 5.2 / zsh / altamirano-cli</span></div>' +
 '<div class="neofetch-row"><span class="neofetch-key">Packages:</span><span class="neofetch-val">Power BI, Python, SQL, Excel, Bizagi, SAP ERP, IA</span></div>' +
-'<div class="neofetch-row"><span class="neofetch-key">Certifications:</span><span class="neofetch-val">Santander, Telefónica, Anthropic, NASA Space Apps, Udemy</span></div>' +
+'<div class="neofetch-row"><span class="neofetch-key">Certifications:</span><span class="neofetch-val">Santander, Telefónica, Anthropic, NASA Space Apps, DataCamp</span></div>' +
 '<div class="neofetch-row"><span class="neofetch-key">Memory:</span><span class="neofetch-val" style="color:#00ff66;">100% Focused / Available for Opportunities</span></div>' +
 '<div class="neofetch-palette">' +
 '<span class="palette-block" style="background:#00ff66;"></span>' +
