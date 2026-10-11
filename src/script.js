@@ -1158,7 +1158,7 @@ function runCommand(raw) {
     return;
   }
   if (cmd === 'linkedin') {
-    addOutput(cmd, '<p><a class="out-link" target="_blank" rel="noreferrer" href="https://www.linkedin.com/feed/update/urn:li:activity:7458064691492249600/">Power BI project on LinkedIn ↗</a></p>');
+    addOutput(cmd, '<p><a class="out-link" target="_blank" rel="noreferrer" href="https://www.linkedin.com/in/alessandroaltamirano">linkedin.com/in/alessandroaltamirano ↗</a></p><p style="margin-top:6px;font-size:11px;color:var(--text-muted);">' + (lang === 'es' ? 'Post técnico de Automatización ETL: ' : 'Technical ETL Automation post: ') + '<a class="out-link" target="_blank" rel="noreferrer" href="https://www.linkedin.com/feed/update/urn:li:activity:7458064691492249600/">' + (lang === 'es' ? 'ver publicación en LinkedIn ↗' : 'view LinkedIn post ↗') + '</a></p>');
     return;
   }
   if (cmd === 'excel') {

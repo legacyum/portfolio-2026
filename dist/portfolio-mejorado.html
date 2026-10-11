@@ -16,8 +16,9 @@
   <meta name="twitter:image" content="https://portfolio-alessandro-2026.vercel.app/assets/portfolio-preview.png" />
   <meta name="referrer" content="strict-origin-when-cross-origin" />
   <meta name="robots" content="index, follow" />
-  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.vercel-insights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob: data: https://vitals.vercel-insights.com; frame-src 'self' blob:; object-src 'self' blob:; base-uri 'self'; form-action 'self' mailto:; frame-ancestors 'self';" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.vercel-insights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self' blob: data: https://vitals.vercel-insights.com; frame-src 'self' blob:; object-src 'self' blob:; base-uri 'self'; form-action 'self' mailto:;" />
   <link rel="canonical" href="https://portfolio-alessandro-2026.vercel.app/" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -2771,7 +2772,7 @@ h4 {
 
 .case-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-top: 16px;
 }
@@ -13421,7 +13422,7 @@ function runCommand(raw) {
     return;
   }
   if (cmd === 'linkedin') {
-    addOutput(cmd, '<p><a class="out-link" target="_blank" rel="noreferrer" href="https://www.linkedin.com/feed/update/urn:li:activity:7458064691492249600/">Power BI project on LinkedIn ↗</a></p>');
+    addOutput(cmd, '<p><a class="out-link" target="_blank" rel="noreferrer" href="https://www.linkedin.com/in/alessandroaltamirano">linkedin.com/in/alessandroaltamirano ↗</a></p><p style="margin-top:6px;font-size:11px;color:var(--text-muted);">' + (lang === 'es' ? 'Post técnico de Automatización ETL: ' : 'Technical ETL Automation post: ') + '<a class="out-link" target="_blank" rel="noreferrer" href="https://www.linkedin.com/feed/update/urn:li:activity:7458064691492249600/">' + (lang === 'es' ? 'ver publicación en LinkedIn ↗' : 'view LinkedIn post ↗') + '</a></p>');
     return;
   }
   if (cmd === 'excel') {
