@@ -2312,16 +2312,20 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
   `;
 }
 
+function normalizeStarCaseId(caseId) {
+  return (caseId === '1' || caseId === 'primax') ? 'primax'
+    : (caseId === '2' || caseId === 'etl' || caseId === 'pipeline' || caseId === 'logistics_etl') ? 'etl'
+    : (caseId === '3' || caseId === 'ml' || caseId === 'machine') ? 'ml'
+    : (caseId === '4' || caseId === 'vasmad' || caseId === 'logistics') ? 'vasmad'
+    : 'primax';
+}
+
 function openCaseModal(caseId, activeTab = 'context') {
   const modal = document.querySelector('#caseModal');
   const body = document.querySelector('#caseModalBody');
   if (!modal || !body) return;
 
-  const validCase = (caseId === '1' || caseId === 'primax') ? 'primax'
-    : (caseId === '2' || caseId === 'etl' || caseId === 'pipeline' || caseId === 'logistics_etl') ? 'etl'
-    : (caseId === '3' || caseId === 'ml' || caseId === 'machine') ? 'ml'
-    : (caseId === '4' || caseId === 'vasmad' || caseId === 'logistics') ? 'vasmad'
-    : 'primax';
+  const validCase = normalizeStarCaseId(caseId);
 
   body.innerHTML = renderStarCaseContent(validCase, activeTab);
   if (typeof modal.showModal === 'function') {
@@ -2356,7 +2360,7 @@ function initCaseModals() {
       e.preventDefault();
       const targetTab = tabBtn.getAttribute('data-tab-target');
       const container = tabBtn.closest('.star-modal-content');
-      const caseId = container ? container.getAttribute('data-active-case') : 'primax';
+      const caseId = normalizeStarCaseId(container ? container.getAttribute('data-active-case') : 'primax');
       const body = document.querySelector('#caseModalBody');
       if (body) {
         body.innerHTML = renderStarCaseContent(caseId, targetTab);
