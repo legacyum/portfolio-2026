@@ -16,7 +16,7 @@
 - `src/script.js`: Lógica unificada (i18n diccionario `T`, CLI, Theme Switcher, Lanyard 3D, Background Engine `#cyber-canvas`, Controlador Gato `#cat3DStage`).
 - `src/cat3d-mini.js`: Widget procedural Three.js del gato 3D, Web Audio API y shader ASCII.
 - `dist/portfolio-mejorado.html`: Bundle monolítico generado por `tests/build-dist.js`.
-- `tests/run-e2e-tests.js`: Suite principal de pruebas E2E (110 tests automáticos ejecutados y pasando).
+- `tests/run-e2e-tests.js`: Suite principal de pruebas E2E (112 tests automáticos ejecutados y pasando).
 - `tests/prototype-cat3d-smoke.js`: Suite de 27 verificaciones cinemáticas y anatómicas del gato 3D.
 - `tests/adversarial-stress-tests.js`: Suite de 16 pruebas adversariales (Tier 5).
 
@@ -40,6 +40,7 @@
 | 15 | Invarianza en smoke tests del gato (27 checks) | Mantener verdes los 27 tests de `tests/prototype-cat3d-smoke.js` | M3 | ORIGINAL_REQUEST §R4 | DONE |
 | 16 | Extensión de tests para nuevas capacidades | Adición de 7 nuevos tests automáticos en `tests/run-e2e-tests.js` (110 tests totales) para R1 y R2 | M3 | ORIGINAL_REQUEST §R4 | DONE |
 | 17 | Validación adversarial (16 checks) | Verificación exitosa en `tests/adversarial-stress-tests.js` | M3 | AGENTS.md | DONE |
+| 18 | Formulario de contacto con persistencia | `#contactForm` inserta en Supabase (`contact_messages`, RLS solo-insert) con clave publishable, honeypot anti-spam, validación en cliente y confirmación i18n en pantalla; `mailto:` se conserva como alternativa directa | M4 | ORIGINAL_REQUEST §R5 | DONE |
 
 ## Milestones
 | # | Name | Scope | Dependencies | Status |
@@ -47,6 +48,7 @@
 | M1 | Canvas & Background Engine (R1) | Enriquecimiento de `#cyber-canvas` en `src/script.js` y `src/styles.css`: constelaciones al cursor y entre partículas, rejilla cuántica elástica/gravitatoria, LERP cromático multi-tema, clamping dt <= 2.5 y aislamiento estricto de eventos. | none | DONE |
 | M2 | Compañero Gato 3D Procedural (R2) | Optimización en `src/cat3d-mini.js` y `src/script.js`: mirada cinemática suavizada, timeout idle, expresiones y ronroneo táctil, paseo relativo entre tarjetas sin solapar controles, corrección cromática del shader ASCII y fallback interactivo. | none | DONE |
 | M3 | Build Parity, E2E Suite & Verification (R3/R4) | Sincronización de `dist/portfolio-mejorado.html` vía `tests/build-dist.js`, pase del 100% de tests E2E expandidos a 110 tests, validación de 27 smoke tests del gato y 16 pruebas adversariales. Puerta aprobada por revisores y auditoría forense CLEAN. | M1, M2 | DONE |
+| M4 | Formulario de contacto persistente (R5) | Creación del proyecto Supabase `portfolio-contact`, tabla `contact_messages` con RLS solo-insert y tabla restringida, conexión del formulario existente vía `fetch` con clave publishable, honeypot y validación en cliente, estados i18n de envío/éxito/error, actualización de los textos de privacidad y del CSP (`connect-src`) en las tres superficies, y ampliación de la suite a 112 tests E2E en verde. | M3 | DONE |
 
 ## Interface Contracts
 ### Theme Switcher ↔ Canvas & Cat3D

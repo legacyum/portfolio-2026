@@ -892,7 +892,7 @@ function executeModularScript(htmlContent) {
 }
 
 // Main Test Execution Function
-function runAllTests() {
+async function runAllTests() {
   printHeader('STARTING DUAL-TRACK E2E TEST SUITE FOR PORTAFOLIO ALESSANDRO');
   console.log(`Workspace root: ${ROOT_DIR}`);
   console.log(`Inspecting files:`);
@@ -1361,17 +1361,98 @@ function runAllTests() {
     const nameInput = form.querySelector('input[name="name"]');
     const emailInput = form.querySelector('input[name="email"]');
     const msgTextarea = form.querySelector('textarea[name="message"]');
+    const status = form.querySelector('#contactStatus');
 
     nameInput.value = 'Juan Perez';
     emailInput.value = 'juan@example.com';
     msgTextarea.value = 'Hola Alessandro, me interesa tu perfil.';
 
+    const calls = [];
+    env.win.fetch = (url, options) => {
+      calls.push({ url, options });
+      return Promise.resolve({ ok: true, status: 201, text: () => Promise.resolve('') });
+    };
+
     form.dispatchEvent(new env.win.Event('submit'));
-    assert(env.win.location.href.startsWith('mailto:alessandro.altamirano23@gmail.com'), 'Submit must set mailto href');
-    assert(env.win.location.href.includes(encodeURIComponent('Juan Perez')), 'Submit mailto URI must encode name');
-    assert(env.win.location.href.includes(encodeURIComponent('juan@example.com')), 'Submit mailto URI must encode email');
-    logPass('Tier 1', 'T1-FRM-02', 'Form JavaScript Submit Handler & Mailto URI Encoding');
-  } catch (err) { logFail('Tier 1', 'T1-FRM-02', 'Form Submit Handler & Mailto Encoding', err); }
+
+    assert.strictEqual(calls.length, 1, 'A valid submission must issue exactly one request');
+    const call = calls[0];
+    assert.strictEqual(call.url, env.win.__contactEndpoint, 'Request must target the configured Supabase endpoint');
+    assert(call.url.startsWith('https://') && call.url.endsWith('/rest/v1/contact_messages'), 'Endpoint must be the Supabase REST route for contact_messages');
+    assert.strictEqual(call.options.method, 'POST', 'Insert must use POST');
+    assert(call.options.headers.apikey, 'A publishable apikey header is required');
+    assert.strictEqual(call.options.headers.Authorization, 'Bearer ' + call.options.headers.apikey, 'Authorization must present the publishable key');
+    assert.strictEqual(call.options.headers['Content-Type'], 'application/json', 'Payload must be JSON');
+    assert.strictEqual(call.options.headers.Prefer, 'return=minimal', 'Prefer: return=minimal is required (public role has no SELECT grant)');
+    const body = JSON.parse(call.options.body);
+    assert.strictEqual(body.name, 'Juan Perez', 'Payload must carry the trimmed name');
+    assert.strictEqual(body.email, 'juan@example.com', 'Payload must carry the email');
+    assert.strictEqual(body.message, 'Hola Alessandro, me interesa tu perfil.', 'Payload must carry the message');
+    assert.strictEqual(body.locale, 'es', 'Payload must record the active locale');
+    assert.strictEqual(body.company_website, undefined, 'The honeypot must never be part of the payload');
+    assert(!/sb_secret|service_role/.test(call.options.body), 'No privileged key may ever reach the client payload');
+    assert(!/sb_secret|service_role/.test(String(call.options.headers.Authorization)), 'Only a publishable key may be used for the insert');
+
+    await new Promise(resolve => setImmediate(resolve));
+    assert(status.textContent.includes('Mensaje enviado'), 'Success must be announced to the user');
+    assert.strictEqual(status.dataset.state, 'ok', 'Status element must expose the ok state');
+    logPass('Tier 1', 'T1-FRM-02', 'Form Submit to Supabase REST Insert (endpoint, headers, payload, success status)');
+  } catch (err) { logFail('Tier 1', 'T1-FRM-02', 'Form Submit to Supabase REST Insert', err); }
+
+  // 1.9b Contact form anti-spam honeypot & client-side validation
+  try {
+    const env = executeInlineScript(portfolioHtmlContent);
+    const form = env.doc.querySelector('#contactForm');
+    const nameInput = form.querySelector('input[name="name"]');
+    const emailInput = form.querySelector('input[name="email"]');
+    const msgTextarea = form.querySelector('textarea[name="message"]');
+    const honeypot = form.querySelector('input[name="company_website"]');
+    const status = form.querySelector('#contactStatus');
+
+    let calls = 0;
+    env.win.fetch = () => { calls++; return Promise.resolve({ ok: true, status: 201 }); };
+
+    assert(honeypot, 'A hidden honeypot field must exist');
+    assert.strictEqual(honeypot.getAttribute('tabindex'), '-1', 'Honeypot must be kept out of keyboard navigation');
+    assert(form.querySelector('.hp-field[aria-hidden="true"]'), 'Honeypot must live in an aria-hidden container');
+
+    honeypot.value = 'https://spam.example';
+    nameInput.value = 'Bot';
+    emailInput.value = 'bot@example.com';
+    msgTextarea.value = 'Compra barato ahora mismo';
+    form.dispatchEvent(new env.win.Event('submit'));
+    assert.strictEqual(calls, 0, 'Honeypot submissions must never reach the network');
+
+    honeypot.value = '';
+    emailInput.value = 'no-es-un-correo';
+    form.dispatchEvent(new env.win.Event('submit'));
+    assert.strictEqual(calls, 0, 'Client-side validation must block malformed emails');
+    assert(status.textContent.length > 0, 'A validation failure must be announced to the user');
+    assert.strictEqual(status.dataset.state, 'error', 'A validation failure must expose the error state');
+    logPass('Tier 1', 'T1-FRM-03', 'Contact Form Anti-Spam Honeypot & Client Validation Guards');
+  } catch (err) { logFail('Tier 1', 'T1-FRM-03', 'Contact Form Anti-Spam Honeypot & Validation Guards', err); }
+
+  // 1.9c Contact form failure handling & direct mailto fallback
+  try {
+    const env = executeInlineScript(portfolioHtmlContent);
+    const form = env.doc.querySelector('#contactForm');
+    form.querySelector('input[name="name"]').value = 'Ana';
+    form.querySelector('input[name="email"]').value = 'ana@example.com';
+    form.querySelector('textarea[name="message"]').value = 'Mensaje suficientemente largo.';
+    const status = form.querySelector('#contactStatus');
+
+    env.win.fetch = () => Promise.reject(new Error('offline'));
+    form.dispatchEvent(new env.win.Event('submit'));
+    await new Promise(resolve => setImmediate(resolve));
+    await new Promise(resolve => setImmediate(resolve));
+    assert.strictEqual(status.dataset.state, 'error', 'Network failures must surface an error state');
+    assert(status.textContent.includes('alessandro.altamirano23@gmail.com'), 'Error message must point to the direct email fallback');
+
+    const fallback = form.querySelector('a[href="mailto:alessandro.altamirano23@gmail.com"]');
+    assert(fallback, 'A direct mailto link must remain available as an alternative');
+    assert.strictEqual(fallback.getAttribute('href'), 'mailto:alessandro.altamirano23@gmail.com');
+    logPass('Tier 1', 'T1-FRM-04', 'Contact Form Failure Handling & Direct Mailto Fallback');
+  } catch (err) { logFail('Tier 1', 'T1-FRM-04', 'Contact Form Failure Handling & Mailto Fallback', err); }
 
   try {
     const doc = parseFullDocument(portfolioHtmlContent);
@@ -2156,11 +2237,16 @@ function runAllTests() {
     emailInput.value = 'test+123@example.com';
     msgTextarea.value = 'Line 1\nLine 2 & <tag>';
 
+    const calls = [];
+    env.win.fetch = (url, options) => { calls.push({ url, options }); return Promise.resolve({ ok: true, status: 201 }); };
     form.dispatchEvent(new env.win.Event('submit'));
-    const mailto = env.win.location.href;
-    assert(mailto.startsWith('mailto:alessandro.altamirano23@gmail.com?subject='), 'Mailto link must be formatted');
-    assert(!mailto.includes('<') && !mailto.includes('>'), 'Mailto link MUST NOT contain unencoded HTML brackets');
-    logPass('Tier 2', 'T2-BND-10', 'Contact Form Special Characters URL-Encoding Boundary');
+
+    assert.strictEqual(calls.length, 1, 'Special characters must not break the submission flow');
+    const body = JSON.parse(calls[0].options.body);
+    assert.strictEqual(body.name, 'O\'Connor & "Sons" <Test>', 'Raw characters must survive JSON serialisation unchanged');
+    assert(body.message.includes('Line 2 & <tag>'), 'Multi-line message content must be preserved intact');
+    assert(!body.message.includes('<script>'), 'No HTML interpretation may happen on the payload');
+    logPass('Tier 2', 'T2-BND-10', 'Contact Form Special Characters Safe JSON Serialisation Boundary');
   } catch (err) { logFail('Tier 2', 'T2-BND-10', 'Contact Form Special Characters URL-Encoding Boundary', err); }
 
   // 2.21 Fallback ASCII Companion Interactivity, State Machine & Gaze Tracking
@@ -2287,11 +2373,14 @@ function runAllTests() {
     const sendSpan = form.querySelector('[data-t="send"]');
 
     assert.strictEqual(nameSpan.textContent, 'Nombre');
-    assert.strictEqual(sendSpan.textContent, 'abrir correo');
+    assert.strictEqual(sendSpan.textContent, 'enviar mensaje');
+    const noteSpan = form.querySelector('[data-t="note"]');
+    assert(noteSpan.textContent.includes('base de datos'), 'Privacy note must disclose where the message is stored');
 
     langBtn.dispatchEvent(new env.win.Event('click'));
     assert.strictEqual(nameSpan.textContent, 'Name');
-    assert.strictEqual(sendSpan.textContent, 'open email');
+    assert.strictEqual(sendSpan.textContent, 'send message');
+    assert(noteSpan.textContent.includes('database'), 'English privacy note must disclose storage too');
     logPass('Tier 3', 'T3-CMB-06', 'Contact Form Labels i18n Dynamics');
   } catch (err) { logFail('Tier 3', 'T3-CMB-06', 'Contact Form Labels i18n Dynamics', err); }
 

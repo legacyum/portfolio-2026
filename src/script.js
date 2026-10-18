@@ -101,8 +101,12 @@ const T = {
     name: 'Nombre',
     email: 'Correo',
     message: 'Mensaje',
-    send: 'abrir correo',
-    note: 'Se abrirá tu cliente de correo; no almacenamos datos.',
+    send: 'enviar mensaje',
+    note: 'Tu mensaje se guarda de forma segura en mi base de datos y solo yo puedo leerlo; no se comparte con terceros.',
+    orEmail: '¿Prefieres el correo? Escríbeme directo ↗',
+    formSending: 'enviando…',
+    formSent: '✓ Mensaje enviado. Te responderé lo antes posible.',
+    formError: 'No se pudo enviar. Escríbeme directo a alessandro.altamirano23@gmail.com.',
     footer: 'Diseñado con intención, datos y café.',
     termsNav: 'términos & privacidad',
     copiedToast: '✓ Copiado al portapapeles',
@@ -230,8 +234,12 @@ const T = {
     name: 'Name',
     email: 'Email',
     message: 'Message',
-    send: 'open email',
-    note: 'Your email app will open; no data is stored.',
+    send: 'send message',
+    note: 'Your message is stored securely in my own database and only I can read it; it is never shared with third parties.',
+    orEmail: 'Prefer email? Write to me directly ↗',
+    formSending: 'sending…',
+    formSent: '✓ Message sent. I will get back to you as soon as possible.',
+    formError: 'Could not send. Please email me directly at alessandro.altamirano23@gmail.com.',
     footer: 'Designed with intention, data and coffee.',
     termsNav: 'terms & privacy',
     copiedToast: '✓ Copied to clipboard',
@@ -533,7 +541,7 @@ const TERMS_CONTENT = {
       },
       {
         title: '02 / Privacidad & Protección de Datos',
-        text: '<strong>No recopilamos ni almacenamos datos personales</strong> en bases de datos de terceros ni empleamos cookies de rastreo o publicidad. El formulario de contacto y los enlaces de correo utilizan protocolos directos del cliente (<code>mailto:</code>), garantizando que tu mensaje sea enviado únicamente desde tu propio gestor de correo.'
+        text: 'Si envías el formulario de contacto, tus datos (<strong>nombre, correo y mensaje</strong>) se almacenan en una base de datos privada gestionada con Supabase, con acceso restringido exclusivamente al titular del sitio y con la única finalidad de responderte. <strong>No se comparten con terceros</strong>, no se usan con fines comerciales ni publicitarios, y puedes solicitar su eliminación escribiendo a <a class="out-link" href="mailto:alessandro.altamirano23@gmail.com">alessandro.altamirano23@gmail.com</a>. No se emplean cookies de rastreo ni publicidad; los enlaces de correo siguen operando mediante <code>mailto:</code> desde tu propio gestor.'
       },
       {
         title: '03 / Confidencialidad & Proyectos Corporativos',
@@ -557,7 +565,7 @@ const TERMS_CONTENT = {
       },
       {
         title: '02 / Privacy & Data Protection',
-        text: '<strong>We do not collect or store personal data</strong> on third-party servers, nor do we use tracking cookies. The contact form and email links rely directly on client-side <code>mailto:</code> protocols, ensuring your communications remain private within your email client.'
+        text: 'If you submit the contact form, your data (<strong>name, email and message</strong>) is stored in a private database managed with Supabase, accessible only to the site owner and used solely to reply to you. <strong>It is never shared with third parties</strong>, nor used for commercial or advertising purposes, and you may request its deletion by writing to <a class="out-link" href="mailto:alessandro.altamirano23@gmail.com">alessandro.altamirano23@gmail.com</a>. No tracking cookies or advertising are used; email links keep working through the <code>mailto:</code> protocol in your own client.'
       },
       {
         title: '03 / Corporate Confidentiality & Case Studies',
@@ -628,7 +636,7 @@ const C = {
     ],
     terms: [
       'AVISO LEGAL & POLÍTICA DE PRIVACIDAD',
-      '<p>Este sitio web es un portafolio profesional de carácter técnico y demostrativo perteneciente a <span class="green">Alessandro Altamirano</span>.</p><ul class="out-list"><li><strong>Privacidad:</strong> no se recopilan ni almacenan datos personales; el contacto opera exclusivamente mediante <code>mailto:</code>.</li><li><strong>Confidencialidad:</strong> proyectos corporativos presentados bajo abstracción metodológica sin datos sensibles.</li><li><strong>Credenciales:</strong> respaldadas por certificados emitidos por Santander, DataCamp, NASA, Fundación Telefónica y Anthropic.</li></ul>'
+      '<p>Este sitio web es un portafolio profesional de carácter técnico y demostrativo perteneciente a <span class="green">Alessandro Altamirano</span>.</p><ul class="out-list"><li><strong>Privacidad:</strong> si usas el formulario de contacto, tu nombre, correo y mensaje se guardan en una base de datos privada (Supabase) que solo el titular puede leer, con la única finalidad de responderte; no se comparten con terceros y puedes pedir su borrado por correo. El contacto directo sigue disponible vía <code>mailto:</code>.</li><li><strong>Confidencialidad:</strong> proyectos corporativos presentados bajo abstracción metodológica sin datos sensibles.</li><li><strong>Credenciales:</strong> respaldadas por certificados emitidos por Santander, DataCamp, NASA, Fundación Telefónica y Anthropic.</li></ul>'
     ]
   },
   en: {
@@ -670,7 +678,7 @@ const C = {
     ],
     terms: [
       'LEGAL NOTICE & PRIVACY POLICY',
-      '<p>This website is a technical and professional demonstration portfolio owned by <span class="green">Alessandro Altamirano</span>.</p><ul class="out-list"><li><strong>Privacy:</strong> No personal data is stored or harvested; contact operates strictly via <code>mailto:</code>.</li><li><strong>Confidenciality:</strong> Corporate case studies presented under generalized methodology with zero sensitive disclosure.</li><li><strong>Credentials:</strong> Backed by verifiable certifications from Santander, DataCamp, NASA, Telefónica and Anthropic.</li></ul>'
+      '<p>This website is a technical and professional demonstration portfolio owned by <span class="green">Alessandro Altamirano</span>.</p><ul class="out-list"><li><strong>Privacy:</strong> if you use the contact form, your name, email and message are stored in a private database (Supabase) readable only by the owner, for the sole purpose of replying to you; they are never shared with third parties and you can request deletion by email. Direct contact remains available via <code>mailto:</code>.</li><li><strong>Confidenciality:</strong> Corporate case studies presented under generalized methodology with zero sensitive disclosure.</li><li><strong>Credentials:</strong> Backed by verifiable certifications from Santander, DataCamp, NASA, Telefónica and Anthropic.</li></ul>'
     ]
   }
 };
@@ -3072,14 +3080,90 @@ function initCrtMonitorHardware() {
 }
 initCrtMonitorHardware();
 
-// Mailto Contact Form Handler
-document.querySelector('#contactForm')?.addEventListener('submit', e => {
-  e.preventDefault();
-  const d = new FormData(e.currentTarget);
-  const subject = encodeURIComponent('Contacto desde tu portafolio — ' + d.get('name'));
-  const text = encodeURIComponent('Nombre: ' + d.get('name') + '\nCorreo: ' + d.get('email') + '\n\n' + d.get('message'));
-  location.href = 'mailto:alessandro.altamirano23@gmail.com?subject=' + subject + '&body=' + text;
-});
+// Contact Form Handler — Supabase (insert-only table protected by RLS)
+const CONTACT_ENDPOINT = 'https://vrwcaeujnxdiseczbqvu.supabase.co/rest/v1/contact_messages';
+const CONTACT_PUBLIC_KEY = 'sb_publishable_DHAx8BkXL7spiePICKNkcQ_80YLDaFU';
+
+async function sendContactMessage(payload) {
+  if (typeof fetch !== 'function') return { ok: false, reason: 'no-fetch' };
+  try {
+    // Prefer: return=minimal is required here: the public key can INSERT but has no SELECT grant.
+    const res = await fetch(CONTACT_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: CONTACT_PUBLIC_KEY,
+        Authorization: 'Bearer ' + CONTACT_PUBLIC_KEY,
+        Prefer: 'return=minimal'
+      },
+      body: JSON.stringify(payload)
+    });
+    return { ok: res.ok, status: res.status };
+  } catch (error) {
+    return { ok: false, reason: 'network' };
+  }
+}
+
+if (typeof window !== 'undefined') {
+  window.__sendContactMessage = sendContactMessage;
+  window.__contactEndpoint = CONTACT_ENDPOINT;
+}
+
+const contactForm = document.querySelector('#contactForm');
+if (contactForm) {
+  const contactStatus = contactForm.querySelector('#contactStatus');
+  const contactSubmit = contactForm.querySelector('button[type="submit"]');
+
+  const setContactStatus = (key, state) => {
+    if (!contactStatus) return;
+    const L = T[lang] || T.es;
+    contactStatus.textContent = L[key] || '';
+    if (contactStatus.dataset) contactStatus.dataset.state = state;
+    contactStatus.hidden = false;
+  };
+
+  contactForm.addEventListener('submit', async e => {
+    e.preventDefault();
+    const d = new FormData(contactForm);
+
+    // Honeypot: only bots fill a hidden field, so drop the submission silently.
+    if (String(d.get('company_website') || '').trim()) return;
+
+    const payload = {
+      name: String(d.get('name') || '').trim().slice(0, 120),
+      email: String(d.get('email') || '').trim().slice(0, 200),
+      message: String(d.get('message') || '').trim().slice(0, 4000),
+      locale: lang,
+      page_url: (typeof location !== 'undefined' && location.href ? String(location.href) : '').slice(0, 300),
+      user_agent: (typeof navigator !== 'undefined' && navigator.userAgent ? String(navigator.userAgent) : '').slice(0, 400)
+    };
+
+    if (payload.name.length < 2 || payload.message.length < 10 || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(payload.email)) {
+      setContactStatus('formError', 'error');
+      return;
+    }
+
+    if (contactSubmit) { contactSubmit.disabled = true; contactSubmit.setAttribute('aria-busy', 'true'); }
+    setContactStatus('formSending', 'pending');
+
+    const result = await sendContactMessage(payload);
+
+    if (contactSubmit) { contactSubmit.disabled = false; contactSubmit.setAttribute('aria-busy', 'false'); }
+
+    if (result.ok) {
+      if (typeof contactForm.reset === 'function') contactForm.reset();
+      setContactStatus('formSent', 'ok');
+    } else {
+      setContactStatus('formError', 'error');
+      // Degraded fallback: without fetch support, hand the message to the mail client instead.
+      if (result.reason === 'no-fetch') {
+        const subject = encodeURIComponent('Contacto desde tu portafolio — ' + payload.name);
+        const text = encodeURIComponent('Nombre: ' + payload.name + '\nCorreo: ' + payload.email + '\n\n' + payload.message);
+        location.href = 'mailto:alessandro.altamirano23@gmail.com?subject=' + subject + '&body=' + text;
+      }
+    }
+  });
+}
 
 // Real-time Clock & Footer Year Initialization
 function updateClock() {

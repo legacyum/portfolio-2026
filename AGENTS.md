@@ -8,20 +8,20 @@ Static, dependency-free portfolio (vanilla HTML/CSS/JS). No `package.json`, no n
 - `src/styles.css` — themes via CSS custom properties, responsive layout.
 - `src/vendor/` — Three.js, OrbitControls, asciify, cosmos, crt engines (loaded via `<script src>` in src, inlined on build).
 - `dist/portfolio-mejorado.html` — generated single-file bundle. Never edit by hand.
-- `tests/` — `build-dist.js`, `run-e2e-tests.js` (110 tests, Tiers 1–4), `adversarial-stress-tests.js` (16 tests, Tier 5), `server.js`, `server-security-tests.js`.
+- `tests/` — `build-dist.js`, `run-e2e-tests.js` (112 tests, Tiers 1–4), `adversarial-stress-tests.js` (16 tests, Tier 5), `server.js`, `server-security-tests.js`.
 - `docs/` — `README.md` (background/test architecture), `PROJECT.md` (cat + canvas milestones, hook contracts).
 
 ## Commands
 
 ```bash
 node tests/build-dist.js                # Regenerate dist (REQUIRED before e2e/adversarial runs)
-node tests/run-e2e-tests.js             # E2E suite: 110 tests, DOM via vm.runInContext, no network
+node tests/run-e2e-tests.js             # E2E suite: 112 tests, DOM via vm.runInContext, no network
 node tests/adversarial-stress-tests.js  # Tier 5 stress suite: 16 tests
 node tests/server-security-tests.js     # Preview-server security checks (spawns tests/server.js)
 node tests/server.js                    # Local preview (PORT/HOST env, defaults 3000/0.0.0.0)
 ```
 
-No lint or typecheck; the three test scripts are the validation (exit 0 = pass). Verified: 110/110 E2E + 16/16 adversarial green.
+No lint or typecheck; the three test scripts are the validation (exit 0 = pass). Verified: 112/112 E2E + 16/16 adversarial green.
 
 ## Architecture rules
 
@@ -32,6 +32,7 @@ No lint or typecheck; the three test scripts are the validation (exit 0 = pass).
 - **Build-markers are load-bearing**: `build-dist.js` inlines vendor scripts with `data-vendor` / `data-canvasui-asciify` attributes so the app script stays the FIRST plain `<script>` (the e2e harness executes it). Don't change the inlining scheme without updating the harness.
 - **Test hooks** (preserve when refactoring): `__triggerRipple(x, y, intensity)` (shockwave queue clamped ≤ 6), `__boostCyberMatrix()` (canonical; `__boostBinaryMatrix` is an alias), `__replayPreloader()`; cat suite `__catMini`, `__summonCat`/`__hideCat`, `__petCat`, `__sleepCat`/`__wakeUpCat`, roam/fur/mode setters.
 - **Preview server**: resolves `src/` → `dist/` → root, serves `src/404.html` on miss with path-traversal guards. `PORT`/`HOST` env supported.
+- **Contact form**: `#contactForm` POSTs to Supabase REST (`contact_messages`, insert-only RLS) using the publishable key exposed as `CONTACT_ENDPOINT`/`CONTACT_PUBLIC_KEY` in `script.js`; a hidden `company_website` honeypot plus client validation gate every submission, and `Prefer: return=minimal` is mandatory because the public role has no SELECT grant. The Supabase origin must stay in `connect-src` (`vercel.json`, `src/_headers`, meta CSP), and the privacy copy must keep matching what is actually stored.
 - **Test invariants**: single `<h1>`; every `target="_blank"` link keeps `rel="noreferrer"`; physics clamps (`dt <= 2.5`, idle breathing > 5.5s, reduced-motion at 15%).
 
 ## Read before sensitive changes
