@@ -1426,25 +1426,29 @@ Consola interactiva lista. Escribe un comando o haz clic en los accesos rápidos
       const caseModalBodyContent = document.getElementById("caseModalBodyContent");
       let activeCaseData = null;
 
-      function escapeHtml(v) {
-        return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;"
-        }[c]));
-      }
-
       function renderStarTab(data, tabKey) {
         if (!data) return;
+        const block = (label, value, valueClass, isLast) => {
+          const wrap = document.createElement("div");
+          if (!isLast) wrap.setAttribute("style", "margin-bottom:12px;");
+          const strong = document.createElement("strong");
+          strong.className = "crt-amber";
+          strong.textContent = label;
+          const p = document.createElement("p");
+          p.className = valueClass;
+          p.setAttribute("style", "margin-top:4px;");
+          p.textContent = value == null ? "" : String(value);
+          wrap.appendChild(strong);
+          wrap.appendChild(p);
+          return wrap;
+        };
+
+        caseModalBodyContent.textContent = "";
         if (tabKey === "all") {
-          caseModalBodyContent.innerHTML = `
-            <div style="margin-bottom:12px;"><strong class="crt-amber">[ S ] SITUACIÓN:</strong><p class="crt-glow" style="margin-top:4px;">${escapeHtml(data.s)}</p></div>
-            <div style="margin-bottom:12px;"><strong class="crt-amber">[ T ] TAREA:</strong><p class="crt-glow" style="margin-top:4px;">${escapeHtml(data.t)}</p></div>
-            <div style="margin-bottom:12px;"><strong class="crt-amber">[ A ] ACCIÓN:</strong><p class="crt-glow" style="margin-top:4px;">${escapeHtml(data.a)}</p></div>
-            <div><strong class="crt-amber">[ R ] RESULTADO:</strong><p class="crt-bright" style="margin-top:4px;">${escapeHtml(data.r)}</p></div>
-          `;
+          caseModalBodyContent.appendChild(block("[ S ] SITUACIÓN:", data.s, "crt-glow", false));
+          caseModalBodyContent.appendChild(block("[ T ] TAREA:", data.t, "crt-glow", false));
+          caseModalBodyContent.appendChild(block("[ A ] ACCIÓN:", data.a, "crt-glow", false));
+          caseModalBodyContent.appendChild(block("[ R ] RESULTADO:", data.r, "crt-bright", true));
         } else {
           const map = {
             s: { title: "SITUACIÓN", text: data.s },
@@ -1454,12 +1458,18 @@ Consola interactiva lista. Escribe un comando o haz clic en los accesos rápidos
           };
           const allowed = Object.prototype.hasOwnProperty.call(map, tabKey) ? tabKey : "s";
           const item = map[allowed];
-          caseModalBodyContent.innerHTML = `
-            <div>
-              <h4 class="crt-amber" style="font-size:0.9rem; margin-bottom:6px;">[ ${allowed.toUpperCase()} ] ${escapeHtml(item.title)}:</h4>
-              <p class="crt-glow" style="font-size:0.84rem; line-height:1.5;">${escapeHtml(item.text)}</p>
-            </div>
-          `;
+          const wrap = document.createElement("div");
+          const h4 = document.createElement("h4");
+          h4.className = "crt-amber";
+          h4.setAttribute("style", "font-size:0.9rem; margin-bottom:6px;");
+          h4.textContent = "[ " + allowed.toUpperCase() + " ] " + item.title + ":";
+          const p = document.createElement("p");
+          p.className = "crt-glow";
+          p.setAttribute("style", "font-size:0.84rem; line-height:1.5;");
+          p.textContent = item.text == null ? "" : String(item.text);
+          wrap.appendChild(h4);
+          wrap.appendChild(p);
+          caseModalBodyContent.appendChild(wrap);
         }
       }
 
