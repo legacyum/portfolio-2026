@@ -1426,14 +1426,24 @@ Consola interactiva lista. Escribe un comando o haz clic en los accesos rápidos
       const caseModalBodyContent = document.getElementById("caseModalBodyContent");
       let activeCaseData = null;
 
+      function escapeHtml(v) {
+        return String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;"
+        }[c]));
+      }
+
       function renderStarTab(data, tabKey) {
         if (!data) return;
         if (tabKey === "all") {
           caseModalBodyContent.innerHTML = `
-            <div style="margin-bottom:12px;"><strong class="crt-amber">[ S ] SITUACIÓN:</strong><p class="crt-glow" style="margin-top:4px;">${data.s}</p></div>
-            <div style="margin-bottom:12px;"><strong class="crt-amber">[ T ] TAREA:</strong><p class="crt-glow" style="margin-top:4px;">${data.t}</p></div>
-            <div style="margin-bottom:12px;"><strong class="crt-amber">[ A ] ACCIÓN:</strong><p class="crt-glow" style="margin-top:4px;">${data.a}</p></div>
-            <div><strong class="crt-amber">[ R ] RESULTADO:</strong><p class="crt-bright" style="margin-top:4px;">${data.r}</p></div>
+            <div style="margin-bottom:12px;"><strong class="crt-amber">[ S ] SITUACIÓN:</strong><p class="crt-glow" style="margin-top:4px;">${escapeHtml(data.s)}</p></div>
+            <div style="margin-bottom:12px;"><strong class="crt-amber">[ T ] TAREA:</strong><p class="crt-glow" style="margin-top:4px;">${escapeHtml(data.t)}</p></div>
+            <div style="margin-bottom:12px;"><strong class="crt-amber">[ A ] ACCIÓN:</strong><p class="crt-glow" style="margin-top:4px;">${escapeHtml(data.a)}</p></div>
+            <div><strong class="crt-amber">[ R ] RESULTADO:</strong><p class="crt-bright" style="margin-top:4px;">${escapeHtml(data.r)}</p></div>
           `;
         } else {
           const map = {
@@ -1442,11 +1452,12 @@ Consola interactiva lista. Escribe un comando o haz clic en los accesos rápidos
             a: { title: "ACCIÓN", text: data.a },
             r: { title: "RESULTADO", text: data.r }
           };
-          const item = map[tabKey];
+          const allowed = Object.prototype.hasOwnProperty.call(map, tabKey) ? tabKey : "s";
+          const item = map[allowed];
           caseModalBodyContent.innerHTML = `
             <div>
-              <h4 class="crt-amber" style="font-size:0.9rem; margin-bottom:6px;">[ ${tabKey.toUpperCase()} ] ${item.title}:</h4>
-              <p class="crt-glow" style="font-size:0.84rem; line-height:1.5;">${item.text}</p>
+              <h4 class="crt-amber" style="font-size:0.9rem; margin-bottom:6px;">[ ${allowed.toUpperCase()} ] ${escapeHtml(item.title)}:</h4>
+              <p class="crt-glow" style="font-size:0.84rem; line-height:1.5;">${escapeHtml(item.text)}</p>
             </div>
           `;
         }
