@@ -4374,9 +4374,10 @@ footer p {
   position: fixed;
   inset: 0;
   margin: auto;
-  width: min(94vw, 980px);
-  max-width: 980px;
+  width: min(94vw, 1080px);
+  max-width: 1080px;
   height: min(90vh, 840px);
+  height: min(92svh, 920px);
   border: 1px solid var(--line);
   background: var(--panel);
   color: var(--text);
@@ -4401,6 +4402,7 @@ footer p {
 
 .case-modal-header {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   min-height: 44px;
@@ -4422,10 +4424,12 @@ footer p {
 .case-close-btn {
   border: 0;
   background: transparent;
-  color: var(--faint);
+  color: var(--muted);
   font-size: 14px;
   cursor: pointer;
-  padding: 4px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px;
   line-height: 1;
   transition: color 0.2s ease;
 }
@@ -4440,10 +4444,13 @@ footer p {
   align-items: center;
   gap: 2px;
   padding: 0 16px;
-  background: rgba(0, 0, 0, 0.25);
   border-bottom: 1px solid var(--line);
   overflow-x: auto;
   scrollbar-width: none;
+  position: sticky;
+  top: -1px;
+  z-index: 2;
+  background: var(--bg);
 }
 
 .case-tabs-nav::-webkit-scrollbar {
@@ -4454,7 +4461,8 @@ footer p {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 11px 14px;
+  min-height: 44px;
+  padding: 12px 10px;
   background: transparent;
   border: none;
   border-bottom: 2px solid transparent;
@@ -4491,6 +4499,7 @@ footer p {
 
 .case-modal-body {
   flex: 1;
+  min-height: 0;
   padding: clamp(20px, 3.5vw, 36px);
   overflow-y: auto;
   scrollbar-color: var(--faint) transparent;
@@ -4521,8 +4530,69 @@ footer p {
 .star-subtitle {
   margin: 0;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 13px;
   line-height: 1.6;
+}
+
+.star-overview {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin: 0 0 24px;
+}
+
+.star-overview dt,
+.star-section-caption {
+  margin: 0 0 8px;
+  color: var(--accent);
+  font-family: "DM Mono", monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.star-overview dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.case-tab-body {
+  padding-top: 20px;
+}
+
+.star-evidence {
+  margin: 24px 0;
+  padding: 18px 20px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  background: rgba(var(--accent-rgb), 0.04);
+}
+
+.star-evidence h4 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--text);
+}
+
+.star-evidence p,
+.star-code-note {
+  margin: 0 0 12px;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+
+.star-evidence p:last-child {
+  margin-bottom: 0;
+}
+
+.case-tab-btn:focus-visible,
+.case-close-btn:focus-visible,
+.star-evidence a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
 }
 
 /* Tab Pane Transitions */
@@ -4538,7 +4608,7 @@ footer p {
 /* --- TAB 1: Real Context & STAR Breakdown --- */
 .star-kpi-strip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 10px;
   margin-bottom: 18px;
 }
@@ -4618,8 +4688,8 @@ footer p {
 }
 
 .star-kpi-chip-sub {
-  font-size: 8.5px;
-  color: var(--faint);
+  font-size: 10px;
+  color: var(--muted);
   font-family: "DM Mono", monospace;
   line-height: 1.3;
   margin-top: 2px;
@@ -4627,13 +4697,13 @@ footer p {
 
 .star-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
   margin-bottom: 20px;
 }
 
 .star-card {
-  padding: 18px 20px;
+  padding: 22px;
   border: 1px solid var(--line);
   background: linear-gradient(145deg, rgba(16, 22, 18, 0.85) 0%, rgba(10, 13, 11, 0.98) 100%);
   border-radius: 6px;
@@ -4678,6 +4748,7 @@ footer p {
   align-items: center;
   justify-content: space-between;
   gap: 8px;
+  flex-wrap: wrap;
   margin-bottom: 12px;
 }
 
@@ -4752,8 +4823,8 @@ footer p {
 .star-card-desc {
   margin: 0 0 12px;
   color: var(--muted);
-  font-size: 11px;
-  line-height: 1.65;
+  font-size: 13px;
+  line-height: 1.75;
 }
 
 .star-card strong {
@@ -4774,8 +4845,8 @@ footer p {
   display: flex;
   align-items: flex-start;
   gap: 8px;
-  font-size: 10px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.65;
   color: var(--muted);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
@@ -5258,6 +5329,57 @@ footer p {
   border-radius: 50%;
   background: var(--accent);
   opacity: 0.7;
+}
+
+@media (max-width: 760px) {
+  .case-tabs-nav {
+    flex-wrap: wrap;
+    padding: 4px;
+  }
+
+  .case-tab-btn {
+    flex: 1 1 30%;
+    justify-content: center;
+    white-space: normal;
+    font-size: 9px;
+    line-height: 1.5;
+  }
+
+  .star-kpi-strip,
+  .star-overview {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .star-card {
+    padding: 18px;
+  }
+}
+
+@media (max-width: 420px) {
+  .star-overview {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .star-kpi-chip {
+    padding: 12px 10px;
+  }
+
+  .star-kpi-chip-val {
+    font-size: 20px;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .case-tab-pane {
+    animation: none;
+  }
+
+  .star-card:hover,
+  .star-kpi-chip:hover {
+    transform: none;
+  }
 }
 
 /* --- Footer Links & Buttons --- */
@@ -12293,6 +12415,7 @@ function createCrtRenderer(host, canvas, getOptions) {
 const T = {
   es: {
     profile: '// perfil profesional',
+    starLabels: {"close": "Cerrar caso de estudio", "role": "Mi aporte", "scope": "Alcance", "evidence": "Evidencia y alcance de los resultados", "repository": "Explorar repositorio", "stack": "Herramientas del proyecto", "navigation": "Explorar el caso", "summary": "El proyecto en breve", "metrics": "Resultados reportados", "codeNote": "Fragmento ilustrativo de la lógica técnica. Consulta el repositorio, cuando esté disponible, para revisar la implementación completa."},
     available: 'Abierto a prácticas y posiciones junior',
     role: 'Industrial Engineering<br><span>Data · Automation · Operations<br>Supply Chain · Logística · Planeamiento</span>',
     aboutNav: 'acerca de mí',
@@ -12426,6 +12549,7 @@ const T = {
   },
   en: {
     profile: '// professional profile',
+    starLabels: {"close": "Close case study", "role": "My contribution", "scope": "Scope", "evidence": "Evidence and result scope", "repository": "Explore repository", "stack": "Project tools", "navigation": "Explore this case", "summary": "Project at a glance", "metrics": "Reported results", "codeNote": "Illustrative technical snippet. Where available, consult the repository to inspect the complete implementation."},
     available: 'Open to internships and junior roles',
     role: 'Industrial Engineering<br><span>Data · Automation · Operations<br>Supply Chain · Logistics · Planning</span>',
     aboutNav: 'about me',
@@ -12561,256 +12685,382 @@ const T = {
 
 // --- STAR Method Deep Dive Case Details Dictionary ---
 const CASE_DETAILS = {
-  es: {
-    primax: {
-      kicker: 'INTELIGENCIA TERRITORIAL & GESTIÓN DOCUMENTAL · PRIMAX ECUADOR',
-      title: 'Dashboard en Power BI para Asesores: Ubicación de Clientes por Región',
-      subtitle: 'Herramienta de geolocalización en Power BI para que los asesores comerciales ubiquen a sus clientes por zona, verificando asesores en Primax Solutions y auditando 100–200 facturas en SAP ERP.',
-      situation: 'En la gestión operativa diaria en PX Servicios Generales (PRIMAX Ecuador), auditaba y validaba semanalmente 100–200 facturas de flete y combustible en SAP ERP bajo estrictos SLAs. En el frente comercial, los asesores comerciales verificados en Primax Solutions carecían de una herramienta visual para saber en qué parte de la región estaban asignados y dónde se ubicaban exactamente sus clientes: la cartera se manejaba en listas estáticas dispersas, lo que dificultaba la planificación territorial de visitas y el contacto con clientes.',
-      situationPoints: [
-        'Volumen operativo: 100–200 facturas comerciales y de flete B2B procesadas por semana en SAP ERP.',
-        'Herramienta para asesores: Los asesores comerciales necesitaban ubicar a sus clientes en el mapa para organizar su gestión.',
-        'Verificación en Primax Solutions: La asignación de asesores y cuentas se verifica en Primax Solutions (no en SAP), pero carecía de visualización geográfica.'
+  "es": {
+    "primax": {
+      "kicker": "INTELIGENCIA TERRITORIAL & GESTIÓN DOCUMENTAL · PRIMAX ECUADOR",
+      "title": "Clientes y asesores en un mismo mapa",
+      "subtitle": "Power BI para consultar carteras por región en PRIMAX Ecuador, con verificación comercial en Primax Solutions.",
+      "situation": "La cartera de clientes se consultaba en listas estáticas. Los asesores necesitaban una vista territorial para organizar sus visitas y encontrar las cuentas asignadas.",
+      "situationPoints": [
+        "La asignación de asesores y carteras se verificaba en Primax Solutions.",
+        "Las zonas requerían normalización antes de visualizarse en el mapa."
       ],
-      task: 'Diseñar una solución analítica en Power BI dirigida a los propios asesores comerciales para que pudieran ubicar en el mapa a sus clientes asignados por región y zona (como se visualiza en la estación de trabajo), facilitando su gestión de campo y cobertura, manteniendo en paralelo el 100% de cumplimiento de SLA en la auditoría en SAP.',
-      taskPoints: [
-        'Geolocalización para asesores: Crear un dashboard interactivo en Power BI para que cada asesor ubique sus clientes por región.',
-        'Verificación en Primax Solutions: Validar y cruzar los datos del asesor y su cartera registrados en Primax Solutions.',
-        'Rigor operativo: Garantizar 100% de cumplimiento de SLA en la auditoría documental de 100–200 facturas semanales en SAP ERP.'
+      "task": "Convertir la cartera comercial en una consulta visual por asesor y región, conservando la relación entre cliente, zona y responsable.",
+      "taskPoints": [
+        "Facilitar la ubicación de cuentas para planificar visitas.",
+        "Mantener separadas la verificación comercial y la auditoría documental en SAP."
       ],
-      action: 'Extracción de datos de asesores y carteras desde Primax Solutions; modelado relacional y normalización de zonales en Power Query; diseño del tablero interactivo en Power BI con mapas geográficos donde los asesores filtran su nombre y ubican a sus clientes por zona; en paralelo con la conciliación y auditoría de 100–200 facturas en SAP ERP con cero discrepancias.',
-      actionPoints: [
-        'Visualización para la fuerza de ventas: Dashboard en Power BI con mapas interactivos para que los asesores ubiquen a sus clientes en segundos.',
-        'Verificación en Primax Solutions: Comprobación de asignación de asesores y carteras en Primax Solutions (no en SAP).',
-        'Auditoría y conciliación en SAP ERP: Validación semanal de 100–200 facturas de fletes y combustible con 100% de cumplimiento de SLA.'
+      "action": "Crucé los datos de asesores y clientes, normalicé las zonas en Power Query y construí un modelo relacional para el dashboard.",
+      "actionPoints": [
+        "Preparé las relaciones entre cartera, asesor y región.",
+        "Diseñé filtros y mapas interactivos en Power BI con medidas DAX.",
+        "En paralelo, audité 100–200 facturas semanales de flete y combustible en SAP ERP."
       ],
-      result: 'Los asesores comerciales lograron ubicar y consultar a sus clientes en el mapa en menos de 5 segundos, optimizando su planificación territorial de visitas; junto con 100% de cumplimiento en SLA documental en SAP ERP con cero observaciones de auditoría.',
-      resultPoints: [
-        'Ubicación ágil de clientes: Los asesores ubican de inmediato sus cuentas asignadas en el mapa regional.',
-        'Validación precisa: Asesores y carteras verificados correctamente en Primax Solutions.',
-        'Excelencia operativa: 100% de cumplimiento en SLA para las 100–200 facturas semanales auditadas en SAP ERP.'
+      "result": "Los asesores pudieron consultar sus clientes en el mapa y organizar su cobertura territorial. En el frente documental se mantuvo el 100% de cumplimiento de SLA.",
+      "resultPoints": [
+        "Consulta por asesor y región desde una misma interfaz.",
+        "Carteras verificadas en Primax Solutions.",
+        "El SLA corresponde a la gestión de facturas en SAP, no al rendimiento del dashboard."
       ],
-      resultBadges: ['Ubicación de Clientes BI', 'Verificación Primax Solutions', '100% SLA en SAP', '0 Obs. Auditoría'],
-      tags: ['Power BI', 'Primax Solutions', 'Geolocalización Clientes', 'Power Query', 'DAX', 'SAP ERP', 'Gestión Territorial', 'SLA Control']
+      "resultBadges": [
+        "Consulta territorial",
+        "Carteras verificadas",
+        "100% SLA documental"
+      ],
+      "tags": [
+        "Power BI",
+        "Primax Solutions",
+        "Geolocalización Clientes",
+        "Power Query",
+        "DAX",
+        "SAP ERP",
+        "Gestión Territorial",
+        "SLA Control"
+      ],
+      "role": "Modelado de datos y visualización en Power BI",
+      "scope": "Herramienta interna para asesores comerciales",
+      "evidence": "Caso interno; el código mostrado ilustra la solución. La auditoría SAP corresponde al frente documental del rol."
     },
-    etl: {
-      kicker: 'AUTOMATIZACIÓN ETL & REPORTES LOGÍSTICOS · PYTHON',
-      title: 'Pipeline ETL para Automatización de Reportes Operativos',
-      subtitle: 'Procesamiento masivo de 48,000+ documentos, generación de Excel enriquecido y despacho por correo.',
-      situation: 'El procesamiento de reportes operativos y logísticos requería consolidar manualmente decenas de miles de registros desde archivos crudos, generando lentitud, alta carga operativa y riesgos de errores en la clasificación de estados.',
-      situationPoints: [
-        'Volumen masivo: 48,833 documentos operativos y más de $323M auditados en balance.',
-        'Carga manual: Proceso manual de consolidación que consumía más de 3.5 horas diarias.',
-        'Riesgo operativo: Errores humanos frecuentes al clasificar estados de cierre y montos.'
+    "etl": {
+      "kicker": "AUTOMATIZACIÓN ETL & REPORTES LOGÍSTICOS · PYTHON",
+      "title": "De archivos operativos a reportes automáticos",
+      "subtitle": "Pipeline en Python para clasificar 48,833 documentos, consolidar montos y distribuir reportes en Excel.",
+      "situation": "El reporte logístico dependía de consolidar archivos manualmente. El volumen de documentos dificultaba mantener criterios uniformes de clasificación y conciliación.",
+      "situationPoints": [
+        "48,833 documentos y más de $323M en montos consolidados.",
+        "La preparación manual añadía carga operativa y riesgo de inconsistencias."
       ],
-      task: 'Diseñar e implementar un pipeline automatizado en Python que extraiga la data operativa cruda, limpie duplicados, clasifique estados y despache automáticamente un reporte ejecutivo formateado en Excel por email.',
-      taskPoints: [
-        'Ingesta optimizada: Procesar datasets masivos con bajo consumo de memoria RAM.',
-        'Clasificación automática: Reglas deterministas para categorizar 100% de documentos.',
-        'Distribución autónoma: Notificación automática por email corporativo a directivos.'
+      "task": "Automatizar el recorrido desde los archivos de entrada hasta un Excel listo para revisar y enviar, con reglas de clasificación consistentes.",
+      "taskPoints": [
+        "Validar estructura y tipos antes de consolidar.",
+        "Separar documentos cerrados y pendientes con reglas explícitas.",
+        "Generar y distribuir el reporte sin repetir tareas manuales."
       ],
-      action: 'Desarrollo de pipeline modular con Pandas para ingesta y validación de tipos; lógica de clasificación automatizada (39,152 cerrados vs 9,681 pendientes); formateo visual y resumen financiero con OpenPyXL ($323M+ auditados); automatización de envío con módulo SMTP.',
-      actionPoints: [
-        'Chunking con Pandas: Lectura por bloques de 10k filas reduciendo 65% el uso de memoria.',
-        'Estilizado OpenPyXL: Generación de hojas de cálculo ejecutivas con tablas y colores corporativos.',
-        'Módulo SMTP seguro: Envío programado del reporte final adjunto a los involucrados.'
+      "action": "Desarrollé un flujo modular con Pandas para preparar y clasificar los datos, OpenPyXL para el reporte y SMTP para su distribución.",
+      "actionPoints": [
+        "Organicé la ingesta y la limpieza de registros.",
+        "Clasifiqué 39,152 documentos cerrados y 9,681 pendientes.",
+        "Consolidé montos y generé el archivo Excel con formato de lectura ejecutiva."
       ],
-      result: '48,833 documentos clasificados y consolidados en segundos con 0 errores de cálculo; reducción del 95% en tiempo de generación de reportes y distribución automática a stakeholders.',
-      resultPoints: [
-        'Tiempo récord: De 3.5 horas de procesamiento manual a sólo 18 segundos de ejecución.',
-        'Precisión absoluta: Cero discrepancias en montos consolidados ($323M+ exactos).',
-        'Autonomía total: Cero intervención humana requerida para el despacho diario.'
+      "result": "El pipeline consolidó 48,833 documentos y automatizó la generación y distribución del reporte operativo.",
+      "resultPoints": [
+        "Los estados cierran con el total: 39,152 + 9,681 = 48,833.",
+        "Los $323M+ representan volumen procesado, no ahorro económico.",
+        "El código público permite revisar la lógica de transformación y salida."
       ],
-      resultBadges: ['48,833 Docs Procesados', '0 Errores de Cálculo', '18 Segundos Tiempo', '$323M+ Auditados'],
-      tags: ['Python', 'Pandas', 'OpenPyXL', 'SMTP', 'ETL', 'Automatización', 'Supply Chain', 'GitHub']
+      "resultBadges": [
+        "48,833 documentos",
+        "$323M+ consolidados",
+        "Excel + SMTP"
+      ],
+      "tags": [
+        "Python",
+        "Pandas",
+        "OpenPyXL",
+        "SMTP",
+        "ETL",
+        "Automatización",
+        "Supply Chain",
+        "GitHub"
+      ],
+      "role": "Desarrollo del pipeline y automatización de reportes",
+      "scope": "Ingesta, transformación, Excel y distribución SMTP",
+      "evidence": "Repositorio público del proyecto. El fragmento de esta vista es una síntesis ilustrativa del pipeline.",
+      "repository": "https://github.com/legacyum/PROYECTO_ETL_LOGISTICA"
     },
-    ml: {
-      kicker: 'MACHINE LEARNING & IA INDUSTRIAL · REPOSITORIO GITHUB',
-      title: 'Predicción Preventiva de Fallas en Maquinaria Industrial',
-      subtitle: 'Modelo analítico de clasificación e Inteligencia Artificial para mantenimiento predictivo basado en telemetría de sensores.',
-      situation: 'Las averías mecánicas imprevistas y el desgaste electromecánico en plantas industriales generan altos costos por inactividad y riesgos de paradas de línea imprevistas.',
-      situationPoints: [
-        'Costos de inactividad: Paradas no programadas con alto impacto financiero en línea de producción.',
-        'Complejidad sensorial: Telemetría multivariable continua (temperatura, torque, rpm, vibración).',
-        'Desbalanceo severo: Menos del 2% de registros corresponden a eventos reales de falla.'
+    "ml": {
+      "kicker": "MACHINE LEARNING & IA INDUSTRIAL · REPOSITORIO GITHUB",
+      "title": "Clasificación de fallas en maquinaria industrial",
+      "subtitle": "Proyecto de machine learning para explorar señales de sensores y evaluar un clasificador de fallas con scikit-learn.",
+      "situation": "Las variables de operación contienen señales asociadas a fallas, pero la baja frecuencia de estos eventos puede hacer engañosa una evaluación basada solo en exactitud.",
+      "situationPoints": [
+        "Variables como temperatura, torque y velocidad rotacional requieren análisis conjunto.",
+        "Una clase mayoritaria sin fallas puede ocultar errores en los eventos críticos."
       ],
-      task: 'Construir un modelo analítico capaz de procesar telemetría multivariable de sensores (temperatura, torque, velocidad rotacional) y clasificar la probabilidad de fallo antes de que ocurra una avería catastrófica.',
-      taskPoints: [
-        'Alerta predictiva: Anticipar la falla con margen suficiente para mantenimiento preventivo.',
-        'Manejo de desbalanceo: Evitar el sesgo del accuracy ingenuo priorizando Recall y ROC-AUC.',
-        'Filtro de ruido: Suprimir falsas alarmas provocadas por picos de arranque de motores.'
+      "task": "Construir un clasificador de fallas y evaluar qué tan bien reconoce la clase de interés, además de su exactitud global.",
+      "taskPoints": [
+        "Preparar variables numéricas para el entrenamiento.",
+        "Evaluar errores con matriz de confusión y métricas complementarias.",
+        "Distinguir la evaluación del modelo de un impacto operativo estimado."
       ],
-      action: 'Análisis exploratorio de datos (EDA) en Python con Pandas y NumPy; balanceo de clases y normalización de variables; entrenamiento y evaluación de un modelo de Inteligencia Artificial (Regresión Logística con scikit-learn y curvas ROC-AUC); visualización en Matplotlib y Seaborn.',
-      actionPoints: [
-        'Preprocesamiento: Normalización con StandardScaler y suavizado por ventanas móviles.',
-        'Entrenamiento con penalización: Regresión Logística con class_weight="balanced" y scikit-learn.',
-        'Evaluación rigurosa: Optimización de curva ROC-AUC y matriz de confusión orientada a planta.'
+      "action": "Exploré los datos con Pandas y NumPy, preparé las variables y entrené una regresión logística con scikit-learn.",
+      "actionPoints": [
+        "Analicé distribuciones y relaciones entre variables mediante EDA.",
+        "Separé el ajuste del escalado de la transformación del conjunto de prueba.",
+        "Contrasté exactitud, F1 y ROC-AUC como métricas diferentes."
       ],
-      result: 'Detección temprana y precisa de patrones de fallo con código modular, reproducible y documentado en GitHub (legacyum/analisis-fallas-maquinas).',
-      resultPoints: [
-        'Alto desempeño: 91.4% de precisión en test holdout y F1-Score de 0.88 en detección de anomalías.',
-        'Impacto en planta: Reducción estimada del 22% en paradas intempestivas de equipos críticos.',
-        'Falsas alarmas controladas: Tasa de falsos positivos inferior al 4.8% en condiciones reales.'
+      "result": "El proyecto produjo un flujo de análisis y evaluación documentado en GitHub, con métricas reportadas de 91.4% de exactitud y F1 de 0.88.",
+      "resultPoints": [
+        "La exactitud mide aciertos globales; no equivale al área bajo la curva ROC.",
+        "El F1 resume el equilibrio entre precisión y recall para la clase evaluada.",
+        "La estimación de −22% en paradas requiere validación operativa antes de atribuir impacto real."
       ],
-      resultBadges: ['91.4% Precisión ROC-AUC', 'F1-Score 0.88', '−22% Paradas Imprevistas', 'Deploy en GitHub'],
-      tags: ['Inteligencia Artificial (IA)', 'Python', 'scikit-learn', 'Machine Learning', 'Pandas', 'NumPy', 'Mantenimiento Predictivo', 'EDA', 'GitHub']
+      "resultBadges": [
+        "91.4% exactitud reportada",
+        "F1 reportado: 0.88",
+        "Código público"
+      ],
+      "tags": [
+        "Inteligencia Artificial (IA)",
+        "Python",
+        "scikit-learn",
+        "Machine Learning",
+        "Pandas",
+        "NumPy",
+        "Mantenimiento Predictivo",
+        "EDA",
+        "GitHub"
+      ],
+      "role": "Análisis exploratorio, preparación y evaluación del modelo",
+      "scope": "Experimento analítico con código público",
+      "evidence": "Las métricas describen la evaluación reportada del modelo. La reducción del 22% en paradas es una estimación, no un resultado medido en planta.",
+      "repository": "https://github.com/legacyum/analisis-fallas-maquinas"
     },
-    vasmad: {
-      kicker: 'LOGÍSTICA, BIZAGI & MEJORA CONTINUA · DEYARLIN S.A.C. (VASMAD)',
-      title: 'Reingeniería de Cadena de Suministro, Bizagi (BPMN) y 5S',
-      subtitle: 'Modelado de procesos en Bizagi, optimización de inventarios con sistemas MRP/PAP, flujos automatizados de compras y estandarización Lean.',
-      situation: 'Cuellos de botella recurrentes en el patio de recepción, demoras excesivas en tiempos de descarga de proveedores y riesgo continuo de quiebres de inventario por falta de visibilidad en la demanda.',
-      situationPoints: [
-        'Congestión en recepción: Tiempos muertos de espera prolongados para transporte pesado.',
-        'Quiebres de stock: Falta de cálculo analítico de Punto de Reorden (ROP) y Stock de Seguridad.',
-        'Desorden físico: Layout de almacén sin zonificación ni señalética 5S estandarizada.'
+    "vasmad": {
+      "kicker": "LOGÍSTICA, BIZAGI & MEJORA CONTINUA · DEYARLIN S.A.C. (VASMAD)",
+      "title": "Abastecimiento y recepción con procesos más claros",
+      "subtitle": "Mejora de operaciones en DEYARLIN S.A.C. (VASMAD) con BPMN, planificación MRP/PAP y organización 5S.",
+      "situation": "La recepción de proveedores acumulaba demoras y el abastecimiento tenía riesgo de quiebres de stock. La organización física del almacén dificultaba la operación.",
+      "situationPoints": [
+        "Cuellos de botella en la descarga y recepción.",
+        "Necesidad de alinear inventario, demanda y reposición.",
+        "Zonas de almacenamiento con oportunidades de orden y señalización."
       ],
-      task: 'Mapear procesos en Bizagi (BPMN), reducir los costos atribuibles a desabastecimiento, agilizar el tiempo de ciclo de descarga y automatizar la generación de órdenes de compra para materias primas críticas.',
-      taskPoints: [
-        'Modelado BPMN 2.0: Diseñar flujos AS-IS y TO-BE identificando puntos ciegos de proceso.',
-        'Modelo MRP/PAP: Calcular dinámicamente ROP para materias primas críticas.',
-        'Lean 5S: Reorganizar el layout físico de almacén y estandarizar puestos de trabajo.'
+      "task": "Rediseñar el flujo de abastecimiento y recepción para reducir costos por desabastecimiento y tiempos de descarga.",
+      "taskPoints": [
+        "Comparar el proceso actual (AS-IS) con el propuesto (TO-BE).",
+        "Estructurar la planificación de materiales y los puntos de reposición.",
+        "Estandarizar el trabajo y la organización del almacén."
       ],
-      action: 'Diagramación de procesos AS-IS y TO-BE en Bizagi Modeler; estructuración de base de datos para planificación de requerimientos (MRP/PAP); creación de flujos automáticos en Power Automate para órdenes de compra; implementación de metodología Lean 5S en layout de almacenamiento.',
-      actionPoints: [
-        'Bizagi Modeler: Mapeo completo de 3 carriles (Planeamiento, Compras y Almacén).',
-        'Fórmulas ROP dinámicas: Nivel de servicio del 95% con cálculo estadístico de variabilidad.',
-        'Power Automate: Flujo de emisión automática de órdenes de compra hacia proveedores clave.'
+      "action": "Modelé procesos en Bizagi, estructuré la planificación MRP/PAP y apliqué 5S para conectar las decisiones de compra con la operación física.",
+      "actionPoints": [
+        "Identifiqué responsables y transferencias entre Planeamiento, Compras y Almacén.",
+        "Organicé datos de consumo y reposición para materiales críticos.",
+        "Implementé flujos de compras con Power Automate y estándares visuales de almacenamiento."
       ],
-      result: '−15% en costos por desabastecimiento; −30% en tiempos de descarga de proveedores; estandarización operativa y trazabilidad total del stock.',
-      resultPoints: [
-        'Ahorro directo: Reducción del 15% en costos por desabastecimiento mediante MRP preventivo.',
-        'Agilidad logística: Reducción del 30% en el tiempo de descarga y recepción de camiones.',
-        'Espacio optimizado: +18% de área útil de almacén liberada gracias a metodología 5S.'
+      "result": "Se reportaron reducciones del 15% en costos por desabastecimiento y del 30% en tiempos de descarga de proveedores.",
+      "resultPoints": [
+        "Mejor coordinación entre compras, planificación y recepción.",
+        "Reposición apoyada en datos de inventario y demanda.",
+        "Organización física y estandarización mediante 5S."
       ],
-      resultBadges: ['−15% Costos Quiebre', '−30% Tiempo Descarga', '+25% Rotación SKUs', 'Lean 5S Certificado'],
-      tags: ['Bizagi (BPMN)', 'Power Automate', 'MRP / PAP', 'Lean 5S', 'Supply Chain', 'Modelado de Procesos', 'Gestión de Inventarios', 'Excel Avanzado']
+      "resultBadges": [
+        "−15% costos de desabastecimiento",
+        "−30% tiempo de descarga",
+        "MRP + 5S"
+      ],
+      "tags": [
+        "Bizagi (BPMN)",
+        "Power Automate",
+        "MRP / PAP",
+        "Lean 5S",
+        "Supply Chain",
+        "Modelado de Procesos",
+        "Gestión de Inventarios",
+        "Excel Avanzado"
+      ],
+      "role": "Análisis de procesos y mejora de operaciones logísticas",
+      "scope": "Compras, inventarios y recepción de proveedores",
+      "evidence": "Caso de experiencia operativa. Los porcentajes expresan mejoras reportadas respecto al proceso previo; el SQL ilustra el cálculo de reposición."
     }
   },
-  en: {
-    primax: {
-      kicker: 'TERRITORIAL INTELLIGENCE & DOCUMENT MANAGEMENT · PRIMAX ECUADOR',
-      title: 'Advisor Power BI Dashboard: Client Location by Region',
-      subtitle: 'Territorial geolocation tool in Power BI enabling sales advisors to locate assigned clients by zone, verifying advisors in Primax Solutions and auditing 100–200 invoices in SAP ERP.',
-      situation: 'In day-to-day operations at PX Servicios Generales (PRIMAX Ecuador), I audited and validated 100–200 fuel and freight invoices weekly in SAP ERP under strict SLAs. On the commercial side, sales advisors verified in Primax Solutions lacked a visual tool to know where in the region they were assigned and where their clients were located: client lists were kept in static spreadsheets, making route planning and field oversight difficult.',
-      situationPoints: [
-        'Operational volume: 100–200 weekly B2B commercial & freight invoices processed in SAP ERP.',
-        'Tool for advisors: Sales advisors needed an interactive map to locate their assigned clients within their region.',
-        'Primax Solutions verification: Advisor assignments were logged in Primax Solutions (not SAP), but lacked geographic visualization.'
+  "en": {
+    "primax": {
+      "kicker": "TERRITORIAL INTELLIGENCE & DOCUMENT MANAGEMENT · PRIMAX ECUADOR",
+      "title": "Clients and advisors on one map",
+      "subtitle": "Power BI for regional client portfolio lookup at PRIMAX Ecuador, with commercial assignments verified in Primax Solutions.",
+      "situation": "Client portfolios were consulted in static lists. Advisors needed a geographic view to plan visits and locate their assigned accounts.",
+      "situationPoints": [
+        "Advisor and portfolio assignments were verified in Primax Solutions.",
+        "Regional names required normalization before mapping."
       ],
-      task: 'Design an interactive Power BI solution for sales advisors to geographically locate their assigned clients by region and zone (as displayed on the workstation monitor), streamlining route planning while sustaining 100% SLA compliance in weekly SAP invoice audits.',
-      taskPoints: [
-        'Advisor geolocation tool: Build an interactive Power BI dashboard allowing advisors to locate their clients across regions.',
-        'Primax Solutions verification: Validate and cross-reference advisor records and portfolios from Primax Solutions.',
-        'Operational rigor: Guarantee 100% on-time SLA compliance for 100–200 weekly audited invoices in SAP ERP.'
+      "task": "Turn the commercial portfolio into a visual lookup by advisor and region while preserving client, territory and owner relationships.",
+      "taskPoints": [
+        "Help advisors locate accounts for visit planning.",
+        "Keep commercial verification separate from SAP document auditing."
       ],
-      action: 'Extracted advisor and client data from Primax Solutions; modeled relational data and normalized regional zones in Power Query; designed the interactive Power BI dashboard enabling advisors to filter their name and map client locations; while executing weekly audits of 100–200 invoices in SAP ERP with zero errors.',
-      actionPoints: [
-        'Sales force visualization: Power BI dashboard with interactive maps for advisors to pinpoint client locations in seconds.',
-        'Primax Solutions verification: Verifying advisor assignments and client rosters in Primax Solutions (not SAP).',
-        'SAP ERP audit & reconciliation: Weekly verification of 100–200 fuel and freight invoices with 100% SLA compliance.'
+      "action": "Cross-referenced advisor and client data, normalized regions in Power Query and built a relational dashboard model.",
+      "actionPoints": [
+        "Prepared relationships between portfolios, advisors and regions.",
+        "Designed interactive Power BI maps and filters with DAX measures.",
+        "In parallel, audited 100–200 weekly freight and fuel invoices in SAP ERP."
       ],
-      result: 'Sales advisors were able to locate and query their assigned clients on the map in under 5 seconds, streamlining territory coverage; paired with 100% SLA compliance in SAP ERP document management with zero audit findings.',
-      resultPoints: [
-        'Fast client geolocation: Advisors instantly locate their assigned client accounts on regional maps.',
-        'Accurate verification: Sales advisors and portfolios reliably verified in Primax Solutions.',
-        'Operational excellence: 100% SLA compliance maintained across 100–200 weekly invoices audited in SAP ERP.'
+      "result": "Advisors could locate clients on the map and organize territory coverage. Document operations maintained 100% SLA compliance.",
+      "resultPoints": [
+        "Advisor and region lookup in a single interface.",
+        "Client portfolios verified in Primax Solutions.",
+        "The SLA measures SAP invoice operations rather than dashboard performance."
       ],
-      resultBadges: ['Client Geolocation BI', 'Primax Solutions Check', '100% SLA in SAP', '0 Audit Discrepancies'],
-      tags: ['Power BI', 'Primax Solutions', 'Client Geolocation', 'Power Query', 'DAX', 'SAP ERP', 'Territorial Ops', 'SLA Control']
+      "resultBadges": [
+        "Territory lookup",
+        "Verified portfolios",
+        "100% document SLA"
+      ],
+      "tags": [
+        "Power BI",
+        "Primax Solutions",
+        "Client Geolocation",
+        "Power Query",
+        "DAX",
+        "SAP ERP",
+        "Territorial Ops",
+        "SLA Control"
+      ],
+      "role": "Data modeling and Power BI visualization",
+      "scope": "Internal tool for sales advisors",
+      "evidence": "Internal case study; the code illustrates the solution. SAP auditing belongs to the role’s document management responsibilities."
     },
-    etl: {
-      kicker: 'ETL AUTOMATION & LOGISTICS REPORTING · PYTHON',
-      title: 'ETL Pipeline for Automated Operations Reporting',
-      subtitle: 'Massive processing of 48,000+ records, styled Excel workbook generation and automatic email dispatch.',
-      situation: 'Manual generation of operational logistics reports required consolidating tens of thousands of raw entries, leading to slow turnaround and risks of misclassification.',
-      situationPoints: [
-        'Massive dataset: 48,833 operational documents and over $323M audited in balance.',
-        'Heavy labor: 3.5+ daily hours lost to manual consolidation spreadsheets.',
-        'Operational risk: Prone to calculation and status classification discrepancies.'
+    "etl": {
+      "kicker": "ETL AUTOMATION & LOGISTICS REPORTING · PYTHON",
+      "title": "From operational files to automated reports",
+      "subtitle": "Python pipeline to classify 48,833 documents, consolidate amounts and distribute Excel reports.",
+      "situation": "Logistics reporting relied on manual file consolidation. Document volume made consistent classification and reconciliation difficult.",
+      "situationPoints": [
+        "48,833 documents and over $323M in consolidated amounts.",
+        "Manual preparation added operational work and inconsistency risks."
       ],
-      task: 'Design and deploy an end-to-end automated Python pipeline to ingest raw data, clean duplicates, classify statuses and email executive formatted Excel reports.',
-      taskPoints: [
-        'Memory optimization: Ingest high-volume files without memory bloat.',
-        'Deterministic classification: Automated rules categorizing 100% of documents.',
-        'Hands-free delivery: Automated SMTP dispatch directly to executive inboxes.'
+      "task": "Automate the path from source files to an Excel report ready for review and delivery, using consistent classification rules.",
+      "taskPoints": [
+        "Validate schema and types before consolidation.",
+        "Separate closed and pending documents using explicit rules.",
+        "Generate and distribute reports without repeating manual tasks."
       ],
-      action: 'Modular Python pipeline with Pandas for ingestion and schema enforcement; automated status classification (39,152 closed vs 9,681 pending); visual formatting and financial consolidation via OpenPyXL ($323M+ audited); automated distribution using Python SMTP module.',
-      actionPoints: [
-        'Pandas chunking: 10,000-row batching reducing memory footprint by 65%.',
-        'OpenPyXL formatting: Automated generation of styled executive workbooks.',
-        'Secure SMTP dispatch: Scheduled headless delivery to key operations stakeholders.'
+      "action": "Built a modular workflow using Pandas for data preparation and classification, OpenPyXL for reporting and SMTP for distribution.",
+      "actionPoints": [
+        "Organized ingestion and record cleaning.",
+        "Classified 39,152 closed documents and 9,681 pending documents.",
+        "Consolidated amounts and generated an Excel workbook formatted for executive review."
       ],
-      result: '48,833 documents classified and consolidated in seconds with 0 calculation errors; 95% report generation time reduction and hands-free distribution.',
-      resultPoints: [
-        'Speed record: Slashed processing time from 3.5 hours down to 18 seconds.',
-        '100% accuracy: Zero calculation mismatches across $323M+ in balances.',
-        'Autonomous execution: Zero human intervention required for daily reports.'
+      "result": "The pipeline consolidated 48,833 documents and automated operational report generation and distribution.",
+      "resultPoints": [
+        "Status counts reconcile: 39,152 + 9,681 = 48,833.",
+        "The $323M+ figure represents processed volume rather than financial savings.",
+        "Public code allows inspection of transformation and output logic."
       ],
-      resultBadges: ['48,833 Docs Processed', '0 Calc Errors', '18s Run Time', '$323M+ Audited'],
-      tags: ['Python', 'Pandas', 'OpenPyXL', 'SMTP', 'ETL', 'Automation', 'Supply Chain', 'GitHub']
+      "resultBadges": [
+        "48,833 documents",
+        "$323M+ consolidated",
+        "Excel + SMTP"
+      ],
+      "tags": [
+        "Python",
+        "Pandas",
+        "OpenPyXL",
+        "SMTP",
+        "ETL",
+        "Automation",
+        "Supply Chain",
+        "GitHub"
+      ],
+      "role": "Pipeline development and report automation",
+      "scope": "Ingestion, transformation, Excel and SMTP delivery",
+      "evidence": "Public project repository. The snippet in this view is an illustrative summary of the pipeline.",
+      "repository": "https://github.com/legacyum/PROYECTO_ETL_LOGISTICA"
     },
-    ml: {
-      kicker: 'INDUSTRIAL MACHINE LEARNING & AI · GITHUB REPOSITORY',
-      title: 'Preventive Machine Failure Prediction in Industrial Equipment',
-      subtitle: 'Classification and Artificial Intelligence model for predictive maintenance based on industrial sensor telemetry.',
-      situation: 'Unplanned mechanical failures and electromechanical wear in industrial plants lead to severe downtime costs and unpredicted production line shutdowns.',
-      situationPoints: [
-        'Costly line stoppages: Unplanned equipment failure hurting manufacturing ROI.',
-        'Telemetry complexity: Continuous multivariate streaming (temp, torque, rpm, vibration).',
-        'Severe class imbalance: Less than 2% of telemetry events reflect actual equipment breakdown.'
+    "ml": {
+      "kicker": "INDUSTRIAL MACHINE LEARNING & AI · GITHUB REPOSITORY",
+      "title": "Industrial machine failure classification",
+      "subtitle": "Machine learning project exploring sensor signals and evaluating a failure classifier with scikit-learn.",
+      "situation": "Operating variables contain signals associated with failure, but infrequent failure events can make accuracy alone misleading.",
+      "situationPoints": [
+        "Temperature, torque and rotational speed require joint analysis.",
+        "A majority non-failure class can hide errors on critical events."
       ],
-      task: 'Build a predictive AI model capable of processing multivariate sensor telemetry (temperature, torque, rotational speed) to classify failure probability before critical breakdown.',
-      taskPoints: [
-        'Early warning system: Forecast failure early enough for proactive maintenance.',
-        'Imbalance handling: Prioritize Recall and ROC-AUC over deceptive naive accuracy.',
-        'Signal denoising: Filter out motor startup spikes and vibration transients.'
+      "task": "Build a failure classifier and evaluate recognition of the class of interest alongside overall accuracy.",
+      "taskPoints": [
+        "Prepare numeric features for training.",
+        "Evaluate errors with a confusion matrix and complementary metrics.",
+        "Separate model evaluation from estimated operational impact."
       ],
-      action: 'Exploratory Data Analysis (EDA) in Python using Pandas and NumPy; feature scaling and class normalization; Logistic Regression and AI training with scikit-learn and ROC-AUC curves; visualization in Matplotlib and Seaborn.',
-      actionPoints: [
-        'Signal preprocessing: Feature standardization via StandardScaler and rolling averages.',
-        'Weighted model training: Balanced Logistic Regression with scikit-learn.',
-        'Operational validation: ROC-AUC and confusion matrix tuned for industrial tolerances.'
+      "action": "Explored data using Pandas and NumPy, prepared features and trained a logistic regression model with scikit-learn.",
+      "actionPoints": [
+        "Inspected distributions and relationships through EDA.",
+        "Kept scaler fitting separate from test-set transformation.",
+        "Compared accuracy, F1 and ROC-AUC as distinct metrics."
       ],
-      result: 'Accurate early detection of failure patterns with modular, reproducible code documented on GitHub (legacyum/analisis-fallas-maquinas).',
-      resultPoints: [
-        'High performance: 91.4% holdout accuracy and 0.88 F1-score on failure events.',
-        'Plant impact: 22% estimated reduction in catastrophic equipment downtime.',
-        'Low false alarms: False positive rate capped under 4.8% in simulated plant runs.'
+      "result": "The project produced an analysis and evaluation workflow documented on GitHub, with reported accuracy of 91.4% and F1 of 0.88.",
+      "resultPoints": [
+        "Accuracy measures overall correct predictions and differs from ROC-AUC.",
+        "F1 summarizes the balance of precision and recall for the evaluated class.",
+        "The estimated 22% downtime reduction needs operational validation before claiming real impact."
       ],
-      resultBadges: ['91.4% ROC-AUC Accuracy', '0.88 F1-Score', '−22% Downtime', 'GitHub Deploy'],
-      tags: ['Artificial Intelligence (AI)', 'Python', 'Machine Learning', 'scikit-learn', 'Pandas', 'NumPy', 'Predictive Maintenance', 'EDA', 'GitHub']
+      "resultBadges": [
+        "91.4% reported accuracy",
+        "Reported F1: 0.88",
+        "Public code"
+      ],
+      "tags": [
+        "Artificial Intelligence (AI)",
+        "Python",
+        "Machine Learning",
+        "scikit-learn",
+        "Pandas",
+        "NumPy",
+        "Predictive Maintenance",
+        "EDA",
+        "GitHub"
+      ],
+      "role": "Exploratory analysis, preprocessing and model evaluation",
+      "scope": "Analytical experiment with public code",
+      "evidence": "Metrics describe the reported model evaluation. The 22% downtime reduction is an estimate rather than a measured plant outcome.",
+      "repository": "https://github.com/legacyum/analisis-fallas-maquinas"
     },
-    vasmad: {
-      kicker: 'LOGISTICS, BIZAGI & CONTINUOUS IMPROVEMENT · DEYARLIN S.A.C. (VASMAD)',
-      title: 'Supply Chain Reengineering, Bizagi (BPMN) & 5S',
-      subtitle: 'Bizagi process modeling, inventory optimization with MRP/PAP systems, automated purchasing flows and Lean standardization.',
-      situation: 'Bottlenecks in the receiving bay, excessive supplier unloading times, and persistent risk of stockouts due to lack of visibility in material demand.',
-      situationPoints: [
-        'Yard congestion: Extended waiting lines for heavy logistics transport.',
-        'Stockout risk: No dynamic Reorder Point (ROP) or safety stock calculation.',
-        'Physical disorganization: Warehouse layout lacking 5S standardization and zoning.'
+    "vasmad": {
+      "kicker": "LOGISTICS, BIZAGI & CONTINUOUS IMPROVEMENT · DEYARLIN S.A.C. (VASMAD)",
+      "title": "Clearer procurement and receiving processes",
+      "subtitle": "Operational improvement at DEYARLIN S.A.C. (VASMAD) through BPMN, MRP/PAP planning and 5S organization.",
+      "situation": "Supplier receiving suffered delays and procurement faced stockout risks. Physical warehouse organization also made operations difficult.",
+      "situationPoints": [
+        "Bottlenecks in unloading and receiving.",
+        "A need to align inventory, demand and replenishment.",
+        "Storage areas needed clearer organization and signage."
       ],
-      task: 'Map AS-IS / TO-BE processes in Bizagi (BPMN), reduce stockout costs, streamline unloading turnaround time, and automate purchase order generation for critical raw materials.',
-      taskPoints: [
-        'BPMN 2.0 modeling: Map AS-IS vs TO-BE processes to remove process bottlenecks.',
-        'MRP/PAP implementation: Derive statistical ROP formulas for critical SKUs.',
-        'Lean 5S rollout: Re-engineer storage zones and visual work standards.'
+      "task": "Redesign procurement and receiving to reduce stockout costs and supplier unloading times.",
+      "taskPoints": [
+        "Compare the current AS-IS process with the proposed TO-BE flow.",
+        "Structure material planning and reorder points.",
+        "Standardize work and warehouse organization."
       ],
-      action: 'Process mapping and flow engineering in Bizagi Modeler; database restructuring for Materials Requirement Planning (MRP/PAP); building automated workflows in Power Automate for purchase orders; implementing 5S methodology across warehouse layout.',
-      actionPoints: [
-        'Bizagi Modeler: 3-swimlane process blueprint (Planning, Purchasing, Warehouse).',
-        'Statistical ROP logic: 95% service level with lead-time standard deviation modeling.',
-        'Power Automate: Trigger-based purchase order dispatch for critical inventory.'
+      "action": "Modeled processes in Bizagi, structured MRP/PAP planning and applied 5S to connect purchasing decisions with physical operations.",
+      "actionPoints": [
+        "Identified responsibilities and handoffs across Planning, Purchasing and Warehouse.",
+        "Organized consumption and replenishment data for critical materials.",
+        "Implemented purchasing flows with Power Automate and visual storage standards."
       ],
-      result: '−15% stockout cost reduction; −30% supplier unloading turnaround time; operational standardization and full inventory traceability.',
-      resultPoints: [
-        'Cost savings: 15% reduction in stockout expenses via predictive MRP replenishment.',
-        'Logistics speed: 30% reduction in truck turnaround and receiving bay dwell time.',
-        'Space optimization: +18% usable warehouse square footage recovered through 5S.'
+      "result": "Reported improvements included 15% lower stockout costs and 30% shorter supplier unloading times.",
+      "resultPoints": [
+        "Better coordination of purchasing, planning and receiving.",
+        "Replenishment supported by inventory and demand data.",
+        "Physical organization and work standards through 5S."
       ],
-      resultBadges: ['−15% Stockout Cost', '−30% Unloading Time', '+25% Inventory Turn', '5S Certified'],
-      tags: ['Bizagi (BPMN)', 'Power Automate', 'MRP / PAP', 'Lean 5S', 'Supply Chain', 'Process Modeling', 'Inventory Management', 'Advanced Excel']
+      "resultBadges": [
+        "−15% stockout costs",
+        "−30% unloading time",
+        "MRP + 5S"
+      ],
+      "tags": [
+        "Bizagi (BPMN)",
+        "Power Automate",
+        "MRP / PAP",
+        "Lean 5S",
+        "Supply Chain",
+        "Process Modeling",
+        "Inventory Management",
+        "Advanced Excel"
+      ],
+      "role": "Process analysis and logistics improvement",
+      "scope": "Purchasing, inventory and supplier receiving",
+      "evidence": "Operational experience case study. Percentages describe reported improvements over the previous process; SQL illustrates replenishment calculations."
     }
   }
 };
@@ -13574,6 +13824,15 @@ function translate() {
   setView(recruiter?.classList.contains('show') ? 'recruiter' : 'terminal', false);
   updateThemeButtonLabel();
   syncCvFrameState();
+  const caseCloseBtn = document.querySelector('#closeCaseBtn');
+  if (caseCloseBtn) caseCloseBtn.setAttribute('aria-label', T[lang].starLabels.close);
+  const caseContent = document.querySelector('#caseModalBody .star-modal-content');
+  if (caseContent) {
+    const active = caseContent.querySelector('.case-tab-btn.active');
+    document.querySelector('#caseModalBody').innerHTML = renderStarCaseContent(
+      caseContent.getAttribute('data-active-case'), active?.getAttribute('data-tab-target') || 'context'
+    );
+  }
 }
 
 // --- CV Modal Control & ThreeDPaper Integration ---
@@ -14188,10 +14447,10 @@ function getCaseDeliverablesData(caseId, currentLang) {
   if (caseId === 'primax') {
     return {
       kpis: [
-        { title: isEs ? 'Ubicación de Clientes' : 'Client Geolocation', val: '100%', sub: isEs ? 'Clientes mapeados en BI' : 'Clients mapped in BI', fill: '100%', highlight: true },
-        { title: isEs ? 'Asesores Comerciales' : 'Sales Advisors', val: 'Mapeados', sub: isEs ? 'Verificados en Solutions' : 'Verified in Solutions', fill: '95%' },
+        { title: isEs ? 'Consulta territorial' : 'Territory lookup', val: 'Power BI', sub: isEs ? 'Filtro por asesor y región' : 'Filter by advisor and region', highlight: true },
+        { title: isEs ? 'Asesores Comerciales' : 'Sales Advisors', val: isEs ? 'Verificados' : 'Verified', sub: isEs ? 'Verificados en Solutions' : 'Verified in Solutions', fill: '95%' },
         { title: isEs ? 'Auditoría SAP ERP' : 'SAP ERP Audit', val: '100% SLA', sub: isEs ? '100–200 facturas/sem' : '100–200 invoices/wk audited', fill: '100%', highlight: true },
-        { title: isEs ? 'Tiempo de Consulta' : 'Lookup Speed', val: '< 5 seg', sub: isEs ? 'Ubicación inmediata en mapa' : 'Instant client lookup on map', fill: '90%' }
+        { title: isEs ? 'Volumen documental' : 'Document volume', val: '100–200', sub: isEs ? 'Facturas semanales en SAP' : 'Weekly invoices in SAP' }
       ],
       code: {
         filename: 'dax_ubicacion_clientes_y_asesores.dax',
@@ -14231,8 +14490,8 @@ function getCaseDeliverablesData(caseId, currentLang) {
       kpis: [
         { title: isEs ? 'Registros Procesados' : 'Records Processed', val: '48,833', sub: isEs ? 'Auditoría logística completa' : 'Full logistics audit', fill: '100%', highlight: true },
         { title: isEs ? 'Monto Consolidado' : 'Consolidated Amount', val: '$323M+', sub: isEs ? 'En balances operativos' : 'In operational balances', fill: '95%' },
-        { title: isEs ? 'Tiempo de Ejecución' : 'Execution Time', val: '18 seg', sub: isEs ? 'De 3.5 hrs manuales a 18s' : 'From 3.5 hrs manual to 18s', fill: '98%', highlight: true },
-        { title: isEs ? 'Integridad de Datos' : 'Data Integrity', val: '100%', sub: isEs ? '0 errores de cálculo' : '0 calculation errors', fill: '100%' }
+        { title: isEs ? 'Documentos cerrados' : 'Closed documents', val: '39,152', sub: isEs ? 'Clasificados por estado' : 'Classified by status', highlight: true },
+        { title: isEs ? 'Documentos pendientes' : 'Pending documents', val: '9,681', sub: isEs ? 'Completan los 48,833 registros' : 'Reconcile to 48,833 records' }
       ],
       code: {
         filename: 'pipeline_etl_logistica.py',
@@ -14265,10 +14524,10 @@ function getCaseDeliverablesData(caseId, currentLang) {
   if (caseId === 'ml') {
     return {
       kpis: [
-        { title: isEs ? 'Precisión (Accuracy)' : 'Model Accuracy', val: '91.4%', sub: isEs ? 'En conjunto de prueba' : 'On test holdout set', fill: '91%', highlight: true },
+        { title: isEs ? 'Exactitud (Accuracy)' : 'Model Accuracy', val: '91.4%', sub: isEs ? 'Evaluación reportada en test' : 'Reported test evaluation', fill: '91%', highlight: true },
         { title: isEs ? 'F1-Score Fallas' : 'Failure F1-Score', val: '0.88', sub: isEs ? 'Balance Precision / Recall' : 'Precision/Recall balance', fill: '88%' },
-        { title: isEs ? 'Paradas Imprevistas' : 'Unplanned Downtime', val: '−22%', sub: isEs ? 'Reducción en planta' : 'Plant downtime reduction', fill: '70%', highlight: true },
-        { title: isEs ? 'Falsos Positivos' : 'False Positive Rate', val: '< 4.8%', sub: isEs ? 'Control de alertas falsas' : 'Controlled false alarms', fill: '95%' }
+        { title: isEs ? 'Paradas (estimación)' : 'Downtime (estimate)', val: '−22%', sub: isEs ? 'Impacto potencial; sin medición en planta' : 'Potential impact; not measured in a plant', fill: '70%', highlight: true },
+        { title: isEs ? 'Falsos Positivos' : 'False Positive Rate', val: '< 4.8%', sub: isEs ? 'Tasa reportada de evaluación' : 'Reported evaluation rate', fill: '95%' }
       ],
       code: {
         filename: 'predictive_maintenance_model.py',
@@ -14338,6 +14597,7 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
 
   const deliv = getCaseDeliverablesData(caseId, lang);
   const isEs = lang === 'es';
+  const labels = T[lang].starLabels;
 
   // Labels dynamically customized per case study to accurately reflect technology stack
   const getTabLabels = (cId, es) => {
@@ -14450,12 +14710,12 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
   } else if (activeTab === 'kpis') {
     paneHtml = `
       <div class="case-tab-pane">
+        <p class="star-section-caption">${escapeHtml(labels.metrics)}</p>
         <div class="kpi-dashboard-grid">
           ${deliv.kpis.map(k => `
             <div class="kpi-card">
               <p class="kpi-metric-title">${escapeHtml(k.title)}</p>
               <h4 class="kpi-metric-num ${k.highlight ? 'highlight' : ''}">${escapeHtml(k.val)}</h4>
-              <div class="kpi-progress-track"><div class="kpi-progress-fill" style="width:${k.fill || '80%'};"></div></div>
               <p class="kpi-metric-sub">${escapeHtml(k.sub)}</p>
             </div>
           `).join('')}
@@ -14465,6 +14725,7 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
   } else if (activeTab === 'code') {
     paneHtml = `
       <div class="case-tab-pane">
+        <p class="star-code-note">${escapeHtml(labels.codeNote)}</p>
         <div class="code-snippet-box">
           <div class="code-header">
             <span class="code-filename">${escapeHtml(deliv.code.filename)}</span>
@@ -14508,7 +14769,6 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
               <span class="star-kpi-chip-dot"></span>
             </div>
             <div class="star-kpi-chip-val">${escapeHtml(k.val)}</div>
-            <div class="star-kpi-chip-progress"><div class="star-kpi-chip-fill" style="width:${k.fill || '85%'};"></div></div>
             <div class="star-kpi-chip-sub">${escapeHtml(k.sub)}</div>
           </div>
         `).join('')}
@@ -14519,7 +14779,7 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
       if (!points || !points.length) return '';
       return `
         <ul class="star-card-bullets">
-          ${points.map(pt => `<li><span class="bullet-ico">›</span><span>${escapeHtml(pt)}</span></li>`).join('')}
+          ${points.map(pt => `<li><span class="bullet-ico" aria-hidden="true">›</span><span>${escapeHtml(pt)}</span></li>`).join('')}
         </ul>
       `;
     };
@@ -14539,7 +14799,7 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
         <div class="star-grid">
           <div class="star-card star-card-s">
             <div class="star-card-header">
-              <div class="star-label"><span>S</span> ${sLabel}</div>
+              <h4 class="star-label"><span>S</span> ${sLabel}</h4>
               <span class="star-corner-tag">${sCorner}</span>
             </div>
             <p class="star-card-desc">${escapeHtml(data.situation)}</p>
@@ -14548,7 +14808,7 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
 
           <div class="star-card star-card-t">
             <div class="star-card-header">
-              <div class="star-label"><span>T</span> ${tLabel}</div>
+              <h4 class="star-label"><span>T</span> ${tLabel}</h4>
               <span class="star-corner-tag">${tCorner}</span>
             </div>
             <p class="star-card-desc">${escapeHtml(data.task)}</p>
@@ -14557,7 +14817,7 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
 
           <div class="star-card star-card-a">
             <div class="star-card-header">
-              <div class="star-label"><span>A</span> ${aLabel}</div>
+              <h4 class="star-label"><span>A</span> ${aLabel}</h4>
               <span class="star-corner-tag">${aCorner}</span>
             </div>
             <p class="star-card-desc">${escapeHtml(data.action)}</p>
@@ -14566,7 +14826,7 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
 
           <div class="star-card star-card-r">
             <div class="star-card-header">
-              <div class="star-label"><span>R</span> ${rLabel}</div>
+              <h4 class="star-label"><span>R</span> ${rLabel}</h4>
               <span class="star-corner-tag highlight">${rCorner}</span>
             </div>
             <p class="star-card-desc"><strong>${escapeHtml(data.result)}</strong></p>
@@ -14582,22 +14842,31 @@ function renderStarCaseContent(caseId, activeTab = 'context') {
     <div class="star-modal-content" data-active-case="${caseId}">
       <div class="star-modal-header">
         <p class="star-kicker">${escapeHtml(data.kicker)}</p>
-        <h3 class="star-title">${escapeHtml(data.title)}</h3>
-        <p class="star-subtitle">${escapeHtml(data.subtitle)}</p>
+        <h3 class="star-title" id="starCaseTitle">${escapeHtml(data.title)}</h3>
+        <p class="star-subtitle" id="starCaseSubtitle">${escapeHtml(data.subtitle)}</p>
       </div>
-      <nav class="case-tabs-nav" aria-label="Entregables del caso">
-        <button type="button" class="case-tab-btn ${activeTab === 'context' ? 'active' : ''}" data-tab-target="context" data-star-tab="context"><span class="tab-num">01</span> ${tabLabels.context}</button>
-        <button type="button" class="case-tab-btn ${activeTab === 'bpmn' ? 'active' : ''}" data-tab-target="bpmn" data-star-tab="bpmn"><span class="tab-num">02</span> ${tabLabels.bpmn}</button>
-        <button type="button" class="case-tab-btn ${activeTab === 'kpis' ? 'active' : ''}" data-tab-target="kpis" data-star-tab="results"><span class="tab-num">03</span> ${tabLabels.kpis}</button>
-        <button type="button" class="case-tab-btn ${activeTab === 'code' ? 'active' : ''}" data-tab-target="code" data-star-tab="action"><span class="tab-num">04</span> ${tabLabels.code}</button>
-        <button type="button" class="case-tab-btn ${activeTab === 'lessons' ? 'active' : ''}" data-tab-target="lessons" data-star-tab="arch"><span class="tab-num">05</span> ${tabLabels.lessons}</button>
+      <dl class="star-overview" aria-label="${escapeHtml(labels.summary)}">
+        <div><dt>${escapeHtml(labels.role)}</dt><dd>${escapeHtml(data.role)}</dd></div>
+        <div><dt>${escapeHtml(labels.scope)}</dt><dd>${escapeHtml(data.scope)}</dd></div>
+      </dl>
+      <nav class="case-tabs-nav" aria-label="${escapeHtml(labels.navigation)}">
+        <button type="button" class="case-tab-btn ${activeTab === 'context' ? 'active' : ''}" aria-current="${activeTab === 'context' ? 'page' : 'false'}" data-tab-target="context" data-star-tab="context"><span class="tab-num">01</span> ${tabLabels.context}</button>
+        <button type="button" class="case-tab-btn ${activeTab === 'bpmn' ? 'active' : ''}" aria-current="${activeTab === 'bpmn' ? 'page' : 'false'}" data-tab-target="bpmn" data-star-tab="bpmn"><span class="tab-num">02</span> ${tabLabels.bpmn}</button>
+        <button type="button" class="case-tab-btn ${activeTab === 'kpis' ? 'active' : ''}" aria-current="${activeTab === 'kpis' ? 'page' : 'false'}" data-tab-target="kpis" data-star-tab="results"><span class="tab-num">03</span> ${tabLabels.kpis}</button>
+        <button type="button" class="case-tab-btn ${activeTab === 'code' ? 'active' : ''}" aria-current="${activeTab === 'code' ? 'page' : 'false'}" data-tab-target="code" data-star-tab="action"><span class="tab-num">04</span> ${tabLabels.code}</button>
+        <button type="button" class="case-tab-btn ${activeTab === 'lessons' ? 'active' : ''}" aria-current="${activeTab === 'lessons' ? 'page' : 'false'}" data-tab-target="lessons" data-star-tab="arch"><span class="tab-num">05</span> ${tabLabels.lessons}</button>
       </nav>
       <div class="case-tab-body">
         ${paneHtml}
       </div>
+      <aside class="star-evidence">
+        <h4>${escapeHtml(labels.evidence)}</h4>
+        <p>${escapeHtml(data.evidence)}</p>
+        ${data.repository ? `<a class="text-link" href="${escapeHtml(data.repository)}" target="_blank" rel="noreferrer">${escapeHtml(labels.repository)} <span aria-hidden="true">↗</span></a>` : ''}
+      </aside>
       <div class="star-footer">
         <div class="star-footer-header">
-          <span class="star-footer-tag">// Stack Tecnológico Verificado</span>
+          <span class="star-footer-tag">${escapeHtml(labels.stack)}</span>
         </div>
         <ul class="star-tags">
           ${data.tags.map(tag => `<li><span class="tag-glow-dot"></span>${escapeHtml(tag)}</li>`).join('')}
@@ -14659,6 +14928,7 @@ function initCaseModals() {
       const body = document.querySelector('#caseModalBody');
       if (body) {
         body.innerHTML = renderStarCaseContent(caseId, targetTab);
+        body.querySelector(`[data-tab-target="${targetTab}"]`)?.focus({ preventScroll: true });
       }
     }
   });
@@ -18947,7 +19217,7 @@ if (typeof document !== 'undefined') {
       </div>
     </div>
   </dialog>
-  <dialog id="caseModal" class="case-modal" aria-labelledby="caseModalTitle">
+  <dialog id="caseModal" class="case-modal" aria-labelledby="starCaseTitle" aria-describedby="starCaseSubtitle">
     <div class="case-modal-box">
       <div class="case-modal-header">
         <div class="circles"><i></i><i></i><i></i></div>
