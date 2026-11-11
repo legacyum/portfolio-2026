@@ -6,7 +6,7 @@ const requestedPort = Number(process.env.PORT);
 const PORT = process.env.PORT !== undefined && Number.isInteger(requestedPort) && requestedPort >= 0 && requestedPort <= 65535
   ? requestedPort
   : 3000;
-const HOST = process.env.HOST || '0.0.0.0';
+const HOST = process.env.HOST || '127.0.0.1';
 const MIME = {
   '.html': 'text/html; charset=utf-8',
   '.css': 'text/css; charset=utf-8',
@@ -25,6 +25,7 @@ const MIME = {
 const ROOT_DIR = path.resolve(__dirname, '..');
 const SRC_DIR = path.join(ROOT_DIR, 'src');
 const DIST_DIR = path.join(ROOT_DIR, 'dist');
+const PROTOTYPES_DIR = path.join(ROOT_DIR, 'prototypes');
 
 function resolveStaticPath(rootDir, rawPath) {
   let decodedPath;
@@ -47,7 +48,8 @@ function resolveStaticPath(rootDir, rawPath) {
   if (
     path.isAbsolute(relativePath) ||
     path.win32.isAbsolute(relativePath) ||
-    relativePath.split('/').includes('..')
+    relativePath.split('/').some(segment => segment.startsWith('.') || segment.toLowerCase() === 'graphify-out') ||
+    /(?:^|\/)debug\.log$/i.test(relativePath)
   ) {
     return null;
   }
@@ -62,18 +64,32 @@ function resolveStaticPath(rootDir, rawPath) {
     return null;
   }
 
-  return candidate;
+  try {
+    const realRoot = fs.realpathSync(rootDir);
+    const realCandidate = fs.realpathSync(candidate);
+    const relativeReal = path.relative(realRoot, realCandidate);
+    if (relativeReal === '..' || relativeReal.startsWith(`..${path.sep}`) || path.isAbsolute(relativeReal)) return null;
+    if (relativeReal.split(path.sep).some(segment => segment.startsWith('.') || segment.toLowerCase() === 'graphify-out') || /(?:^|[\\/])debug\.log$/i.test(relativeReal)) return null;
+    return fs.statSync(realCandidate).isFile() ? realCandidate : null;
+  } catch {
+    return null;
+  }
 }
 
 const server = http.createServer((req, res) => {
   let reqPath = (req.url || '/').split('?')[0];
   if (reqPath === '/') reqPath = '/index.html';
 
-  // Resolve priority: src/ -> dist/ -> root
+  // Serve public roots and the two explicit prototype pages only.
   let filePath = null;
-  for (const rootDir of [SRC_DIR, DIST_DIR, ROOT_DIR]) {
-    const candidate = resolveStaticPath(rootDir, reqPath);
-    if (candidate && fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+  const roots = [[SRC_DIR, reqPath], [DIST_DIR, reqPath]];
+  if (reqPath.startsWith('/src/')) roots.push([SRC_DIR, reqPath.slice(4)]);
+  if (reqPath === '/prototypes/cat3d.html' || reqPath === '/prototypes/crt.html') {
+    roots.push([PROTOTYPES_DIR, reqPath.slice('/prototypes'.length)]);
+  }
+  for (const [rootDir, publicPath] of roots) {
+    const candidate = resolveStaticPath(rootDir, publicPath);
+    if (candidate) {
       filePath = candidate;
       break;
     }
@@ -87,8 +103,6 @@ const server = http.createServer((req, res) => {
     res.writeHead(200, {
       'Content-Type': contentType,
       'Content-Length': stat.size,
-      'Access-Control-Allow-Origin': '*',
-      'Cross-Origin-Resource-Policy': 'cross-origin',
       'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
       'Pragma': 'no-cache',
       'Expires': '0'

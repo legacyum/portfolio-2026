@@ -1,0 +1,19 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+const files=['src/vendor/three.min.js','src/shaders/3d-paper/sources/3d-paper.html','dist/portfolio-mejorado.html',...['3d-paper','3d-paper-canonical','3d-paper-certificate','3d-paper-japanese','3d-paper-site-of-the-year'].map(x=>`dist/shaders/3d-paper/sources/${x}.html`)];
+for(const f of files){let text=fs.readFileSync(f,'utf8'),script;if(f.endsWith('.js'))script=text;else if(f.includes('portfolio-mejorado')){let match=text.match(/<script data-vendor="three">\s*([\s\S]*?)<\/script>/);assert(match,f);script=match[1]}else script=text.slice(text.indexOf('<script>')+8,text.indexOf('</script>'));let context={exports:{},module:{exports:{}},console:{error(){},warn(){},log(){}}};context.module.exports=context.exports;vm.runInNewContext(script,context,{filename:f});let T=context.exports,root=new T.Object3D();
+ for(const p of ['.userData[constructor].prototype[pwned]','.__proto__[__proto__].__proto__[pwned]','.userData.__proto__[pwned]']){let b=T.PropertyBinding.create(root,p);b.setValue([true],0);assert.strictEqual(vm.runInNewContext('({}).pwned',context),undefined,f+' '+p);}
+ let parsed={nodeName:undefined,objectName:'userData',objectIndex:'constructor',propertyName:'prototype',propertyIndex:'pwned'};let binding=T.PropertyBinding.create(root,'.position',parsed);binding.setValue([true],0);assert.strictEqual(vm.runInNewContext('({}).pwned',context),undefined,f+' parsed');
+ let clip=T.AnimationClip.parse({name:'attack',duration:1,tracks:[{name:'.userData[constructor].prototype[pwned]',type:'bool',times:[0,1],values:[true,true]}]});let mixer=new T.AnimationMixer(root);mixer.clipAction(clip).play();mixer.update(0.5);assert.strictEqual(vm.runInNewContext('({}).pwned',context),undefined,f+' mixer');
+ let group=new T.AnimationObjectGroup(root);let composite=T.PropertyBinding.create(group,'.userData[constructor].prototype[pwned]');composite.setValue([true],0);assert.strictEqual(vm.runInNewContext('({}).pwned',context),undefined,f+' group');
+ let inherited=T.PropertyBinding.create(root,'.userData.toString[portfolio_probe]');inherited.setValue([true],0);assert.strictEqual(vm.runInNewContext('Object.prototype.toString.portfolio_probe',context),undefined,f+' inherited function');
+ root.prototypeAlias=vm.runInNewContext('Object.prototype',context);T.PropertyBinding.create(root,'.prototypeAlias[portfolio_probe]').setValue([true],0);assert.strictEqual(vm.runInNewContext('({}).portfolio_probe',context),undefined,f+' aliased prototype');
+ let shared=vm.runInNewContext('({sharedArray:[0], sharedObject:{value:0}})',context);Object.setPrototypeOf(root.userData,shared);
+ for(const parsed of [{objectName:'userData',propertyName:'sharedArray',propertyIndex:'0'},{objectName:'userData',objectIndex:'sharedObject',propertyName:'value'}]) T.PropertyBinding.create(root,'.position',parsed).setValue([42],0);
+ assert.strictEqual(shared.sharedArray[0],0,f+' inherited array');assert.strictEqual(shared.sharedObject.value,0,f+' inherited object');
+ root.userData.ownArray=[0];T.PropertyBinding.create(root,'.position',{objectName:'userData',propertyName:'ownArray',propertyIndex:'0'}).setValue([8],0);assert.strictEqual(root.userData.ownArray[0],8,f+' own array');
+ T.PropertyBinding.create(root,'.rotation[x]').setValue([0.5],0);assert.strictEqual(root.rotation.x,0.5,f+' Euler accessor');
+ root.material=new T.MeshBasicMaterial();T.PropertyBinding.create(root,'.material.opacity').setValue([0.25],0);assert.strictEqual(root.material.opacity,0.25,f+' material opacity');
+ let valid=T.PropertyBinding.create(root,'.position[x]');valid.setValue([3],0);assert.strictEqual(root.position.x,3,f+' position');
+ let b2=T.PropertyBinding.create(root,'.position');b2.setValue([4,5,6],0);assert.deepStrictEqual([root.position.x,root.position.y,root.position.z],[4,5,6],f+' vector');
+ console.log('PASS',f);
+}
