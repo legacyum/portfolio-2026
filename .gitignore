@@ -32,4 +32,5 @@ scratch/
 
 # Local audit artifacts (capturas, scripts, logs)
 output/
+artifacts/
 

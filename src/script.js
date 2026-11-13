@@ -136,7 +136,21 @@ const T = {
     logChipEtl: 'cat etl_pipeline.py',
     logChipVasmad: 'cat vasmad_mrp.md',
     logChipBizagi: 'cat bizagi_bpmn.md',
-    logChipMl: 'cat ml_telemetry.py'
+    logChipMl: 'cat ml_telemetry.py',
+    credVerify: 'ver credencial ↗',
+    certNasaTitle: 'Galactic Problem Solver',
+    certNasaSkills: 'NASA Space Apps Challenge 2025 · Hackathon Internacional',
+    certClaudeTitle: 'Claude Code in Action',
+    certClaudeSkills: 'Ingeniería de contexto · Automatización con IA · Developer Workflow',
+    crtPhosphorTag: 'FÓSFORO:',
+    cosmosDiamLabel: 'DIÁMETRO',
+    cosmosTempLabel: 'TEMP. SUPERFICIE',
+    cosmosOrbitLabel: 'ESTADO ORBITAL',
+    cosmosRealtime: 'TIEMPO REAL',
+    cosmosDaySec: '1 DÍA / SEG',
+    cosmosYear10s: '1 AÑO / 10S',
+    cosmosPause: 'PAUSA',
+    cosmosNow: 'AHORA'
   },
   en: {
     profile: '// professional profile',
@@ -270,7 +284,21 @@ const T = {
     logChipEtl: 'cat etl_pipeline.py',
     logChipVasmad: 'cat vasmad_mrp.md',
     logChipBizagi: 'cat bizagi_bpmn.md',
-    logChipMl: 'cat ml_telemetry.py'
+    logChipMl: 'cat ml_telemetry.py',
+    credVerify: 'verify credential ↗',
+    certNasaTitle: 'Galactic Problem Solver',
+    certNasaSkills: 'NASA Space Apps Challenge 2025 · International Hackathon',
+    certClaudeTitle: 'Claude Code in Action',
+    certClaudeSkills: 'Context Engineering · AI Automation · Developer Workflow',
+    crtPhosphorTag: 'PHOSPHOR:',
+    cosmosDiamLabel: 'DIAMETER',
+    cosmosTempLabel: 'SURFACE TEMP.',
+    cosmosOrbitLabel: 'ORBITAL STATE',
+    cosmosRealtime: 'REAL TIME',
+    cosmosDaySec: '1 DAY / SEC',
+    cosmosYear10s: '1 YEAR / 10S',
+    cosmosPause: 'PAUSE',
+    cosmosNow: 'NOW'
   }
 };
 
@@ -1103,21 +1131,21 @@ function runCommand(raw) {
     return;
   }
 
-  if (cmd === 'cat pet' || cmd === 'gato acariciar' || cmd === 'cat purr' || cmd === 'gato purr') {
+  if (cmd === 'cat pet' || cmd === 'gato pet' || cmd === 'gato acariciar' || cmd === 'acariciar' || cmd === 'cat purr' || cmd === 'gato purr') {
     if (typeof window.__summonCat === 'function') window.__summonCat();
     if (typeof window.__petCat === 'function') window.__petCat();
     addOutput(cmd, '<p class="output-title">// ROBCO FELINE · ' + (lang === 'es' ? 'CARICIA & RONRONEO' : 'PET & PURR') + '</p><p><span class="green">' + (lang === 'es' ? '❤️ ¡Has acariciado al gato! Ronroneo Web Audio a 25Hz y partículas fosforescentes activadas.' : '❤️ You petted the cat! 25Hz Web Audio purr & glowing heart particles activated.') + '</span></p>');
     return;
   }
 
-  if (cmd === 'cat play' || cmd === 'cat yarn' || cmd === 'gato jugar' || cmd === 'gato ovillo') {
+  if (cmd === 'cat play' || cmd === 'gato play' || cmd === 'cat yarn' || cmd === 'gato jugar' || cmd === 'jugar' || cmd === 'gato ovillo') {
     if (typeof window.__summonCat === 'function') window.__summonCat();
     if (typeof window.__spawnYarn === 'function') window.__spawnYarn();
     addOutput(cmd, '<p class="output-title">// ROBCO FELINE · ' + (lang === 'es' ? 'OVILLO DE LANA' : 'YARN BALL') + '</p><p><span class="green">' + (lang === 'es' ? '🧶 ¡Lanzando ovillo de lana! Impulso físico de rebote y maullido activados.' : '🧶 Bouncing yarn ball spawned! Physics kick & meow activated.') + '</span></p>');
     return;
   }
 
-  if (cmd === 'cat roam' || cmd === 'cat walk' || cmd === 'gato pasear' || cmd === 'gato caminar') {
+  if (cmd === 'cat roam' || cmd === 'gato roam' || cmd === 'cat walk' || cmd === 'gato pasear' || cmd === 'gato caminar') {
     if (typeof window.__summonCat === 'function') window.__summonCat();
     if (typeof window.__startCatRoam === 'function') window.__startCatRoam();
     addOutput(cmd, '<p class="output-title">// ROBCO FELINE · ' + (lang === 'es' ? 'MODO PASEO LIBRE' : 'FREE ROAMING MODE') + '</p><p><span class="green">' + (lang === 'es' ? '🐾 Gato en exploración autónoma: trepando por las tarjetas del portafolio y persiguiendo el cursor.' : '🐾 Autonomous roam active: cat climbing portfolio cards & following cursor.') + '</span></p>');
@@ -1130,7 +1158,7 @@ function runCommand(raw) {
     return;
   }
 
-  if (cmd === 'cat sleep' || cmd === 'gato dormir' || cmd === 'cat nap' || cmd === 'gato siesta') {
+  if (cmd === 'cat sleep' || cmd === 'gato sleep' || cmd === 'gato dormir' || cmd === 'cat nap' || cmd === 'gato siesta') {
     if (typeof window.__summonCat === 'function') window.__summonCat();
     if (typeof window.__sleepCat === 'function') window.__sleepCat();
     addOutput(cmd, '<p class="output-title">// ROBCO FELINE · ' + (lang === 'es' ? 'MODO SUEÑO' : 'NAP MODE') + '</p><p><span class="green">' + (lang === 'es' ? '💤 El gato se ha acurrucado plácidamente en postura de hogaza. Zzz...' : '💤 Cat curled up in catloaf pose. Zzz...') + '</span></p>');
@@ -1222,34 +1250,6 @@ function runCommand(raw) {
       '<p style="font-size:11px; color:var(--text-muted); margin-top:4px;">' + (lang === 'es' ? 'Escribe <code>cat help</code> para ver todos los subcomandos o <code>cat lab</code> para el laboratorio 3D.' : 'Type <code>cat help</code> for all subcommands or <code>cat lab</code> for 3D lab.') + '</p>' +
     '</div>';
     addOutput(cmd, html);
-    return;
-  }
-  if (cmd === 'cat pet' || cmd === 'gato pet' || cmd === 'gato acariciar' || cmd === 'acariciar') {
-    if (typeof window.__summonCat === 'function') window.__summonCat();
-    if (window.__catMini && typeof window.__catMini.petCat === 'function') {
-      window.__catMini.petCat();
-    }
-    addOutput(cmd, '<p><span class="green">' + (lang === 'es' ? '🐾 Acariciando al gato... ¡ronronea felizmente y da un saltito!' : '🐾 Petting the cat... purrs happily and bounces!') + '</span></p>');
-    return;
-  }
-  if (cmd === 'cat play' || cmd === 'gato play' || cmd === 'gato jugar' || cmd === 'jugar') {
-    if (typeof window.__summonCat === 'function') window.__summonCat();
-    if (window.__catMini) {
-      if (typeof window.__catMini.spawnYarn === 'function') window.__catMini.spawnYarn();
-      if (typeof window.__catMini.triggerBounce === 'function') window.__catMini.triggerBounce();
-    }
-    addOutput(cmd, '<p><span class="green">' + (lang === 'es' ? '🎾 ¡El gato juega alegremente persiguiendo su ovillo!' : '🎾 Cat joyfully bats and chases its yarn ball!') + '</span></p>');
-    return;
-  }
-  if (cmd === 'cat sleep' || cmd === 'gato sleep' || cmd === 'gato dormir') {
-    if (typeof window.__summonCat === 'function') window.__summonCat();
-    if (window.__catMini && typeof window.__catMini.sleep === 'function') window.__catMini.sleep();
-    addOutput(cmd, '<p><span class="green">' + (lang === 'es' ? '💤 El gato se acurruca en forma de rosca a tomar una siesta.' : '💤 Cat loafs and takes a peaceful nap.') + '</span></p>');
-    return;
-  }
-  if (cmd === 'cat roam' || cmd === 'gato roam' || cmd === 'gato pasear') {
-    if (typeof window.__toggleCatRoaming === 'function') window.__toggleCatRoaming();
-    addOutput(cmd, '<p><span class="green">' + (lang === 'es' ? '🐾 Alternando modo paseo del gato por la pantalla.' : '🐾 Toggling cat roaming mode across screen.') + '</span></p>');
     return;
   }
   if (cmd === 'cat stats' || cmd === 'gato stats') {
@@ -1415,6 +1415,22 @@ function translate() {
   setView(recruiter?.classList.contains('show') ? 'recruiter' : 'terminal', false);
   updateThemeButtonLabel();
   syncCvFrameState();
+  const fsLabel = document.querySelector('#crtFullscreenLabel');
+  const casing = document.querySelector('#crtMonitorCasing');
+  if (fsLabel) {
+    const isFs = casing && casing.classList.contains('crt-fullscreen-mode');
+    fsLabel.textContent = isFs
+      ? (lang === 'es' ? 'MODO MONITOR' : 'MONITOR MODE')
+      : (lang === 'es' ? 'PANTALLA COMPLETA' : 'FULLSCREEN');
+  }
+  const orbitsText = document.querySelector('#cosmosOrbitsText');
+  const orbitsBtn = document.querySelector('#cosmosOrbitsBtn');
+  if (orbitsText && orbitsBtn) {
+    const isOff = orbitsBtn.classList.contains('active');
+    orbitsText.textContent = lang === 'en'
+      ? (isOff ? 'ORBITS: OFF' : 'ORBITS: ON')
+      : (isOff ? 'ÓRBITAS: OFF' : 'ÓRBITAS: ON');
+  }
   const caseCloseBtn = document.querySelector('#closeCaseBtn');
   if (caseCloseBtn) caseCloseBtn.setAttribute('aria-label', T[lang].starLabels.close);
   const caseContent = document.querySelector('#caseModalBody .star-modal-content');
@@ -2713,6 +2729,9 @@ function initTiltCards() {
 
   cards.forEach(card => {
     card.addEventListener('mousemove', e => {
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+      }
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -3190,6 +3209,7 @@ function initCrtMonitorHardware() {
   if (powerBtn && casing) {
     powerBtn.addEventListener('click', () => {
       const isOff = casing.classList.toggle('crt-powered-off');
+      powerBtn.setAttribute('aria-pressed', isOff ? 'false' : 'true');
       if (typeof playKeySound === 'function') playKeySound('enter');
       if (powerLed) {
         powerLed.classList.toggle('standby', isOff);
@@ -3200,6 +3220,7 @@ function initCrtMonitorHardware() {
   if (fullscreenBtn && casing) {
     fullscreenBtn.addEventListener('click', () => {
       const isFs = casing.classList.toggle('crt-fullscreen-mode');
+      fullscreenBtn.setAttribute('aria-pressed', isFs ? 'true' : 'false');
       if (typeof playKeySound === 'function') playKeySound('tab');
       if (fullscreenIcon) {
         fullscreenIcon.textContent = isFs ? '❐' : '⛶';
@@ -3530,12 +3551,12 @@ function initLanyard() {
 
   let width = stage.clientWidth || 320;
   let height = stage.clientHeight || 520;
-  let dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+  let dpr = Math.min((typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1, 2);
 
   function resizeCanvas() {
     width = stage.clientWidth || 320;
     height = stage.clientHeight || 520;
-    dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+    dpr = Math.min((typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1, 2);
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     canvas.style.width = width + 'px';
@@ -3836,17 +3857,32 @@ function initLanyard() {
   }
 
   // Animation Frame Loop
+  let lanyardRaf = 0;
   function loop(now) {
+    lanyardRaf = 0;
     const curTime = now || ((typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now());
     const dt = Math.min(0.05, (curTime - lastTime) / 1000);
     lastTime = curTime;
     updatePhysics(dt);
-    if (typeof requestAnimationFrame === 'function') {
-      requestAnimationFrame(loop);
+    if (!document.hidden && typeof requestAnimationFrame === 'function') {
+      lanyardRaf = requestAnimationFrame(loop);
     }
   }
   if (typeof requestAnimationFrame === 'function') {
-    requestAnimationFrame(loop);
+    lanyardRaf = requestAnimationFrame(loop);
+  }
+  if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (lanyardRaf && typeof cancelAnimationFrame === 'function') {
+          cancelAnimationFrame(lanyardRaf);
+          lanyardRaf = 0;
+        }
+      } else if (!lanyardRaf && typeof requestAnimationFrame === 'function') {
+        lastTime = (typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now();
+        lanyardRaf = requestAnimationFrame(loop);
+      }
+    });
   }
 
   // Pointer / Drag Interaction Handlers with Elastic Tension Constraint
@@ -5069,10 +5105,15 @@ function initCosmosIntegration() {
 
   // Orbits toggle
   const orbitsBtn = document.querySelector('#cosmosOrbitsBtn');
+  const orbitsText = document.querySelector('#cosmosOrbitsText');
   orbitsBtn?.addEventListener('click', () => {
     if (window.CosmicAtlas) {
       const show = window.CosmicAtlas.toggleOrbits();
-      orbitsBtn.textContent = show ? 'ÓRBITAS: ON' : 'ÓRBITAS: OFF';
+      const label = lang === 'en'
+        ? (show ? 'ORBITS: ON' : 'ORBITS: OFF')
+        : (show ? 'ÓRBITAS: ON' : 'ÓRBITAS: OFF');
+      if (orbitsText) orbitsText.textContent = label;
+      else orbitsBtn.textContent = label;
       orbitsBtn.classList.toggle('active', !show);
     }
   });
@@ -5142,7 +5183,8 @@ function openCatModal() {
   const modal = document.getElementById('catModal');
   const iframe = document.getElementById('catModalIframe');
   if (!modal) return;
-  if (iframe && iframe.dataset.src && (!iframe.src || iframe.src === 'about:blank' || iframe.src.endsWith('/'))) {
+  const curSrc = iframe ? iframe.getAttribute('src') : '';
+  if (iframe && iframe.dataset.src && (!curSrc || curSrc === 'about:blank' || curSrc.endsWith('/'))) {
     iframe.src = iframe.dataset.src;
   }
   if (typeof modal.showModal === 'function') {
@@ -5161,6 +5203,10 @@ function openCatModal() {
 function closeCatModal() {
   const modal = document.getElementById('catModal');
   if (!modal) return;
+  const iframe = document.getElementById('catModalIframe');
+  if (iframe && iframe.getAttribute('src')) {
+    iframe.setAttribute('src', '');
+  }
   if (typeof modal.close === 'function') {
     modal.close();
   } else {
@@ -5970,6 +6016,7 @@ function initCat3D() {
       isVisible = true;
       stage.classList.add('cat-visible');
       stage.setAttribute('aria-hidden', 'false');
+      if (box) box.setAttribute('tabindex', '0');
       if (fallback && !mini) {
         fallback.classList.add('is-active');
       }
@@ -5993,6 +6040,7 @@ function initCat3D() {
       isVisible = false;
       stage.classList.remove('cat-visible', 'cat-peeking', 'cat-roaming');
       stage.setAttribute('aria-hidden', 'true');
+      if (box) box.setAttribute('tabindex', '-1');
       if (mini) mini.hide();
       if (fallback) fallback.classList.remove('is-active', 'fallback-happy');
     }
@@ -6051,12 +6099,14 @@ function initCat3D() {
 
     // Drag & Drop interaction for repositioning the cat
     let isDraggingCat = false;
+    let didDragCatMove = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
 
     stage.addEventListener('mousedown', (e) => {
       if (e.target.closest('.cat3d-btn')) return;
       isDraggingCat = true;
+      didDragCatMove = false;
       const pb = getParentBounds();
       const rect = stage.getBoundingClientRect();
       dragOffsetX = e.clientX - rect.left;
@@ -6068,6 +6118,7 @@ function initCat3D() {
 
     window.addEventListener('mousemove', (e) => {
       if (!isDraggingCat) return;
+      didDragCatMove = true;
       const pb = getParentBounds();
       const stageW = stage.offsetWidth || 252;
       const stageH = stage.offsetHeight || 196;
@@ -6085,8 +6136,10 @@ function initCat3D() {
       if (!isDraggingCat) return;
       isDraggingCat = false;
       stage.style.cursor = '';
-      if (mini && typeof mini.playMeow === 'function') mini.playMeow();
-      else if (window.Cat3DMini && typeof window.Cat3DMini.playMeow === 'function') window.Cat3DMini.playMeow();
+      if (didDragCatMove) {
+        if (mini && typeof mini.playMeow === 'function') mini.playMeow();
+        else if (window.Cat3DMini && typeof window.Cat3DMini.playMeow === 'function') window.Cat3DMini.playMeow();
+      }
       if (isRoaming) {
         roamState = 'idle';
         idleWaitTimer = 1.8;
@@ -6101,8 +6154,6 @@ function initCat3D() {
         if (mini) mini.pause();
       } else if (isVisible) {
         if (mini) mini.resume();
-      } else {
-        scheduleNext();
       }
     });
 
@@ -6114,6 +6165,15 @@ function initCat3D() {
     window.__hideCat = hideCat;
     window.__startCatRoam = startRoaming;
     window.__stopCatRoam = () => stopRoaming(true);
+    window.__toggleCatRoaming = () => {
+      if (isRoaming) {
+        stopRoaming(true);
+        return false;
+      }
+      showCat(true);
+      startRoaming();
+      return true;
+    };
     window.__isCatRoaming = () => isRoaming;
     window.__petCat = petCat;
     window.__wakeUpCat = wakeUpCat;

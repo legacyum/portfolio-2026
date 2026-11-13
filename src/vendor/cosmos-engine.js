@@ -493,6 +493,8 @@
     window.dispatchEvent(evt);
   }
 
+  let reusableTargetPos = null;
+
   function animate() {
     if (!isRunning) {
       animationFrameId = null;
@@ -564,8 +566,8 @@
     // Camera follow
     const focused = bodiesMap.get(focusedBodyId);
     if (focused && controls) {
-      const targetPos = new THREE.Vector3();
-      focused.group.getWorldPosition(targetPos);
+      if (!reusableTargetPos) reusableTargetPos = new THREE.Vector3();
+      focused.group.getWorldPosition(reusableTargetPos);
 
       if (isTransitioning && targetCamPos) {
         camera.position.lerp(targetCamPos, 0.08);
@@ -574,7 +576,7 @@
           isTransitioning = false;
         }
       } else {
-        controls.target.lerp(targetPos, 0.08);
+        controls.target.lerp(reusableTargetPos, 0.08);
       }
       controls.update();
     }
@@ -617,6 +619,7 @@
     if (!isRunning) {
       isRunning = true;
       lastFrameTime = performance.now();
+      window.addEventListener('resize', onWindowResize);
       animate();
     }
   }

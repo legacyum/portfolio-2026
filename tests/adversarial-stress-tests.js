@@ -1032,7 +1032,7 @@ async function runAdversarialTests() {
   console.log(`  Failed Tests:            ${COLORS.red}${COLORS.bright}${advFailed}${COLORS.reset}\n`);
 
   if (advFailed === 0) {
-    console.log(`  ${COLORS.green}${COLORS.bright}SUCCESS: All 14 Empirical Adversarial Stress Tests Passed with ZERO failures!${COLORS.reset}\n`);
+    console.log(`  ${COLORS.green}${COLORS.bright}SUCCESS: All ${advTotal} Empirical Adversarial Stress Tests Passed with ZERO failures!${COLORS.reset}\n`);
     process.exit(0);
   } else {
     console.log(`  ${COLORS.red}${COLORS.bright}FAILURE: ${advFailed} adversarial tests failed!${COLORS.reset}\n`);

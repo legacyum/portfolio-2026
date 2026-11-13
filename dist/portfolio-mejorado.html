@@ -1584,30 +1584,6 @@ h4 {
   color: var(--accent);
 }
 
-.crt-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  letter-spacing: 0.04em;
-  font-family: inherit;
-  transition: color 0.2s ease, opacity 0.2s ease;
-}
-
-.crt-toggle-btn .crt-tag {
-  opacity: 0.75;
-}
-
-.crt-toggle-btn #crtStatus {
-  font-weight: 600;
-  color: var(--accent);
-}
-
-.crt-toggle-btn[aria-pressed="false"] #crtStatus {
-  color: var(--muted);
-  opacity: 0.6;
-}
-
 .crt-status-static {
   display: inline-flex;
   align-items: center;
@@ -8578,6 +8554,8 @@ body.crt-active #cat3DStage {
     window.dispatchEvent(evt);
   }
 
+  let reusableTargetPos = null;
+
   function animate() {
     if (!isRunning) {
       animationFrameId = null;
@@ -8649,8 +8627,8 @@ body.crt-active #cat3DStage {
     // Camera follow
     const focused = bodiesMap.get(focusedBodyId);
     if (focused && controls) {
-      const targetPos = new THREE.Vector3();
-      focused.group.getWorldPosition(targetPos);
+      if (!reusableTargetPos) reusableTargetPos = new THREE.Vector3();
+      focused.group.getWorldPosition(reusableTargetPos);
 
       if (isTransitioning && targetCamPos) {
         camera.position.lerp(targetCamPos, 0.08);
@@ -8659,7 +8637,7 @@ body.crt-active #cat3DStage {
           isTransitioning = false;
         }
       } else {
-        controls.target.lerp(targetPos, 0.08);
+        controls.target.lerp(reusableTargetPos, 0.08);
       }
       controls.update();
     }
@@ -8702,6 +8680,7 @@ body.crt-active #cat3DStage {
     if (!isRunning) {
       isRunning = true;
       lastFrameTime = performance.now();
+      window.addEventListener('resize', onWindowResize);
       animate();
     }
   }
@@ -12545,7 +12524,21 @@ const T = {
     logChipEtl: 'cat etl_pipeline.py',
     logChipVasmad: 'cat vasmad_mrp.md',
     logChipBizagi: 'cat bizagi_bpmn.md',
-    logChipMl: 'cat ml_telemetry.py'
+    logChipMl: 'cat ml_telemetry.py',
+    credVerify: 'ver credencial ↗',
+    certNasaTitle: 'Galactic Problem Solver',
+    certNasaSkills: 'NASA Space Apps Challenge 2025 · Hackathon Internacional',
+    certClaudeTitle: 'Claude Code in Action',
+    certClaudeSkills: 'Ingeniería de contexto · Automatización con IA · Developer Workflow',
+    crtPhosphorTag: 'FÓSFORO:',
+    cosmosDiamLabel: 'DIÁMETRO',
+    cosmosTempLabel: 'TEMP. SUPERFICIE',
+    cosmosOrbitLabel: 'ESTADO ORBITAL',
+    cosmosRealtime: 'TIEMPO REAL',
+    cosmosDaySec: '1 DÍA / SEG',
+    cosmosYear10s: '1 AÑO / 10S',
+    cosmosPause: 'PAUSA',
+    cosmosNow: 'AHORA'
   },
   en: {
     profile: '// professional profile',
@@ -12679,7 +12672,21 @@ const T = {
     logChipEtl: 'cat etl_pipeline.py',
     logChipVasmad: 'cat vasmad_mrp.md',
     logChipBizagi: 'cat bizagi_bpmn.md',
-    logChipMl: 'cat ml_telemetry.py'
+    logChipMl: 'cat ml_telemetry.py',
+    credVerify: 'verify credential ↗',
+    certNasaTitle: 'Galactic Problem Solver',
+    certNasaSkills: 'NASA Space Apps Challenge 2025 · International Hackathon',
+    certClaudeTitle: 'Claude Code in Action',
+    certClaudeSkills: 'Context Engineering · AI Automation · Developer Workflow',
+    crtPhosphorTag: 'PHOSPHOR:',
+    cosmosDiamLabel: 'DIAMETER',
+    cosmosTempLabel: 'SURFACE TEMP.',
+    cosmosOrbitLabel: 'ORBITAL STATE',
+    cosmosRealtime: 'REAL TIME',
+    cosmosDaySec: '1 DAY / SEC',
+    cosmosYear10s: '1 YEAR / 10S',
+    cosmosPause: 'PAUSE',
+    cosmosNow: 'NOW'
   }
 };
 
@@ -13512,21 +13519,21 @@ function runCommand(raw) {
     return;
   }
 
-  if (cmd === 'cat pet' || cmd === 'gato acariciar' || cmd === 'cat purr' || cmd === 'gato purr') {
+  if (cmd === 'cat pet' || cmd === 'gato pet' || cmd === 'gato acariciar' || cmd === 'acariciar' || cmd === 'cat purr' || cmd === 'gato purr') {
     if (typeof window.__summonCat === 'function') window.__summonCat();
     if (typeof window.__petCat === 'function') window.__petCat();
     addOutput(cmd, '<p class="output-title">// ROBCO FELINE · ' + (lang === 'es' ? 'CARICIA & RONRONEO' : 'PET & PURR') + '</p><p><span class="green">' + (lang === 'es' ? '❤️ ¡Has acariciado al gato! Ronroneo Web Audio a 25Hz y partículas fosforescentes activadas.' : '❤️ You petted the cat! 25Hz Web Audio purr & glowing heart particles activated.') + '</span></p>');
     return;
   }
 
-  if (cmd === 'cat play' || cmd === 'cat yarn' || cmd === 'gato jugar' || cmd === 'gato ovillo') {
+  if (cmd === 'cat play' || cmd === 'gato play' || cmd === 'cat yarn' || cmd === 'gato jugar' || cmd === 'jugar' || cmd === 'gato ovillo') {
     if (typeof window.__summonCat === 'function') window.__summonCat();
     if (typeof window.__spawnYarn === 'function') window.__spawnYarn();
     addOutput(cmd, '<p class="output-title">// ROBCO FELINE · ' + (lang === 'es' ? 'OVILLO DE LANA' : 'YARN BALL') + '</p><p><span class="green">' + (lang === 'es' ? '🧶 ¡Lanzando ovillo de lana! Impulso físico de rebote y maullido activados.' : '🧶 Bouncing yarn ball spawned! Physics kick & meow activated.') + '</span></p>');
     return;
   }
 
-  if (cmd === 'cat roam' || cmd === 'cat walk' || cmd === 'gato pasear' || cmd === 'gato caminar') {
+  if (cmd === 'cat roam' || cmd === 'gato roam' || cmd === 'cat walk' || cmd === 'gato pasear' || cmd === 'gato caminar') {
     if (typeof window.__summonCat === 'function') window.__summonCat();
     if (typeof window.__startCatRoam === 'function') window.__startCatRoam();
     addOutput(cmd, '<p class="output-title">// ROBCO FELINE · ' + (lang === 'es' ? 'MODO PASEO LIBRE' : 'FREE ROAMING MODE') + '</p><p><span class="green">' + (lang === 'es' ? '🐾 Gato en exploración autónoma: trepando por las tarjetas del portafolio y persiguiendo el cursor.' : '🐾 Autonomous roam active: cat climbing portfolio cards & following cursor.') + '</span></p>');
@@ -13539,7 +13546,7 @@ function runCommand(raw) {
     return;
   }
 
-  if (cmd === 'cat sleep' || cmd === 'gato dormir' || cmd === 'cat nap' || cmd === 'gato siesta') {
+  if (cmd === 'cat sleep' || cmd === 'gato sleep' || cmd === 'gato dormir' || cmd === 'cat nap' || cmd === 'gato siesta') {
     if (typeof window.__summonCat === 'function') window.__summonCat();
     if (typeof window.__sleepCat === 'function') window.__sleepCat();
     addOutput(cmd, '<p class="output-title">// ROBCO FELINE · ' + (lang === 'es' ? 'MODO SUEÑO' : 'NAP MODE') + '</p><p><span class="green">' + (lang === 'es' ? '💤 El gato se ha acurrucado plácidamente en postura de hogaza. Zzz...' : '💤 Cat curled up in catloaf pose. Zzz...') + '</span></p>');
@@ -13631,34 +13638,6 @@ function runCommand(raw) {
       '<p style="font-size:11px; color:var(--text-muted); margin-top:4px;">' + (lang === 'es' ? 'Escribe <code>cat help</code> para ver todos los subcomandos o <code>cat lab</code> para el laboratorio 3D.' : 'Type <code>cat help</code> for all subcommands or <code>cat lab</code> for 3D lab.') + '</p>' +
     '</div>';
     addOutput(cmd, html);
-    return;
-  }
-  if (cmd === 'cat pet' || cmd === 'gato pet' || cmd === 'gato acariciar' || cmd === 'acariciar') {
-    if (typeof window.__summonCat === 'function') window.__summonCat();
-    if (window.__catMini && typeof window.__catMini.petCat === 'function') {
-      window.__catMini.petCat();
-    }
-    addOutput(cmd, '<p><span class="green">' + (lang === 'es' ? '🐾 Acariciando al gato... ¡ronronea felizmente y da un saltito!' : '🐾 Petting the cat... purrs happily and bounces!') + '</span></p>');
-    return;
-  }
-  if (cmd === 'cat play' || cmd === 'gato play' || cmd === 'gato jugar' || cmd === 'jugar') {
-    if (typeof window.__summonCat === 'function') window.__summonCat();
-    if (window.__catMini) {
-      if (typeof window.__catMini.spawnYarn === 'function') window.__catMini.spawnYarn();
-      if (typeof window.__catMini.triggerBounce === 'function') window.__catMini.triggerBounce();
-    }
-    addOutput(cmd, '<p><span class="green">' + (lang === 'es' ? '🎾 ¡El gato juega alegremente persiguiendo su ovillo!' : '🎾 Cat joyfully bats and chases its yarn ball!') + '</span></p>');
-    return;
-  }
-  if (cmd === 'cat sleep' || cmd === 'gato sleep' || cmd === 'gato dormir') {
-    if (typeof window.__summonCat === 'function') window.__summonCat();
-    if (window.__catMini && typeof window.__catMini.sleep === 'function') window.__catMini.sleep();
-    addOutput(cmd, '<p><span class="green">' + (lang === 'es' ? '💤 El gato se acurruca en forma de rosca a tomar una siesta.' : '💤 Cat loafs and takes a peaceful nap.') + '</span></p>');
-    return;
-  }
-  if (cmd === 'cat roam' || cmd === 'gato roam' || cmd === 'gato pasear') {
-    if (typeof window.__toggleCatRoaming === 'function') window.__toggleCatRoaming();
-    addOutput(cmd, '<p><span class="green">' + (lang === 'es' ? '🐾 Alternando modo paseo del gato por la pantalla.' : '🐾 Toggling cat roaming mode across screen.') + '</span></p>');
     return;
   }
   if (cmd === 'cat stats' || cmd === 'gato stats') {
@@ -13824,6 +13803,22 @@ function translate() {
   setView(recruiter?.classList.contains('show') ? 'recruiter' : 'terminal', false);
   updateThemeButtonLabel();
   syncCvFrameState();
+  const fsLabel = document.querySelector('#crtFullscreenLabel');
+  const casing = document.querySelector('#crtMonitorCasing');
+  if (fsLabel) {
+    const isFs = casing && casing.classList.contains('crt-fullscreen-mode');
+    fsLabel.textContent = isFs
+      ? (lang === 'es' ? 'MODO MONITOR' : 'MONITOR MODE')
+      : (lang === 'es' ? 'PANTALLA COMPLETA' : 'FULLSCREEN');
+  }
+  const orbitsText = document.querySelector('#cosmosOrbitsText');
+  const orbitsBtn = document.querySelector('#cosmosOrbitsBtn');
+  if (orbitsText && orbitsBtn) {
+    const isOff = orbitsBtn.classList.contains('active');
+    orbitsText.textContent = lang === 'en'
+      ? (isOff ? 'ORBITS: OFF' : 'ORBITS: ON')
+      : (isOff ? 'ÓRBITAS: OFF' : 'ÓRBITAS: ON');
+  }
   const caseCloseBtn = document.querySelector('#closeCaseBtn');
   if (caseCloseBtn) caseCloseBtn.setAttribute('aria-label', T[lang].starLabels.close);
   const caseContent = document.querySelector('#caseModalBody .star-modal-content');
@@ -15122,6 +15117,9 @@ function initTiltCards() {
 
   cards.forEach(card => {
     card.addEventListener('mousemove', e => {
+      if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        return;
+      }
       const rect = card.getBoundingClientRect();
       const x = e.clientX - rect.left;
       const y = e.clientY - rect.top;
@@ -15599,6 +15597,7 @@ function initCrtMonitorHardware() {
   if (powerBtn && casing) {
     powerBtn.addEventListener('click', () => {
       const isOff = casing.classList.toggle('crt-powered-off');
+      powerBtn.setAttribute('aria-pressed', isOff ? 'false' : 'true');
       if (typeof playKeySound === 'function') playKeySound('enter');
       if (powerLed) {
         powerLed.classList.toggle('standby', isOff);
@@ -15609,6 +15608,7 @@ function initCrtMonitorHardware() {
   if (fullscreenBtn && casing) {
     fullscreenBtn.addEventListener('click', () => {
       const isFs = casing.classList.toggle('crt-fullscreen-mode');
+      fullscreenBtn.setAttribute('aria-pressed', isFs ? 'true' : 'false');
       if (typeof playKeySound === 'function') playKeySound('tab');
       if (fullscreenIcon) {
         fullscreenIcon.textContent = isFs ? '❐' : '⛶';
@@ -15939,12 +15939,12 @@ function initLanyard() {
 
   let width = stage.clientWidth || 320;
   let height = stage.clientHeight || 520;
-  let dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+  let dpr = Math.min((typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1, 2);
 
   function resizeCanvas() {
     width = stage.clientWidth || 320;
     height = stage.clientHeight || 520;
-    dpr = (typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1;
+    dpr = Math.min((typeof window !== 'undefined' && window.devicePixelRatio) ? window.devicePixelRatio : 1, 2);
     canvas.width = width * dpr;
     canvas.height = height * dpr;
     canvas.style.width = width + 'px';
@@ -16245,17 +16245,32 @@ function initLanyard() {
   }
 
   // Animation Frame Loop
+  let lanyardRaf = 0;
   function loop(now) {
+    lanyardRaf = 0;
     const curTime = now || ((typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now());
     const dt = Math.min(0.05, (curTime - lastTime) / 1000);
     lastTime = curTime;
     updatePhysics(dt);
-    if (typeof requestAnimationFrame === 'function') {
-      requestAnimationFrame(loop);
+    if (!document.hidden && typeof requestAnimationFrame === 'function') {
+      lanyardRaf = requestAnimationFrame(loop);
     }
   }
   if (typeof requestAnimationFrame === 'function') {
-    requestAnimationFrame(loop);
+    lanyardRaf = requestAnimationFrame(loop);
+  }
+  if (typeof document !== 'undefined' && typeof document.addEventListener === 'function') {
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        if (lanyardRaf && typeof cancelAnimationFrame === 'function') {
+          cancelAnimationFrame(lanyardRaf);
+          lanyardRaf = 0;
+        }
+      } else if (!lanyardRaf && typeof requestAnimationFrame === 'function') {
+        lastTime = (typeof performance !== 'undefined' && typeof performance.now === 'function') ? performance.now() : Date.now();
+        lanyardRaf = requestAnimationFrame(loop);
+      }
+    });
   }
 
   // Pointer / Drag Interaction Handlers with Elastic Tension Constraint
@@ -17478,10 +17493,15 @@ function initCosmosIntegration() {
 
   // Orbits toggle
   const orbitsBtn = document.querySelector('#cosmosOrbitsBtn');
+  const orbitsText = document.querySelector('#cosmosOrbitsText');
   orbitsBtn?.addEventListener('click', () => {
     if (window.CosmicAtlas) {
       const show = window.CosmicAtlas.toggleOrbits();
-      orbitsBtn.textContent = show ? 'ÓRBITAS: ON' : 'ÓRBITAS: OFF';
+      const label = lang === 'en'
+        ? (show ? 'ORBITS: ON' : 'ORBITS: OFF')
+        : (show ? 'ÓRBITAS: ON' : 'ÓRBITAS: OFF');
+      if (orbitsText) orbitsText.textContent = label;
+      else orbitsBtn.textContent = label;
       orbitsBtn.classList.toggle('active', !show);
     }
   });
@@ -17551,7 +17571,8 @@ function openCatModal() {
   const modal = document.getElementById('catModal');
   const iframe = document.getElementById('catModalIframe');
   if (!modal) return;
-  if (iframe && iframe.dataset.src && (!iframe.src || iframe.src === 'about:blank' || iframe.src.endsWith('/'))) {
+  const curSrc = iframe ? iframe.getAttribute('src') : '';
+  if (iframe && iframe.dataset.src && (!curSrc || curSrc === 'about:blank' || curSrc.endsWith('/'))) {
     iframe.src = iframe.dataset.src;
   }
   if (typeof modal.showModal === 'function') {
@@ -17570,6 +17591,10 @@ function openCatModal() {
 function closeCatModal() {
   const modal = document.getElementById('catModal');
   if (!modal) return;
+  const iframe = document.getElementById('catModalIframe');
+  if (iframe && iframe.getAttribute('src')) {
+    iframe.setAttribute('src', '');
+  }
   if (typeof modal.close === 'function') {
     modal.close();
   } else {
@@ -18379,6 +18404,7 @@ function initCat3D() {
       isVisible = true;
       stage.classList.add('cat-visible');
       stage.setAttribute('aria-hidden', 'false');
+      if (box) box.setAttribute('tabindex', '0');
       if (fallback && !mini) {
         fallback.classList.add('is-active');
       }
@@ -18402,6 +18428,7 @@ function initCat3D() {
       isVisible = false;
       stage.classList.remove('cat-visible', 'cat-peeking', 'cat-roaming');
       stage.setAttribute('aria-hidden', 'true');
+      if (box) box.setAttribute('tabindex', '-1');
       if (mini) mini.hide();
       if (fallback) fallback.classList.remove('is-active', 'fallback-happy');
     }
@@ -18460,12 +18487,14 @@ function initCat3D() {
 
     // Drag & Drop interaction for repositioning the cat
     let isDraggingCat = false;
+    let didDragCatMove = false;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
 
     stage.addEventListener('mousedown', (e) => {
       if (e.target.closest('.cat3d-btn')) return;
       isDraggingCat = true;
+      didDragCatMove = false;
       const pb = getParentBounds();
       const rect = stage.getBoundingClientRect();
       dragOffsetX = e.clientX - rect.left;
@@ -18477,6 +18506,7 @@ function initCat3D() {
 
     window.addEventListener('mousemove', (e) => {
       if (!isDraggingCat) return;
+      didDragCatMove = true;
       const pb = getParentBounds();
       const stageW = stage.offsetWidth || 252;
       const stageH = stage.offsetHeight || 196;
@@ -18494,8 +18524,10 @@ function initCat3D() {
       if (!isDraggingCat) return;
       isDraggingCat = false;
       stage.style.cursor = '';
-      if (mini && typeof mini.playMeow === 'function') mini.playMeow();
-      else if (window.Cat3DMini && typeof window.Cat3DMini.playMeow === 'function') window.Cat3DMini.playMeow();
+      if (didDragCatMove) {
+        if (mini && typeof mini.playMeow === 'function') mini.playMeow();
+        else if (window.Cat3DMini && typeof window.Cat3DMini.playMeow === 'function') window.Cat3DMini.playMeow();
+      }
       if (isRoaming) {
         roamState = 'idle';
         idleWaitTimer = 1.8;
@@ -18510,8 +18542,6 @@ function initCat3D() {
         if (mini) mini.pause();
       } else if (isVisible) {
         if (mini) mini.resume();
-      } else {
-        scheduleNext();
       }
     });
 
@@ -18523,6 +18553,15 @@ function initCat3D() {
     window.__hideCat = hideCat;
     window.__startCatRoam = startRoaming;
     window.__stopCatRoam = () => stopRoaming(true);
+    window.__toggleCatRoaming = () => {
+      if (isRoaming) {
+        stopRoaming(true);
+        return false;
+      }
+      showCat(true);
+      startRoaming();
+      return true;
+    };
     window.__isCatRoaming = () => isRoaming;
     window.__petCat = petCat;
     window.__wakeUpCat = wakeUpCat;
@@ -18765,7 +18804,7 @@ if (typeof document !== 'undefined') {
       <div class="links"><div class="link-item"><a href="mailto:alessandro.altamirano23@gmail.com">email ↗</a><button class="copy-btn" data-copy="alessandro.altamirano23@gmail.com" type="button" aria-label="Copiar correo"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button></div><a href="https://www.linkedin.com/in/alessandroaltamirano" target="_blank" rel="noopener noreferrer">linkedin ↗</a><a href="https://github.com/legacyum" target="_blank" rel="noopener noreferrer">github ↗</a><a class="link-btn" id="openCvBtn" href="CV_Alessandro_Altamirano_Salazar_2026.pdf" target="_blank" rel="noopener noreferrer">ver_cv.pdf ↗</a></div>
     </aside>
     <section class="page" id="top">
-      <header class="top"><p><span class="dot"></span> LIMA, PERÚ <span>/</span> UTC−5</p><div class="utilities"><button class="utility" id="language" type="button" aria-label="Change language">EN</button><button class="utility" id="view" type="button" aria-pressed="false" data-t="recruiterMode">modo reclutador</button><button class="theme" id="theme" type="button">tema: verde</button><span class="crt-status-static" aria-label="Monitor CRT desactivado"><span class="crt-tag">CRT:</span> <span>OFF</span></span><time id="clock"></time></div></header>
+      <header class="top"><p><span class="dot"></span> LIMA, PERÚ <span>/</span> UTC−5</p><div class="utilities"><button class="utility" id="language" type="button" aria-label="Change language">EN</button><button class="utility" id="view" type="button" aria-pressed="false" data-t="recruiterMode">modo reclutador</button><button class="theme" id="theme" type="button">tema: verde</button><span class="crt-status-static" aria-label="Monitor CRT desactivado"><span class="crt-tag">CRT:</span> <span id="crtStatus">OFF</span></span><time id="clock"></time></div></header>
       <section class="hero">
         <div class="hero-grid">
           <div class="hero-intro">
@@ -19073,35 +19112,35 @@ if (typeof document !== 'undefined') {
           </div>
           <div class="certifications-list">
             <a class="credential-card tilt-card reveal" style="--stagger:1" href="https://drive.google.com/file/d/1cQc80EHDGVL-HHTvodDKgtxesuoVq0IT/view?usp=sharing" target="_blank" rel="noopener noreferrer">
-              <div class="cred-header"><span class="cred-issuer">Santander Open Academy</span><span class="cred-badge">ver credencial ↗</span></div>
+              <div class="cred-header"><span class="cred-issuer">Santander Open Academy</span><span class="cred-badge" data-t="credVerify">ver credencial ↗</span></div>
               <h4 data-t="certPyTitle">Python para Análisis de Datos</h4>
               <p class="cred-skills" data-t="certPySkills">Pandas · NumPy · Automatización · Scripting</p>
             </a>
             <a class="credential-card tilt-card reveal" style="--stagger:2" href="https://drive.google.com/file/d/1jqEA5AxWUhB4RaCrlOAuPybT3x-dP993/view?usp=sharing" target="_blank" rel="noopener noreferrer">
-              <div class="cred-header"><span class="cred-issuer">Santander Open Academy</span><span class="cred-badge">ver credencial ↗</span></div>
+              <div class="cred-header"><span class="cred-issuer">Santander Open Academy</span><span class="cred-badge" data-t="credVerify">ver credencial ↗</span></div>
               <h4 data-t="certBiTitle">Power BI para Business Intelligence</h4>
               <p class="cred-skills" data-t="certBiSkills">DAX · Power Query · Modelado Dimensional · Dashboards KPI</p>
             </a>
             <a class="credential-card tilt-card reveal" style="--stagger:3" href="https://drive.google.com/file/d/1thaxesW5lzO6yov0ce5aqxhTkFfruI2j/view?usp=sharing" target="_blank" rel="noopener noreferrer">
-              <div class="cred-header"><span class="cred-issuer">Fundación Telefónica</span><span class="cred-badge">ver credencial ↗</span></div>
+              <div class="cred-header"><span class="cred-issuer">Fundación Telefónica</span><span class="cred-badge" data-t="credVerify">ver credencial ↗</span></div>
               <h4 data-t="certExcelTitle">Excel Avanzado & Automatización</h4>
               <p class="cred-skills" data-t="certExcelSkills">Tablas dinámicas · Fórmulas avanzadas · Análisis de datos</p>
             </a>
             <a class="credential-card tilt-card reveal" style="--stagger:4" href="https://www.datacamp.com/certificate/SQA0016606348599" target="_blank" rel="noopener noreferrer">
-              <div class="cred-header"><span class="cred-issuer">DataCamp</span><span class="cred-badge">ver credencial ↗</span></div>
+              <div class="cred-header"><span class="cred-issuer">DataCamp</span><span class="cred-badge" data-t="credVerify">ver credencial ↗</span></div>
               <h4 data-t="certSqlTitle">SQL Associate</h4>
               <p class="cred-skills" data-t="certSqlSkills">SQL · PostgreSQL · Análisis de datos</p>
               <p class="cred-skills" data-t="certSqlMeta">Expedida: ago. 2026 · Vence: ago. 2028 · ID: SQA0016606348599</p>
             </a>
             <a class="credential-card tilt-card reveal" style="--stagger:5" href="https://drive.google.com/file/d/1zkQ49YxqPnr1A7bpui4AeKSvIUpMw0BJ/view?usp=sharing" target="_blank" rel="noopener noreferrer">
-              <div class="cred-header"><span class="cred-issuer">NASA Space Apps</span><span class="cred-badge">ver credencial ↗</span></div>
-              <h4>Galactic Problem Solver</h4>
-              <p class="cred-skills">NASA Space Apps Challenge 2025 · Hackathon Internacional</p>
+              <div class="cred-header"><span class="cred-issuer">NASA Space Apps</span><span class="cred-badge" data-t="credVerify">ver credencial ↗</span></div>
+              <h4 data-t="certNasaTitle">Galactic Problem Solver</h4>
+              <p class="cred-skills" data-t="certNasaSkills">NASA Space Apps Challenge 2025 · Hackathon Internacional</p>
             </a>
             <a class="credential-card tilt-card reveal" style="--stagger:6" href="https://verify.skilljar.com/c/aeqidtgg2pe2" target="_blank" rel="noopener noreferrer">
-              <div class="cred-header"><span class="cred-issuer">Anthropic</span><span class="cred-badge">ver credencial ↗</span></div>
-              <h4>Claude Code in Action</h4>
-              <p class="cred-skills">Ingeniería de contexto · Automatización con IA · Developer Workflow</p>
+              <div class="cred-header"><span class="cred-issuer">Anthropic</span><span class="cred-badge" data-t="credVerify">ver credencial ↗</span></div>
+              <h4 data-t="certClaudeTitle">Claude Code in Action</h4>
+              <p class="cred-skills" data-t="certClaudeSkills">Ingeniería de contexto · Automatización con IA · Developer Workflow</p>
             </a>
           </div>
         </div>
@@ -19129,7 +19168,7 @@ if (typeof document !== 'undefined') {
         <div class="crt-controls-group">
           <!-- Power switch + LED -->
           <div class="crt-control-item">
-            <button type="button" class="crt-hw-btn crt-power-toggle" id="crtPowerBtn" aria-label="Interruptor de encendido del monitor">
+            <button type="button" class="crt-hw-btn crt-power-toggle" id="crtPowerBtn" aria-pressed="true" aria-label="Interruptor de encendido del monitor">
               <span class="crt-hw-icon">⏻</span>
               <span class="crt-hw-label">POWER</span>
             </button>
@@ -19139,14 +19178,14 @@ if (typeof document !== 'undefined') {
           <!-- Phosphor color switch -->
           <div class="crt-control-item">
             <button type="button" class="crt-hw-btn" id="crtPhosphorBtn" aria-label="Cambiar fósforo catódico">
-              <span class="crt-hw-tag">FÓSFORO:</span>
+              <span class="crt-hw-tag" data-t="crtPhosphorTag">FÓSFORO:</span>
               <span class="crt-hw-val" id="crtPhosphorVal">VERDE P1</span>
             </button>
           </div>
 
           <!-- Screen mode toggle (Desktop Monitor vs Fullscreen Tube) -->
           <div class="crt-control-item">
-            <button type="button" class="crt-hw-btn" id="crtFullscreenBtn" aria-label="Alternar pantalla completa">
+            <button type="button" class="crt-hw-btn" id="crtFullscreenBtn" aria-pressed="false" aria-label="Alternar pantalla completa">
               <span class="crt-hw-icon" id="crtFullscreenIcon">⛶</span>
               <span class="crt-hw-label" id="crtFullscreenLabel">PANTALLA COMPLETA</span>
             </button>
@@ -19189,7 +19228,7 @@ if (typeof document !== 'undefined') {
       </div>
       <div class="cv-modal-body">
         <div id="cvPdfView" class="cv-view-panel" role="tabpanel" aria-labelledby="cvTabPdf" style="display: none;">
-          <iframe id="cvPdfIframe" src="CV_Alessandro_Altamirano_Salazar_2026.pdf" title="Currículum Vitae - Alessandro Altamirano">
+          <iframe id="cvPdfIframe" src="CV_Alessandro_Altamirano_Salazar_2026.pdf" loading="lazy" title="Currículum Vitae - Alessandro Altamirano">
             <p style="padding: 24px; text-align: center; color: var(--muted, #888);">
               Tu navegador no admite la visualización directa de documentos PDF.<br><br>
               <a class="button ghost" href="CV_Alessandro_Altamirano_Salazar_2026.pdf" download target="_blank" rel="noopener noreferrer" style="display: inline-block; margin-top: 10px;">
@@ -19208,9 +19247,10 @@ if (typeof document !== 'undefined') {
             <iframe
               id="threeDPaperFrame"
               title="3D Paper"
-              src="shaders/3d-paper/sources/3d-paper.html"
+              src=""
+              data-src="shaders/3d-paper/sources/3d-paper.html"
               sandbox="allow-scripts"
-              loading="eager"
+              loading="lazy"
             ></iframe>
           </div>
         </div>
@@ -19263,15 +19303,15 @@ if (typeof document !== 'undefined') {
           <p class="cosmos-hud-desc" id="cosmosBodyDesc">Estrella enana amarilla centro de nuestro sistema solar, concentra el 99.86% de la masa total.</p>
           <div class="cosmos-hud-metrics" id="cosmosHudMetrics">
             <div class="cosmos-metric">
-              <span class="cosmos-metric-label">DIÁMETRO</span>
+              <span class="cosmos-metric-label" data-t="cosmosDiamLabel">DIÁMETRO</span>
               <strong class="cosmos-metric-val" id="cosmosMetricDiameter">1,392,700 km</strong>
             </div>
             <div class="cosmos-metric">
-              <span class="cosmos-metric-label">TEMP. SUPERFICIE</span>
+              <span class="cosmos-metric-label" data-t="cosmosTempLabel">TEMP. SUPERFICIE</span>
               <strong class="cosmos-metric-val" id="cosmosMetricTemp">5,500 °C</strong>
             </div>
             <div class="cosmos-metric">
-              <span class="cosmos-metric-label">ESTADO ORBITAL</span>
+              <span class="cosmos-metric-label" data-t="cosmosOrbitLabel">ESTADO ORBITAL</span>
               <strong class="cosmos-metric-val" id="cosmosMetricOrbit">Centro de Masa</strong>
             </div>
           </div>
@@ -19282,23 +19322,23 @@ if (typeof document !== 'undefined') {
           <div class="cosmos-speed-controls">
             <button type="button" class="cosmos-btn active" data-mode="realtime" title="Sincronizado a hora real">
               <svg class="cosmos-svg-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><polyline points="12 7 12 12 15 14"></polyline></svg>
-              <span>TIEMPO REAL</span>
+              <span data-t="cosmosRealtime">TIEMPO REAL</span>
             </button>
             <button type="button" class="cosmos-btn" data-mode="day_sec" title="1 segundo = 1 día terrestre">
               <svg class="cosmos-svg-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 19 22 12 13 5 13 19"></polygon><polygon points="2 19 11 12 2 5 2 19"></polygon></svg>
-              <span>1 DÍA / SEG</span>
+              <span data-t="cosmosDaySec">1 DÍA / SEG</span>
             </button>
             <button type="button" class="cosmos-btn" data-mode="year_10s" title="10 segundos = 1 año terrestre">
               <svg class="cosmos-svg-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-              <span>1 AÑO / 10S</span>
+              <span data-t="cosmosYear10s">1 AÑO / 10S</span>
             </button>
             <button type="button" class="cosmos-btn" data-mode="paused" id="cosmosPauseBtn">
               <svg class="cosmos-svg-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="6" y="5" width="4" height="14" rx="1"></rect><rect x="14" y="5" width="4" height="14" rx="1"></rect></svg>
-              <span id="cosmosPauseText">PAUSA</span>
+              <span id="cosmosPauseText" data-t="cosmosPause">PAUSA</span>
             </button>
             <button type="button" class="cosmos-btn" id="cosmosSyncNowBtn" title="Restablecer al segundo actual">
               <svg class="cosmos-svg-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
-              <span>AHORA</span>
+              <span data-t="cosmosNow">AHORA</span>
             </button>
             <button type="button" class="cosmos-btn" id="cosmosOrbitsBtn">
               <svg class="cosmos-svg-icon" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M2 12h20"></path><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>

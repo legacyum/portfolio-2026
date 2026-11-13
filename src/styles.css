@@ -1555,30 +1555,6 @@ h4 {
   color: var(--accent);
 }
 
-.crt-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-  letter-spacing: 0.04em;
-  font-family: inherit;
-  transition: color 0.2s ease, opacity 0.2s ease;
-}
-
-.crt-toggle-btn .crt-tag {
-  opacity: 0.75;
-}
-
-.crt-toggle-btn #crtStatus {
-  font-weight: 600;
-  color: var(--accent);
-}
-
-.crt-toggle-btn[aria-pressed="false"] #crtStatus {
-  color: var(--muted);
-  opacity: 0.6;
-}
-
 .crt-status-static {
   display: inline-flex;
   align-items: center;

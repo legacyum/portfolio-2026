@@ -1460,8 +1460,8 @@ async function runAllTests() {
     assert(img, 'Case study image must exist');
     assert(img.getAttribute('src') === 'assets/primax-power-bi-dashboard.png', 'Image src must be assets/primax-power-bi-dashboard.png');
     assert(img.hasAttribute('alt') && img.getAttribute('alt').length > 5, 'Image alt text must be descriptive');
-    logPass('Tier 1', 'T1-FRM-03', 'Case Study Image Optimization & Descriptive Alt Text');
-  } catch (err) { logFail('Tier 1', 'T1-FRM-03', 'Case Study Image Optimization', err); }
+    logPass('Tier 1', 'T1-FRM-05', 'Case Study Image Optimization & Descriptive Alt Text');
+  } catch (err) { logFail('Tier 1', 'T1-FRM-05', 'Case Study Image Optimization', err); }
 
   try {
     const env = executeInlineScript(portfolioHtmlContent);
@@ -1475,16 +1475,16 @@ async function runAllTests() {
 
     langBtn.dispatchEvent(new env.win.Event('click'));
     assert.strictEqual(env.doc.documentElement.lang, 'es', 'Document lang should revert to "es"');
-    logPass('Tier 1', 'T1-FRM-04', 'i18n Translation Engine Toggle (ES <-> EN)');
-  } catch (err) { logFail('Tier 1', 'T1-FRM-04', 'i18n Translation Engine Toggle', err); }
+    logPass('Tier 1', 'T1-FRM-06', 'i18n Translation Engine Toggle (ES <-> EN)');
+  } catch (err) { logFail('Tier 1', 'T1-FRM-06', 'i18n Translation Engine Toggle', err); }
 
   try {
     const doc = parseFullDocument(portfolioHtmlContent);
     const clearBtn = doc.querySelector('#clear');
     assert(clearBtn, '#clear button must exist');
     assert(clearBtn.getAttribute('data-t') === 'clear', '#clear button should have data-t translation attribute');
-    logPass('Tier 1', 'T1-FRM-05', 'Clear Terminal Header Button & Translation Metadata');
-  } catch (err) { logFail('Tier 1', 'T1-FRM-05', 'Clear Terminal Header Button', err); }
+    logPass('Tier 1', 'T1-FRM-07', 'Clear Terminal Header Button & Translation Metadata');
+  } catch (err) { logFail('Tier 1', 'T1-FRM-07', 'Clear Terminal Header Button', err); }
 
   // 1.8 Process & ROI Simulator Feature
   try {

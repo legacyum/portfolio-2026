@@ -81,5 +81,15 @@ if (fs.existsSync(srcShaders)) {
   fs.cpSync(srcShaders, distShaders, { recursive: true });
 }
 
+// Sync prototypes/cat3d.html to src/prototypes/cat3d.html for Vercel (outputDirectory: "src")
+const protoCatSrc = path.join(ROOT_DIR, 'prototypes', 'cat3d.html');
+const srcProtoDir = path.join(SRC_DIR, 'prototypes');
+if (fs.existsSync(protoCatSrc)) {
+  fs.mkdirSync(srcProtoDir, { recursive: true });
+  const protoCatHtml = fs.readFileSync(protoCatSrc, 'utf8')
+    .replace(/\.\.\/src\/vendor\//g, '../vendor/');
+  fs.writeFileSync(path.join(srcProtoDir, 'cat3d.html'), protoCatHtml, 'utf8');
+}
+
 console.log(`✓ Generated ${path.relative(ROOT_DIR, outPath)} (${distHtml.length} bytes)`);
 
